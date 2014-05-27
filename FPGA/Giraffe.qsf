@@ -52,11 +52,9 @@ set_global_assignment -name NOMINAL_CORE_SUPPLY_VOLTAGE 1.2V
 set_global_assignment -name BDF_FILE wiznet_test.bdf
 set_global_assignment -name VERILOG_FILE Verilog/switch_spi.v
 set_global_assignment -name VERILOG_FILE Verilog/spi_master.v
-set_global_assignment -name VERILOG_FILE Verilog/reset.v
 set_global_assignment -name VERILOG_FILE Verilog/fsmc.v
 set_global_assignment -name VERILOG_FILE Verilog/define.v
 set_global_assignment -name VERILOG_FILE Verilog/data.v
-set_global_assignment -name VERILOG_FILE Verilog/conrol_reg.v
 set_global_assignment -name VERILOG_FILE Verilog/bufer.v
 set_global_assignment -name VERILOG_FILE Verilog/bidirec.v
 set_global_assignment -name VERILOG_FILE Verilog/avtomat.v

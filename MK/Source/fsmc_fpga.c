@@ -14,6 +14,7 @@ extern SemaphoreHandle_t xMutexFSMC;
 extern SemaphoreHandle_t xSemaphoreEXTI;
 extern SemaphoreHandle_t xSemaphoreFSMCDMA;
 extern SemaphoreHandle_t xSemaphoreSPIDMA;
+
 /*******************************************************************************
 * Function Name  : FSMC_NAND_Init
 * Description    : Configures the FSMC and GPIOs to interface with the NAND memory.
@@ -180,7 +181,21 @@ void FSMC_FPGA_Init(void)
 
 
 
+/******************************************************************************
+* Function Name  : FSMC_NAND_Detect
+* Description    : Detect FPGA 
+*******************************************************************************/
+bool FSMC_FPGA_Detect(void)
+{
+	uint16_t  status = 0x00;
 
+  *(bit_bus *)(FPGA_FLASH_START_ADDR | CMD_AREA) = FPGA_CMD_DETECT;
+	status = *(bit_bus *)(FPGA_FLASH_START_ADDR | DATA_AREA);
+	if (status==FPGA_DETECT) return(TRUE);
+	else  return (FALSE);
+	
+	return(FALSE);
+}
 /******************************************************************************
 * Function Name  : FSMC_NAND_Reset
 * Description    : This routine reset the NAND FLASH
@@ -208,13 +223,14 @@ void FSMC_FPGA_GetBufer(void)
 * Description    : start calculation bufer 
 *******************************************************************************/
 
-uint32_t FSMC_START_CALC (void)
+bit_bus FSMC_START_CALC (void)
 {
 	
 	*(bit_bus *)(FPGA_FLASH_START_ADDR | CMD_AREA) = CMD_WRITE_CONTROL_REG;
 	*(bit_bus *)(FPGA_FLASH_START_ADDR | DATA_AREA) = control_reg;
 	*(bit_bus *)(FPGA_FLASH_START_ADDR | CMD_AREA) = FPGA_CMD_START;
 	control_reg++;
+	
 	return(0);
 }
 /******************************************************************************
@@ -225,15 +241,12 @@ uint32_t FSMC_START_CALC (void)
 *                     a Timeout error
 *                   - NAND_READY: when memory is ready for the next operation  
 *******************************************************************************/
-uint32_t FSMC_FPGA_GetStatus(void)
+bit_bus FSMC_FPGA_GetStatus(void)
 {
-  uint32_t  status = 0x00;
+  bit_bus  status = 0;
 	
 	*(bit_bus *)(FPGA_FLASH_START_ADDR | CMD_AREA) = FPGA_CMD_STATUS;
 	status = *(bit_bus *)(FPGA_FLASH_START_ADDR | DATA_AREA);
 	
-
-
-  /* Return the operation status */
   return (status);      
 }

@@ -19,6 +19,8 @@
 `define CMD_RESET					255  
 `define CMD_STATUS				112 
 `define FPGA_CMD_START  		3
+`define FPGA_CMD_DETECT 		4
+
 
 `define CMD_READ_BUFER			1
 `define CMD_WRITE_BUFER			128

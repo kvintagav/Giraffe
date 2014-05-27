@@ -122,20 +122,22 @@ int main(void)
 		
   vFreeRTOSInitAll();
 	
-//	usart_send("\r\ndevice_start\r");
+	console_send("\r\ndevice_start\r");
 
 	
 	if ((xMutexFSMC != NULL)&&(xSemaphoreEXTI !=NULL)&&(xSemaphoreFSMCDMA!=NULL)&&(xSemaphoreCONSOLE!=NULL))
-	{
-		xTaskCreate(GetBuferFPGA,(signed char*)"GetBuferFPGA", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+4 , NULL);
-		xTaskCreate(StartCalcBuferFPGA,(signed char*)"StartCalcBufer", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+3 , NULL);
-		xTaskCreate(vLedTask,(signed char *)"LedTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2 , NULL);
-	  xTaskCreate(ConsoleExchange,(signed char *)"ConsoleExchange", configMINIMAL_STACK_SIZE*3, NULL, tskIDLE_PRIORITY+2 , NULL);
-
-		
-		vTaskStartScheduler();
-	}
-
+		{
+			if (FSMC_FPGA_Detect()==TRUE)	console_send("\r\n FPGA is connect \r");
+			else console_send("\r\n FPGA is not detect, check the connection \r");
+			
+			xTaskCreate(GetBuferFPGA,(signed char*)"GetBuferFPGA", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+4 , NULL);
+			xTaskCreate(StartCalcBuferFPGA,(signed char*)"StartCalcBufer", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+3 , NULL);
+				
+			xTaskCreate(vLedTask,(signed char *)"LedTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2 , NULL);
+			xTaskCreate(ConsoleExchange,(signed char *)"ConsoleExchange", configMINIMAL_STACK_SIZE*3, NULL, tskIDLE_PRIORITY+2 , NULL);
+			
+			vTaskStartScheduler();
+		}
 	for( ;; );
 }
 /**

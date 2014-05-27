@@ -28,7 +28,10 @@ char *commands[] = {
   NULL
 };
 
-
+/******************************************************************************
+* Function Name  : ResetStart
+* Description    : Reboot system
+*******************************************************************************/
 void ResetStart(void)
 {
 	IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
@@ -39,7 +42,10 @@ void ResetStart(void)
 }
 
 
-
+/******************************************************************************
+* Function Name  : CommandProcessing
+* Description    : Processing input command 
+*******************************************************************************/
 void CommandProcessing(char *bufer_in, char *bufer_out)
 {
 	char **cmdp;
@@ -75,13 +81,20 @@ void CommandProcessing(char *bufer_in, char *bufer_out)
     }
 }
 
+/******************************************************************************
+* Function Name  : send_byte
+* Description    : Send byte to usart
+*******************************************************************************/	
 void send_byte(char data)
 {
 	while(!(USART->SR & USART_SR_TC));
 	USART_SendData(USART,data);
 }
-
-void usart_send( char* string)
+/******************************************************************************
+* Function Name  : usart_send
+* Description    : send string to out 
+*******************************************************************************/	
+void console_send( char* string)
 {
 	int i=0;
 	while(string[i])
@@ -90,3 +103,7 @@ void usart_send( char* string)
 			i++;
 	}
 }
+/******************************************************************************
+* Function Name  : 
+* Description    : 
+*******************************************************************************/
