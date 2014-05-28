@@ -169,8 +169,7 @@ void FSMC_FPGA_Init(void)
   DMA_Init(DMA_FSMC_STREAM, &DMA_FSMC_InitStructure);
 	
 	 DMA_ITConfig(DMA_FSMC_STREAM, DMA_FSMC_IT_TC, ENABLE);
-	/* DMA_Cmd(DMA_FSMC_STREAM, ENABLE);
-	*/
+	
   NVIC_InitStructure.NVIC_IRQChannel = DMA_FSMC_STREAM_IRQ;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY+3;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;

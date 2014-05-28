@@ -10,7 +10,7 @@
 
 
 extern CONFIG_MSG Config_Msg;
-extern CHCONFIG_TYPE_DEF Chconfig_Type_Def; 
+
 /*
 extern uint8 txsize[MAX_SOCK_NUM];
 extern uint8 rxsize[MAX_SOCK_NUM];

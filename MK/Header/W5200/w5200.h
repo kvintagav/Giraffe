@@ -7,6 +7,11 @@
 #include "Types.h"
 #include <stdbool.h>
 
+
+
+
+
+
 #define WINDOWFULL_FLAG_ON 1
 #define WINDOWFULL_FLAG_OFF 0 
 #define WINDOWFULL_MAX_RETRY_NUM 3

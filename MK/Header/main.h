@@ -23,16 +23,18 @@
 /*WIZNET LIB*/
 
 #ifdef WIZNET
-
 	#include "util.h"
 	#include "config.h"
 	#include "w5200.h"
 	#include "socket.h"
 	#include "spi2.h"
 	#include "loopback.h"
-
-
 #endif
+
+#ifdef EEPROM
+	#include "eeprom.h"
+#endif
+
 /*Config Gpio for platform */
 #ifdef DISCOVERY
  #include "PlatformConfigDiscovery.h"

@@ -10,14 +10,13 @@
 #include "main.h"
 #include "fsmc_fpga.h"
 #include "user_tasks.h"
-#include "periphery_init.h"
 #include "console.h"
 
 /*Mutex*/
 SemaphoreHandle_t xMutexFSMC= 				NULL;
-SemaphoreHandle_t xMutexUSART_DEBUG=	NULL;
+SemaphoreHandle_t xMutexUSART_CONSOLE=NULL;
 SemaphoreHandle_t xMutexSPI_WIZ=			NULL;
-
+//SemaphoreHandle_t xMutexUSART=				NULL;
 /*Semaphore*/
 SemaphoreHandle_t xSemaphoreEXTI= 		NULL;
 SemaphoreHandle_t xSemaphoreFSMCDMA= 	NULL;
@@ -26,12 +25,6 @@ SemaphoreHandle_t xSemaphoreCONSOLE= 	NULL;
 
 /*Queue*/
 
-#ifdef __GNUC__
-  
-  #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-  #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif /* __GNUC__ */
 
 /***********************************************/
 void vApplicationTickHook( void )
@@ -92,6 +85,10 @@ void vFreeRTOSInitAll()
 		FSMC_FPGA_Init();
 
 		CONSOLE_USART_INIT();
+		
+		#ifdef EEPROM
+			I2C_EE_INIT();
+		#endif
 	
 		#ifdef WIZNET
 			WIZ_GPIO_Install();
@@ -107,14 +104,16 @@ void vFreeRTOSInitAll()
  
 /*******************************************************************/
 int main(void)
+
 {
 	xMutexFSMC = xSemaphoreCreateMutex();
-	xMutexUSART_DEBUG = xSemaphoreCreateMutex();
+	xMutexUSART_CONSOLE = xSemaphoreCreateMutex();
 
 	vSemaphoreCreateBinary(xSemaphoreFSMCDMA);
 	vSemaphoreCreateBinary(xSemaphoreEXTI);
 	vSemaphoreCreateBinary(xSemaphoreCONSOLE);
 	
+
 	#ifdef WIZNET
 		xMutexSPI_WIZ =  xSemaphoreCreateMutex();
 		vSemaphoreCreateBinary(xSemaphoreSPIDMA);
@@ -122,38 +121,24 @@ int main(void)
 		
   vFreeRTOSInitAll();
 	
-	console_send("\r\ndevice_start\r");
+	console_send("\r\n\r\ndevice_start\r");
 
 	
 	if ((xMutexFSMC != NULL)&&(xSemaphoreEXTI !=NULL)&&(xSemaphoreFSMCDMA!=NULL)&&(xSemaphoreCONSOLE!=NULL))
 		{
-			if (FSMC_FPGA_Detect()==TRUE)	console_send("\r\n FPGA is connect \r");
-			else console_send("\r\n FPGA is not detect, check the connection \r");
+			if (FSMC_FPGA_Detect()==TRUE)	console_send("\n FPGA is connect \r");
+			else console_send("\nFPGA is not detect, check the connection \r");
 			
-			xTaskCreate(GetBuferFPGA,(signed char*)"GetBuferFPGA", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+4 , NULL);
-			xTaskCreate(StartCalcBuferFPGA,(signed char*)"StartCalcBufer", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+3 , NULL);
-				
-			xTaskCreate(vLedTask,(signed char *)"LedTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2 , NULL);
+			xTaskCreate(ProcessingIntFPGA,(signed char*)"ProcessingIntFPGA", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+5 , NULL);
+			xTaskCreate(StartCalcBuferFPGA,(signed char*)"StartCalcBufer", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+4 , NULL);
+			
+			xTaskCreate(TCP_IPConnect,(signed char*)"TCP_IPConnect", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+3 , NULL);
+			
+			xTaskCreate(vLedTask,(signed char *)"LedTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+1 , NULL);
 			xTaskCreate(ConsoleExchange,(signed char *)"ConsoleExchange", configMINIMAL_STACK_SIZE*3, NULL, tskIDLE_PRIORITY+2 , NULL);
 			
 			vTaskStartScheduler();
 		}
 	for( ;; );
 }
-/**
-  * @brief  Retargets the C library printf function to the USART.
-  * @param  None
-  * @retval None
-  */
-PUTCHAR_PROTOTYPE
-{
-  /* Place your implementation of fputc here */
-  /* e.g. write a character to the USART */
-  USART_SendData(USART, (uint8_t) ch);
 
-  /* Loop until the end of transmission */
-  while (USART_GetFlagStatus(USART, USART_FLAG_TC) == RESET)
-  {}
-
-  return ch;
-}

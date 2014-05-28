@@ -2,7 +2,7 @@
 #include "main.h"
 
 
-
-void CommandProcessing(char *bufer_in, char *bufer_out);
+void CONSOLE_USART_INIT(void);
+void CommandProcessing( char *bufer_in, char *bufer_out);
 void console_send( char* str);
-void send_byte(char data);
+void 	LED_INIT(void);

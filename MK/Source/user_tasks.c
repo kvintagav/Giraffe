@@ -12,8 +12,8 @@ extern SemaphoreHandle_t xSemaphoreCONSOLE;
 
 extern char bufer_console[SIZE_CONS_IN]; 
 char bufer_cons_out[SIZE_CONS_OUT];
+
 extern bit_bus input_bufer[BUFFER_SIZE];
-bool BEBUG_INFO=0; /*1 Enable translate debug info , 0 - Disable translate debug info*/
 
 /******************************************************************************
 * Function Name  : ConsoleExchange
@@ -26,6 +26,10 @@ void ConsoleExchange (void *pvParameters)
     {
 				xSemaphoreTake( xSemaphoreCONSOLE,portMAX_DELAY);
 				CommandProcessing( bufer_console,  bufer_cons_out);
+				console_send(bufer_cons_out);
+				console_send("\n>");
+			
+
 //				print(bufer_cons_out);
 		}
     vTaskDelete(NULL);	
@@ -51,53 +55,58 @@ void vLedTask (void *pvParameters)
     vTaskDelete(NULL);	
 }
 /******************************************************************************
-* Function Name  : GetBuferFPGA
+* Function Name  : StartGetBuferFPGA
 * Description    : Get bufer 2KB from FPGA to memory with DMA
 *******************************************************************************/
 
-void GetBuferFPGA(void *pvParameters)
+void ProcessingIntFPGA(void *pvParameters)
 {
-	int i=1000;
-	int summ;
-
+//	int i=1000;
+	
 	/* Take the semaphore before started to ensure it is in the correct	state. */
 	xSemaphoreTake( xSemaphoreEXTI, mainDONT_BLOCK );
 	xSemaphoreTake( xSemaphoreFSMCDMA,mainDONT_BLOCK);
 
 	while(1)
-    {
+  {
 			/*Take Semaphore EXT Interrupt NWAIT from FPGA */
 			xSemaphoreTake( xSemaphoreEXTI,portMAX_DELAY);
 			
-			#ifdef DEBUG
 			
-			#endif
 			/*Take mutex for use FSMC*/
 			xSemaphoreTake(xMutexFSMC , portMAX_DELAY);
 			if((FSMC_FPGA_GetStatus() & FPGA_READY_BUFER)==FPGA_READY_BUFER)
 			{
 
 				FSMC_FPGA_GetBufer();
-			
-		
-				/*Enable DMA receive bufer from FPGA */
-				DMA_Cmd(DMA_FSMC_STREAM, ENABLE);
-
-				xSemaphoreTake( xSemaphoreFSMCDMA,portMAX_DELAY);
 				
-				for (i=0;i<BUFFER_SIZE;i++)
-				{
-					summ+=input_bufer[i];
-				}
-			
+				/*Enable DMA receive bufer from FPGA */
+				
+				DMA_Cmd(DMA_FSMC_STREAM, ENABLE);
+				
+				xSemaphoreTake( xSemaphoreFSMCDMA,portMAX_DELAY);
 			}
 			xSemaphoreGive(xMutexFSMC );
-		
-			
 		}
     vTaskDelete(NULL);	
 }
 
+
+
+/******************************************************************************
+* Function Name  : TCP_IPConnect
+* Description    :	Installation and maintenance of connection to the server
+*******************************************************************************/
+void TCP_IPConnect(void *pvParameters)
+{
+	while(1)
+	{
+	//	check_socket(SOCKET_RESEACH,);
+		
+		vTaskDelay(TCP_IPConnect_PERIOD);
+	}
+	vTaskDelete(NULL);
+}
 
 /******************************************************************************
 * Function Name  : StartCalcBuferFPGA
@@ -114,7 +123,7 @@ void StartCalcBuferFPGA(void *pvParameters)
 			xSemaphoreTake(xMutexFSMC , portMAX_DELAY);
 			FSMC_START_CALC();
 			xSemaphoreGive(xMutexFSMC );
-			vTaskDelay(10000);
+			vTaskDelay(START_CAL_PERIOD);
 		}
     vTaskDelete(NULL);	
 }

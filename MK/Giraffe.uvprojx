@@ -359,7 +359,7 @@
             <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_STDPERIPH_DRIVER, STM32F4XX, DEBUG, DISCOVERY</Define>
+              <Define>USE_STDPERIPH_DRIVER, STM32F4XX, DEBUG, DISCOVERY,WIZNET</Define>
               <Undefine></Undefine>
               <IncludePath>.\Header;.\Header\freertos;.\Header\W5200;.\RTE\Device\STM32F407VG;.\STM32f4xx_StdPeriphDriver\inc</IncludePath>
             </VariousControls>
@@ -425,14 +425,14 @@
               <FilePath>.\Source\fsmc_fpga.c</FilePath>
             </File>
             <File>
-              <FileName>periphery_init.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Source\periphery_init.c</FilePath>
-            </File>
-            <File>
               <FileName>stm32f4xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Source\stm32f4xx_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>eeprom.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\eeprom.c</FilePath>
             </File>
           </Files>
         </Group>

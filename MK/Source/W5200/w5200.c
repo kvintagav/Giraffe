@@ -14,6 +14,7 @@
 #include "spi2.h"		
 #include "w5200.h"
 #include "socket.h"
+#include "console.h"
 
 #ifdef __DEF_IINCHIP_PPP__
    #include "md5.h"
@@ -22,10 +23,10 @@ CONFIG_MSG Config_Msg;
 CHCONFIG_TYPE_DEF Chconfig_Type_Def;
 
 uint8 Enable_DHCP = OFF;
-const uint8 MAC[6] = {0x00, 0x08, 0xDC, 0x01, 0x02, 0x03};//MAC Address
-const uint8 IP[4] = {192, 168, 0, 51};//IP Address
-const uint8 GateWay[4] = {192, 168, 0, 1};//Gateway Address
-const uint8 SubNet[4] = {255, 255, 255, 0};//SubnetMask Address
+//const uint8 MAC[6] = {0x00, 0x08, 0xDC, 0x01, 0x02, 0x03};//MAC Address
+//const uint8 IP[4] = {192, 168, 0, 51};//IP Address
+//const uint8 GateWay[4] = {192, 168, 0, 1};//Gateway Address
+//const uint8 SubNet[4] = {255, 255, 255, 0};//SubnetMask Address
 
 //TX MEM SIZE- SOCKET 0:8KB, SOCKET 1:2KB, SOCKET2-7:1KB
 //RX MEM SIZE- SOCKET 0:8KB, SOCKET 1:2KB, SOCKET2-7:1KB
@@ -34,8 +35,8 @@ uint8 rxsize[MAX_SOCK_NUM] = {16,0,0,0,0,0,0,0};
 
 //FOR TCP Client
 //Configuration Network Information of TEST PC
-uint8 Dest_IP[4] = {192, 168, 0, 4}; //DST_IP Address
-uint16 Dest_PORT = 5000; //DST_IP port
+//uint8 Dest_IP[4] = {192, 168, 0, 36}; //DST_IP Address
+//uint16 Dest_PORT = 5000; //DST_IP port
 
 __IO uint32_t Timer2_Counter;
 
@@ -110,28 +111,51 @@ void WIZ_Config(void) {
 	
 	 uint8 tmp_array[6];       
 			uint8 i;
-			
-			// MAC ADDRESS
-			for (i = 0 ; i < 6; i++) Config_Msg.Mac[i] = MAC[i];
-			// Local IP ADDRESS
-			Config_Msg.Lip[0] = IP[0]; Config_Msg.Lip[1] = IP[1]; Config_Msg.Lip[2] = IP[2]; Config_Msg.Lip[3] = IP[3];
-			// GateWay ADDRESS
-			Config_Msg.Gw[0] = GateWay[0]; Config_Msg.Gw[1] = GateWay[1]; Config_Msg.Gw[2] = GateWay[2]; Config_Msg.Gw[3] = GateWay[3];
-			// Subnet Mask ADDRESS
-			Config_Msg.Sub[0] = SubNet[0]; Config_Msg.Sub[1] = SubNet[1]; Config_Msg.Sub[2] = SubNet[2]; Config_Msg.Sub[3] = SubNet[3];
-			
+			/*EEPROM request for read settings for W5200 and server's IP*/
+	
+			/*Network Setting default*/
+	
+				console_send("\ndefault network setting\r");
+
+				// MAC ADDRESS
+				Config_Msg.Mac[0] = MAC_1;
+				Config_Msg.Mac[1] = MAC_2;
+				Config_Msg.Mac[2] = MAC_3;
+				Config_Msg.Mac[3] = MAC_4;
+				Config_Msg.Mac[4] = MAC_5;
+				Config_Msg.Mac[5] = MAC_6;
+				// Local IP ADDRESS
+				Config_Msg.Lip[0] = IP_1;
+				Config_Msg.Lip[1] = IP_2; 
+				Config_Msg.Lip[2] = IP_3; 
+				Config_Msg.Lip[3] = IP_4;
+				// GateWay ADDRESS
+				Config_Msg.Gw[0] = GateWay_1;
+				Config_Msg.Gw[1] = GateWay_2;
+				Config_Msg.Gw[2] = GateWay_3;
+				Config_Msg.Gw[3] = GateWay_4;
+				// Subnet Mask ADDRESS
+				Config_Msg.Sub[0] = SubNet_1;
+				Config_Msg.Sub[1] = SubNet_2; 
+				Config_Msg.Sub[2] = SubNet_3; 
+				Config_Msg.Sub[3] = SubNet_4;
+				
+  
+				//Destination IP address for TCP Client
+				Config_Msg.destip[0] = Dest_IP_1; 
+				Config_Msg.destip[1] = Dest_IP_2;
+				Config_Msg.destip[2] = Dest_IP_3; 
+				Config_Msg.destip[3] = Dest_IP_4;
+				Config_Msg.port = Dest_PORT;
+
 			setSHAR(Config_Msg.Mac);
 			setSUBR(Config_Msg.Sub);
 			setGAR(Config_Msg.Gw);
 			setSIPR(Config_Msg.Lip);
 
 			// Set DHCP
-			Config_Msg.DHCP = Enable_DHCP;    
-			//Destination IP address for TCP Client
-			Chconfig_Type_Def.destip[0] = Dest_IP[0]; Chconfig_Type_Def.destip[1] = Dest_IP[1];
-			Chconfig_Type_Def.destip[2] = Dest_IP[2]; Chconfig_Type_Def.destip[3] = Dest_IP[3];
-			Chconfig_Type_Def.port = Dest_PORT;
-
+			Config_Msg.DHCP = Enable_DHCP;  
+				
 			//Set PTR and RCR register	
 			setRTR(6000);
 			setRCR(3);
