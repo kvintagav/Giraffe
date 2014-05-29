@@ -17,13 +17,18 @@
 
 
 extern SemaphoreHandle_t xMutexUSART_CONSOLE;
-
+CONFIG_MSG Config_Msg;
+/********privat function *****************/
 void send_byte(char data);
+void SettingsDefault(void);
+bool CheckAndWriteVersion(void);
+
 
 enum tel_cmd {
   HELP_CMD,
 	PRINT,
 	SETTINGS,
+	DEFAULT,
 	SAVE,
 	REBOOT,
     
@@ -34,10 +39,31 @@ char *commands[] = {
   "help",
 	"print",
 	"set",
+	"default",
 	"save",
 	"reboot",
   NULL
 };
+
+enum set_cmd {
+  IP,
+	MASK,
+	DNS,
+	GATEWAY,
+	PORT,
+    
+};
+
+// Command table
+char *set_comm[] = {
+  "ip",
+	"mask",
+	"dns",
+	"gateway",
+	"port",
+	NULL
+};
+
 /*********************************************
 * Function Name  : LED_INIT
 * Description    : init led for indication work of different process and freertos
@@ -128,7 +154,101 @@ void ResetStart(void)
 	IWDG_ReloadCounter();
 	IWDG_Enable();
 }
+/******************************************************************************
+* Function Name  : ReadConfig
+* Description    : settings all parameter if eeprom don't read or empty
+*******************************************************************************/
+bool ReadConfig(void)
+{
+	if (I2C_EE_BufferRead((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==TRUE) /*if read struct from eeprom without error*/
+	{
+		/*if  eeprom is empty*/
+		if((Config_Msg.version[0]==0)&&(Config_Msg.version[1]==0)&&(Config_Msg.version[2]==0))
+		{
+			/*Eeprom is empty. Fill the structure with default values ??and write*/
+			SettingsDefault();
+			if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) return FALSE;				
+		}
+		else
+		{
+			/*if eeprom is not empty, check version*/
+			if (CheckAndWriteVersion()==FALSE)
+			{
+				if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) return FALSE;
+			}
+		}	
+	}		
+	else
+	{
+			/*if error read from eeprom*/
+			SettingsDefault();
+			return FALSE;
+		
+	}
+	return TRUE;
+}
+/******************************************************************************
+* Function Name  : SettingsDefault
+* Description    : settings all parameter if eeprom don't read or empty
+*******************************************************************************/
 
+void SettingsDefault(void)
+{
+		Config_Msg.ID = 				ID_DEFAULT;
+			// MAC ADDRESS
+		Config_Msg.Mac[0] = MAC_1;
+		Config_Msg.Mac[1] = MAC_2;
+		Config_Msg.Mac[2] = MAC_3;
+		Config_Msg.Mac[3] = MAC_4;
+		Config_Msg.Mac[4] = MAC_5;
+		Config_Msg.Mac[5] = MAC_6;
+		// Local IP ADDRESS
+		Config_Msg.Lip[0] = IP_1;
+		Config_Msg.Lip[1] = IP_2; 
+		Config_Msg.Lip[2] = IP_3; 
+		Config_Msg.Lip[3] = IP_4;
+		// GateWay ADDRESS
+		Config_Msg.Gw[0] = GateWay_1;
+		Config_Msg.Gw[1] = GateWay_2;
+		Config_Msg.Gw[2] = GateWay_3;
+		Config_Msg.Gw[3] = GateWay_4;
+		// Subnet Mask ADDRESS
+		Config_Msg.Sub[0] = SubNet_1;
+		Config_Msg.Sub[1] = SubNet_2; 
+		Config_Msg.Sub[2] = SubNet_3; 
+		Config_Msg.Sub[3] = SubNet_4;
+		
+		//Destination IP address for TCP Client
+		Config_Msg.destip[0] = Dest_IP_1; 
+		Config_Msg.destip[1] = Dest_IP_2;
+		Config_Msg.destip[2] = Dest_IP_3; 
+		Config_Msg.destip[3] = Dest_IP_4;
+		//Destination PORT for TCP Client
+		Config_Msg.port = Dest_PORT;
+	}
+/******************************************************************************
+* Function Name  : CheckAndWriteVersion
+* Description    : Checking the version of the project in eeprom,  
+*									if not te same, then replace
+*******************************************************************************/
+
+bool CheckAndWriteVersion(void)
+{	
+				
+		if ((Config_Msg.version[0]!=	TOP_VERSION)&&(Config_Msg.version[1]!=VERSION)&&(Config_Msg.version[2]!= SUB_VERSION))
+		{
+			/*Version and Date, update*/
+			Config_Msg.version[2]	=	TOP_VERSION;
+			Config_Msg.version[1]	= VERSION;
+			Config_Msg.version[0]	= SUB_VERSION;
+			Config_Msg.day =				DAY_VERSION;
+			Config_Msg.month =			MONTH_VERSION;	
+			Config_Msg.year = 			YEAR_VERSION;	
+			return FALSE;
+		}
+		
+		return TRUE;
+}
 
 /******************************************************************************
 * Function Name  : CommandProcessing
@@ -138,15 +258,19 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 {
 	
 	char **cmdp;
+	char **set_cmdp;
   char *cp;
-  char *help = {"\nhelp: Show all available commands\
+	char *help = {"\nhelp: Show all available commands\
     \r\n print: show all settings parameter\
-    \r\n set: setting need parameter\
-		\r\n save: change settings to save \
+    \r\n set: setting relevant parameters, need to save after\
+		\r\n default: setting default parameters, need to save after\
+		\r\n save: change settings to save\
 		\r\n reboot: reboot system, start with new settings\r"}; /* command HELP : Message */ 
 
-			
-			
+		for(cp = bufer_in; *cp != '\0';  cp++){
+    *cp = tolower(*cp);     /* Translate big letter to small letter */       
+		} 
+		
 		if(*bufer_in != '\0') {
     /* Find the input command in table; if it isn't there, return Syntax Error */
     for(cmdp = commands; *cmdp != NULL; cmdp++) {      
@@ -159,21 +283,28 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
     }
 		 switch(cmdp - commands) {
 					 
-				case HELP_CMD :     /* Process HELP command */
+				case HELP_CMD:     
 							sprintf(bufer_out, help);
 					
 					break;
 				
-				case PRINT:      /* Process GET LED command */
-					break;
+				case PRINT:    
+						sprintf(bufer_out,"\nSET IP = %u.%u.%u.%u\r",Config_Msg.Lip[0],Config_Msg.Lip[1],Config_Msg.Lip[2],Config_Msg.Lip[3]);	
+	
+				break;
+				
+				case SETTINGS :         
 					
-				case SETTINGS :      /* Process LED3 ON command */      
+				
 					break;
-					
-				case SAVE :      /* Process LED4 ON command */
-					break;
-					
-				case REBOOT :     /* Process LED3 OFF command */
+				case DEFAULT :
+						SettingsDefault();
+				break;				
+				case SAVE :      
+						if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
+						else sprintf(bufer_out,"\nsave successfully\r");
+				break;
+				case REBOOT :     
 					sprintf(bufer_out, "\ndevice rebooot\r");
 					ResetStart();
 				default :

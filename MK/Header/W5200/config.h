@@ -8,30 +8,7 @@
 
 
 
-typedef  uint8_t fpga_size_byte;
-//=================================================
-/*setting W5200 and Server's IP*/
-typedef struct _CONFIG_MSG
-{
-	uint8 Mac[6];
-	uint8 Lip[4];
-	uint8 Sub[4];
-	uint8 Gw[4];
-	uint8 DNS_Server_IP[4];
-	uint8  DHCP;
 
-	uint16 port;
-	uint8 destip[4];
-
-}
-CONFIG_MSG;
-
-
-typedef struct _CONFIG_TYPE_DEF
-{
-	uint16 port;
-	uint8 destip[4];
-}CHCONFIG_TYPE_DEF;
 
 	
 #define SOCK_CONFIG		2	// UDP

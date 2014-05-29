@@ -7,7 +7,7 @@
 */
 
 #include "stm32f4xx.h"
-#include "config.h"
+//#include "config.h"
 #include "stdio.h"
 #include "w5200.h"
 #include "socket.h"

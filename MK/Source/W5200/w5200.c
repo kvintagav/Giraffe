@@ -8,7 +8,7 @@
  
 #include <stdio.h>
 #include <string.h>
-#include "config.h"
+//#include "config.h"
 #include "util.h"
 #include "main.h"
 #include "spi2.h"		
@@ -19,8 +19,8 @@
 #ifdef __DEF_IINCHIP_PPP__
    #include "md5.h"
 #endif
-CONFIG_MSG Config_Msg;
-CHCONFIG_TYPE_DEF Chconfig_Type_Def;
+extern CONFIG_MSG Config_Msg;
+
 
 uint8 Enable_DHCP = OFF;
 //const uint8 MAC[6] = {0x00, 0x08, 0xDC, 0x01, 0x02, 0x03};//MAC Address
@@ -110,43 +110,12 @@ void WIZ_Config(void) {
 	
 	
 	 uint8 tmp_array[6];       
-			uint8 i;
+
 			/*EEPROM request for read settings for W5200 and server's IP*/
 	
 			/*Network Setting default*/
 	
 				console_send("\ndefault network setting\r");
-
-				// MAC ADDRESS
-				Config_Msg.Mac[0] = MAC_1;
-				Config_Msg.Mac[1] = MAC_2;
-				Config_Msg.Mac[2] = MAC_3;
-				Config_Msg.Mac[3] = MAC_4;
-				Config_Msg.Mac[4] = MAC_5;
-				Config_Msg.Mac[5] = MAC_6;
-				// Local IP ADDRESS
-				Config_Msg.Lip[0] = IP_1;
-				Config_Msg.Lip[1] = IP_2; 
-				Config_Msg.Lip[2] = IP_3; 
-				Config_Msg.Lip[3] = IP_4;
-				// GateWay ADDRESS
-				Config_Msg.Gw[0] = GateWay_1;
-				Config_Msg.Gw[1] = GateWay_2;
-				Config_Msg.Gw[2] = GateWay_3;
-				Config_Msg.Gw[3] = GateWay_4;
-				// Subnet Mask ADDRESS
-				Config_Msg.Sub[0] = SubNet_1;
-				Config_Msg.Sub[1] = SubNet_2; 
-				Config_Msg.Sub[2] = SubNet_3; 
-				Config_Msg.Sub[3] = SubNet_4;
-				
-  
-				//Destination IP address for TCP Client
-				Config_Msg.destip[0] = Dest_IP_1; 
-				Config_Msg.destip[1] = Dest_IP_2;
-				Config_Msg.destip[2] = Dest_IP_3; 
-				Config_Msg.destip[3] = Dest_IP_4;
-				Config_Msg.port = Dest_PORT;
 
 			setSHAR(Config_Msg.Mac);
 			setSUBR(Config_Msg.Sub);
@@ -154,7 +123,7 @@ void WIZ_Config(void) {
 			setSIPR(Config_Msg.Lip);
 
 			// Set DHCP
-			Config_Msg.DHCP = Enable_DHCP;  
+				Config_Msg.DHCP = Enable_DHCP;  
 				
 			//Set PTR and RCR register	
 			setRTR(6000);

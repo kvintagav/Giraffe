@@ -8,6 +8,9 @@
 
 #include "eeprom.h"
 
+/* Privat function */
+bool I2CWaitEvent( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT);
+
 /*********************************************
 * Function Name  : I2C_EE_INIT
 * Description    : init module I2C EEPROM
@@ -57,7 +60,7 @@ void I2C_EE_INIT(void){
 * Function Name  : I2C_EE_BufferWrite
 * Description    : Writes buffer of data to the I2C EEPROM.
 *******************************************************************************/
-void I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
+bool I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
 {
   u8 NumOfPage = 0, NumOfSingle = 0, Addr = 0, count = 0;
 
@@ -72,7 +75,7 @@ void I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
     /* If NumByteToWrite < I2C_PageSize */
     if(NumOfPage == 0) 
     {
-      I2C_EE_PageWrite(pBuffer, WriteAddr, NumOfSingle);
+      if (I2C_EE_PageWrite(pBuffer, WriteAddr, NumOfSingle)==EE_ERROR) return EE_ERROR;
       I2C_EE_WaitEepromStandbyState();
     }
     /* If NumByteToWrite > I2C_PageSize */
@@ -80,7 +83,7 @@ void I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
     {
       while(NumOfPage--)
       {
-        I2C_EE_PageWrite(pBuffer, WriteAddr, I2C_PageSize); 
+        if (I2C_EE_PageWrite(pBuffer, WriteAddr, I2C_PageSize)==EE_ERROR) return EE_ERROR; 
     	I2C_EE_WaitEepromStandbyState();
         WriteAddr +=  I2C_PageSize;
         pBuffer += I2C_PageSize;
@@ -88,7 +91,7 @@ void I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
 
       if(NumOfSingle!=0)
       {
-        I2C_EE_PageWrite(pBuffer, WriteAddr, NumOfSingle);
+        if (I2C_EE_PageWrite(pBuffer, WriteAddr, NumOfSingle)==EE_ERROR) return EE_ERROR;
         I2C_EE_WaitEepromStandbyState();
       }
     }
@@ -99,7 +102,7 @@ void I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
     /* If NumByteToWrite < I2C_PageSize */
     if(NumOfPage== 0) 
     {
-      I2C_EE_PageWrite(pBuffer, WriteAddr, NumOfSingle);
+      if (I2C_EE_PageWrite(pBuffer, WriteAddr, NumOfSingle)==EE_ERROR) return EE_ERROR;
       I2C_EE_WaitEepromStandbyState();
     }
     /* If NumByteToWrite > I2C_PageSize */
@@ -111,7 +114,7 @@ void I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
       
       if(count != 0)
       {  
-        I2C_EE_PageWrite(pBuffer, WriteAddr, count);
+        if (I2C_EE_PageWrite(pBuffer, WriteAddr, count)==EE_ERROR) return EE_ERROR;
         I2C_EE_WaitEepromStandbyState();
         WriteAddr += count;
         pBuffer += count;
@@ -119,18 +122,20 @@ void I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
       
       while(NumOfPage--)
       {
-        I2C_EE_PageWrite(pBuffer, WriteAddr, I2C_PageSize);
+        if (I2C_EE_PageWrite(pBuffer, WriteAddr, I2C_PageSize)==EE_ERROR) return EE_ERROR;
         I2C_EE_WaitEepromStandbyState();
         WriteAddr +=  I2C_PageSize;
         pBuffer += I2C_PageSize;  
       }
       if(NumOfSingle != 0)
       {
-        I2C_EE_PageWrite(pBuffer, WriteAddr, NumOfSingle); 
+        if (I2C_EE_PageWrite(pBuffer, WriteAddr, NumOfSingle)==EE_ERROR) return EE_ERROR;
         I2C_EE_WaitEepromStandbyState();
       }
     }
   }  
+	
+	return NO_ERROR;
 }
 
 /*******************************************************************************
@@ -138,26 +143,27 @@ void I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
 * Description    : Writes more than one byte to the EEPROM with a single WRITE
 *                  cycle. The number of byte can't exceed the EEPROM page size.
 *******************************************************************************/
-void I2C_EE_PageWrite(u8* pBuffer, u8 WriteAddr, u8 NumByteToWrite)
+bool I2C_EE_PageWrite(u8* pBuffer, u8 WriteAddr, u8 NumByteToWrite)
 {
+	
   /* Send START condition */
   I2C_GenerateSTART(I2C, ENABLE);
   
   /* Test on EV5 and clear it */
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)); 
+ 	if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
   
   /* Send EEPROM address for write */
   I2C_Send7bitAddress(I2C, EEPROM_ADDRESS, I2C_Direction_Transmitter);
 
   /* Test on EV6 and clear it */
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));  
-
+	if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
+	
   /* Send the EEPROM's internal address to write to */    
   I2C_SendData(I2C, WriteAddr);  
 
   /* Test on EV8 and clear it */
-  while(! I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
-
+	while(! I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
+	
   /* While there is data to be written */
   while(NumByteToWrite--)  
   {
@@ -168,62 +174,71 @@ void I2C_EE_PageWrite(u8* pBuffer, u8 WriteAddr, u8 NumByteToWrite)
     pBuffer++; 
   
     /* Test on EV8 and clear it */
-    while (!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+		while (!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
+	
   }
 
   /* Send STOP condition */
   I2C_GenerateSTOP(I2C, ENABLE);
+	
+	return NO_ERROR;
 }
 /*******************************************************************************
 * Function Name  : I2C_EE_ByteWrite
 * Description    : Writes one byte to the I2C EEPROM.
 *******************************************************************************/
-void I2C_EE_ByteWrite(u8* pBuffer, u8 WriteAddr)
+bool I2C_EE_ByteWrite(u8* pBuffer, u8 WriteAddr)
 {
+
   /* Send STRAT condition */
   I2C_GenerateSTART(I2C, ENABLE);
 
   /* Test on EV5 and clear it */
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT));  
-
+	if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
+	
   /* Send EEPROM address for write */
   I2C_Send7bitAddress(I2C, EEPROM_ADDRESS, I2C_Direction_Transmitter);
   
   /* Test on EV6 and clear it */
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
-      
+	if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
+	
   /* Send the EEPROM's internal address to write to */
   I2C_SendData(I2C, WriteAddr);
   
   /* Test on EV8 and clear it */
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
-
+  if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
+	
   /* Send the byte to be written */
   I2C_SendData(I2C, *pBuffer); 
    
   /* Test on EV8 and clear it */
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	
+  if (I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
   
+	
   /* Send STOP condition */
   I2C_GenerateSTOP(I2C, ENABLE);
+	
+	return NO_ERROR;
 }
 /*******************************************************************************
 * Function Name  : I2C_EE_BufferRead
 * Description    : Reads a block of data from the EEPROM.
 *******************************************************************************/
-void I2C_EE_BufferRead(u8* pBuffer, u8 ReadAddr, u16 NumByteToRead)
+bool I2C_EE_BufferRead(u8* pBuffer, u8 ReadAddr, u16 NumByteToRead)
 {  
+	
   /* Send START condition */
   I2C_GenerateSTART(I2C, ENABLE);
   
   /* Test on EV5 and clear it */
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT));
+	if (I2CWaitEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
    
   /* Send EEPROM address for write */
   I2C_Send7bitAddress(I2C, EEPROM_ADDRESS, I2C_Direction_Transmitter);
 
   /* Test on EV6 and clear it */
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
+  if(I2CWaitEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
   
   /* Clear EV6 by setting again the PE bit */
   I2C_Cmd(I2C, ENABLE);
@@ -232,20 +247,21 @@ void I2C_EE_BufferRead(u8* pBuffer, u8 ReadAddr, u16 NumByteToRead)
   I2C_SendData(I2C, ReadAddr);  
 
   /* Test on EV8 and clear it */
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
-  
-  /* Send STRAT condition a second time */  
+	if (I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR)return EE_ERROR;
+     
+	/* Send STRAT condition a second time */  
   I2C_GenerateSTART(I2C, ENABLE);
   
   /* Test on EV5 and clear it */
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT));
-  
+	if(I2CWaitEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR ) return EE_ERROR;
+  	 
   /* Send EEPROM address for read */
   I2C_Send7bitAddress(I2C, EEPROM_ADDRESS, I2C_Direction_Receiver);
   
   /* Test on EV6 and clear it */
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED));
-  
+	if(I2CWaitEvent(I2C, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
+   
+	 
   /* While there is data to be read */
   while(NumByteToRead)  
   {
@@ -274,6 +290,8 @@ void I2C_EE_BufferRead(u8* pBuffer, u8 ReadAddr, u16 NumByteToRead)
 
   /* Enable Acknowledgement to be ready for another reception */
   I2C_AcknowledgeConfig(I2C, ENABLE);
+	
+	return TRUE;
 }
 /*******************************************************************************
 * Function Name  : I2C_EE_WaitEepromStandbyState
@@ -295,4 +313,22 @@ void I2C_EE_WaitEepromStandbyState(void)
   
   /* Clear AF flag */
   I2C_ClearFlag(I2C, I2C_FLAG_AF);
+}
+
+/*******************************************************************************
+* Function Name  : I2C_WaitEvent
+* Description    : wait event from i2c
+*******************************************************************************/
+bool I2CWaitEvent( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT)
+{
+	int eetime=WAYT_REQUEST_EEPROM;
+	
+  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))
+   {
+    if(eetime==0) return EE_ERROR;
+		else (eetime--);
+  }
+	 
+	return NO_ERROR;
+	
 }

@@ -1,10 +1,11 @@
 
 #include "stm32f4xx.h"
-#include "config.h"
+//#include "config.h"
 #include "w5200.h"
 #include "socket.h"
 #include "util.h"
 #include "loopback.h"
+#include "console.h"
 //#include "main.h"
 //#include "control_fpga.h"
 #include <stdio.h>

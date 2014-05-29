@@ -80,19 +80,29 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 /*******************************************************************/
 void vFreeRTOSInitAll()
 {
-		LED_INIT();
-	
-		FSMC_FPGA_Init();
-
 		CONSOLE_USART_INIT();
+		console_send("\r\n\r\ndevice_start\r");
+
+		LED_INIT();
+			
+		#ifdef FSMC
+		FSMC_FPGA_Init();
+		if (FSMC_FPGA_Detect()==TRUE)	console_send("\n FPGA is connect \r");
+		else console_send("\nFPGA is not detect, check the connection \r");
+
+		#endif
 		
 		#ifdef EEPROM
 			I2C_EE_INIT();
+			if (ReadConfig()==TRUE)	console_send("\nEEPROM start\r");
+			else console_send("\nEEPROM not connect, check the connection \r\n setting is enabled by default\r");
+
 		#endif
 	
 		#ifdef WIZNET
 			WIZ_GPIO_Install();
 			WIZ_Config();
+			console_send("\nWIZNET start\r");
 		#endif
 	
 	
@@ -106,12 +116,15 @@ void vFreeRTOSInitAll()
 int main(void)
 
 {
-	xMutexFSMC = xSemaphoreCreateMutex();
+	
 	xMutexUSART_CONSOLE = xSemaphoreCreateMutex();
-
-	vSemaphoreCreateBinary(xSemaphoreFSMCDMA);
-	vSemaphoreCreateBinary(xSemaphoreEXTI);
 	vSemaphoreCreateBinary(xSemaphoreCONSOLE);
+	
+	#ifdef FSMC
+		vSemaphoreCreateBinary(xSemaphoreFSMCDMA);
+		vSemaphoreCreateBinary(xSemaphoreEXTI);
+		xMutexFSMC = xSemaphoreCreateMutex();
+	#endif
 	
 
 	#ifdef WIZNET
@@ -121,18 +134,18 @@ int main(void)
 		
   vFreeRTOSInitAll();
 	
-	console_send("\r\n\r\ndevice_start\r");
 
 	
 	if ((xMutexFSMC != NULL)&&(xSemaphoreEXTI !=NULL)&&(xSemaphoreFSMCDMA!=NULL)&&(xSemaphoreCONSOLE!=NULL))
 		{
-			if (FSMC_FPGA_Detect()==TRUE)	console_send("\n FPGA is connect \r");
-			else console_send("\nFPGA is not detect, check the connection \r");
+			#ifdef FSMC	
+				xTaskCreate(ProcessingIntFPGA,(signed char*)"ProcessingIntFPGA", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+5 , NULL);
+				xTaskCreate(StartCalcBuferFPGA,(signed char*)"StartCalcBufer", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+4 , NULL);
+			#endif
 			
-			xTaskCreate(ProcessingIntFPGA,(signed char*)"ProcessingIntFPGA", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+5 , NULL);
-			xTaskCreate(StartCalcBuferFPGA,(signed char*)"StartCalcBufer", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+4 , NULL);
-			
-			xTaskCreate(TCP_IPConnect,(signed char*)"TCP_IPConnect", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+3 , NULL);
+			#ifdef WIZNET
+				xTaskCreate(TCP_IPConnect,(signed char*)"TCP_IPConnect", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+3 , NULL);
+			#endif
 			
 			xTaskCreate(vLedTask,(signed char *)"LedTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+1 , NULL);
 			xTaskCreate(ConsoleExchange,(signed char *)"ConsoleExchange", configMINIMAL_STACK_SIZE*3, NULL, tskIDLE_PRIORITY+2 , NULL);

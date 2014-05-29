@@ -1,36 +1,15 @@
 
 #include "stm32f4xx.h"
-#include "config.h"
+//#include "config.h"
 #include "util.h"
 #include "w5200.h"
 #include "main.h"
+#include "console.h"
 #include <stdio.h>
 #include <stdarg.h>
 
 
 
-extern CONFIG_MSG Config_Msg;
-
-/*
-extern uint8 txsize[MAX_SOCK_NUM];
-extern uint8 rxsize[MAX_SOCK_NUM];
-*/
-
-#ifdef __GNUC__
-  /* With GCC/RAISONANCE, small printf (option LD Linker->Libraries->Small printf
-     set to 'Yes') calls __io_putchar() */
-  #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-  #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif /* __GNUC__ */
-
-extern uint8 MAC[6];
-extern uint8 IP[4];
-extern uint8 GateWay[4];
-extern uint8 SubNet[4];
-extern uint8 Enable_DHCP;
-extern uint8 Dest_IP[4] ;
-extern uint16 Dest_PORT ;
 
 void Reset_W5200(void)
 {

@@ -22,6 +22,8 @@
 #include "stdio.h"
 /*WIZNET LIB*/
 
+//#define FSMC
+
 #ifdef WIZNET
 	#include "util.h"
 	#include "config.h"

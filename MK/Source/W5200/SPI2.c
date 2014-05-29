@@ -1,10 +1,10 @@
 #include "stm32f4xx.h"
-#include "config.h"
+//#include "config.h"
 #include "socket.h"
 #include "w5200.h"
 #include "util.h"
 #include "main.h"
-
+#include "console.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -29,6 +29,8 @@ void WIZ_SPI_Init(void)
 		  /* Enable SPI1 */
 		  SPI_Cmd(WIZ_SPI, ENABLE);
 		  SPI_NSSInternalSoftwareConfig(WIZ_SPI, SPI_NSSInternalSoft_Set);
+		
+		
 	}
 
 
