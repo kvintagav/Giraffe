@@ -64,6 +64,8 @@ char *set_comm[] = {
 	NULL
 };
 
+uint8 state=CMD;
+
 /*********************************************
 * Function Name  : LED_INIT
 * Description    : init led for indication work of different process and freertos
@@ -167,6 +169,7 @@ bool ReadConfig(void)
 		{
 			/*Eeprom is empty. Fill the structure with default values ??and write*/
 			SettingsDefault();
+			CheckAndWriteVersion();
 			if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) return FALSE;				
 		}
 		else
@@ -251,6 +254,18 @@ bool CheckAndWriteVersion(void)
 }
 
 /******************************************************************************
+* Function Name  : PrintVersion
+* Description    : print in console version programm and data kompile programm
+*******************************************************************************/
+void PrintVersion(char *bufer_out)
+{			
+	sprintf(bufer_out,"\n Version: %u.%u.%u Compilation date: %u.%u.%u\r",Config_Msg.version[2],Config_Msg.version[1],\
+	Config_Msg.version[0],Config_Msg.day,Config_Msg.month,Config_Msg.year);	
+
+	
+}
+
+/******************************************************************************
 * Function Name  : CommandProcessing
 * Description    : Processing input command 
 *******************************************************************************/
@@ -267,50 +282,64 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 		\r\n save: change settings to save\
 		\r\n reboot: reboot system, start with new settings\r"}; /* command HELP : Message */ 
 
-		for(cp = bufer_in; *cp != '\0';  cp++){
-    *cp = tolower(*cp);     /* Translate big letter to small letter */       
-		} 
-		
-		if(*bufer_in != '\0') {
-    /* Find the input command in table; if it isn't there, return Syntax Error */
-    for(cmdp = commands; *cmdp != NULL; cmdp++) {      
-      if(strncmp(*cmdp, bufer_in, strlen(*cmdp)) == 0) break;      
-    }
-		
-		 if(*cmdp == NULL) {
-      sprintf(bufer_out,"\nBAD command\r");
-      return;
-    }
-		 switch(cmdp - commands) {
-					 
-				case HELP_CMD:     
-							sprintf(bufer_out, help);
-					
-					break;
-				
-				case PRINT:    
-						sprintf(bufer_out,"\nSET IP = %u.%u.%u.%u\r",Config_Msg.Lip[0],Config_Msg.Lip[1],Config_Msg.Lip[2],Config_Msg.Lip[3]);	
-	
-				break;
-				
-				case SETTINGS :         
-					
-				
-					break;
-				case DEFAULT :
-						SettingsDefault();
-				break;				
-				case SAVE :      
-						if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
-						else sprintf(bufer_out,"\nsave successfully\r");
-				break;
-				case REBOOT :     
-					sprintf(bufer_out, "\ndevice rebooot\r");
-					ResetStart();
-				default :
-					break;
+		if (state==CMD)
+		{
+			for(cp = bufer_in; *cp != '\0';  cp++){
+			*cp = tolower(*cp);     /* Translate big letter to small letter */       
+			} 
+			
+			if(*bufer_in != '\0') {
+			/* Find the input command in table; if it isn't there, return Syntax Error */
+			for(cmdp = commands; *cmdp != NULL; cmdp++) {      
+				if(strncmp(*cmdp, bufer_in, strlen(*cmdp)) == 0) break;      
 			}
-	}
+			
+			 if(*cmdp == NULL) {
+				sprintf(bufer_out,"\nBAD command\r");
+				return;
+			}
+			 switch(cmdp - commands) {
+						 
+					case HELP_CMD:     
+								sprintf(bufer_out, help);
+						
+						break;
+					
+					case PRINT:    
+							sprintf(bufer_out,"\nSET IP = %u.%u.%u.%u\r",Config_Msg.Lip[0],Config_Msg.Lip[1],Config_Msg.Lip[2],Config_Msg.Lip[3]);	
+
+					break;
+					
+					case SETTINGS :         
+						
+					
+						break;
+					case DEFAULT :
+							SettingsDefault();
+					break;				
+					case SAVE :    
+						//	sprintf(bufer_out,"\nenter today's date[format DD.MM.YYYY]:");	
+						//	state=DATA;
+								if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
+								else sprintf(bufer_out,"\nsave successfully\r");
+
+					break;
+					case REBOOT :     
+						sprintf(bufer_out, "\ndevice rebooot\r");
+						ResetStart();
+					default :
+							sprintf(bufer_out,"\nBAD command\r");
+						break;
+				}
+			}
+		}
+		else if (state==DATA)
+		{
+			if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
+			else sprintf(bufer_out,"\nsave successfully\r");
+			state=CMD;
+			
+		}
 }
 
 /******************************************************************************

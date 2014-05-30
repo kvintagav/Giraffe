@@ -5,6 +5,10 @@
 
 #include "main.h"
 
+#define CMD 	0 
+#define DATA 	1
+
+
 typedef  uint8_t fpga_size_byte;
 //=================================================
 /*setting W5200 and Server's IP*/
@@ -38,6 +42,7 @@ void CommandProcessing( char *bufer_in, char *bufer_out);
 void console_send( char* str);
 void 	LED_INIT(void);
 bool ReadConfig(void);
+void PrintVersion( char *bufer_out);
 
 #endif
 

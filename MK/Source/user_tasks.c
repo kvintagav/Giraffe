@@ -22,7 +22,10 @@ extern bit_bus input_bufer[BUFFER_SIZE];
 void ConsoleExchange (void *pvParameters)
 {
 		xSemaphoreTake( xSemaphoreCONSOLE,mainDONT_BLOCK);
-    while(1)
+    PrintVersion(bufer_cons_out);
+		console_send(bufer_cons_out);
+		
+		while(1)
     {
 				xSemaphoreTake( xSemaphoreCONSOLE,portMAX_DELAY);
 				CommandProcessing( bufer_console,  bufer_cons_out);

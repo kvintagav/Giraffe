@@ -81,24 +81,23 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 void vFreeRTOSInitAll()
 {
 		CONSOLE_USART_INIT();
-		console_send("\r\n\r\ndevice_start\r");
+		console_send("\r\n\r\nDevice_start\r");
 
 		LED_INIT();
-			
-		#ifdef FSMC
-		FSMC_FPGA_Init();
-		if (FSMC_FPGA_Detect()==TRUE)	console_send("\n FPGA is connect \r");
-		else console_send("\nFPGA is not detect, check the connection \r");
-
-		#endif
+		
 		
 		#ifdef EEPROM
 			I2C_EE_INIT();
 			if (ReadConfig()==TRUE)	console_send("\nEEPROM start\r");
-			else console_send("\nEEPROM not connect, check the connection \r\n setting is enabled by default\r");
-
+			else console_send("\nEEPROM is not connect \r\n parameters is enabled by default\r");
 		#endif
-	
+
+		#ifdef FSMC
+			FSMC_FPGA_Init();
+			if (FSMC_FPGA_Detect()==TRUE)	console_send("\n FPGA is connect \r");
+			else console_send("\nFPGA is not detect, check the connection \r");
+		#endif
+
 		#ifdef WIZNET
 			WIZ_GPIO_Install();
 			WIZ_Config();
