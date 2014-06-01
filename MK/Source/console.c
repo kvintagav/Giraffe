@@ -285,7 +285,8 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 	
 	char **cmdp;
 	char **set_cmdp;
-  char *cp;
+	char *cp;
+	
 	char *help = {"\nhelp: Show all available commands\
     \r\n print: show all settings parameter\
     \r\n set: setting relevant parameters, need to save after\
@@ -329,10 +330,10 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 						Config_Msg.Lip[0],Config_Msg.Lip[1],Config_Msg.Lip[2],Config_Msg.Lip[3],\
 						Config_Msg.Gw[0],Config_Msg.Gw[1],Config_Msg.Gw[2],Config_Msg.Gw[3],\
 						Config_Msg.Sub[0],Config_Msg.Sub[1],Config_Msg.Sub[2],Config_Msg.Sub[3],\
-					  Config_Msg.port_science,\
+						Config_Msg.port_science,\
 						Config_Msg.DNS_Server_IP[0],Config_Msg.DNS_Server_IP[1],Config_Msg.DNS_Server_IP[2],Config_Msg.DNS_Server_IP[3],\
-					  Config_Msg.port,\
-					  Config_Msg.day_set,Config_Msg.month_set,Config_Msg.year_set);	
+						Config_Msg.port,\
+						Config_Msg.day_set,Config_Msg.month_set,Config_Msg.year_set);	
 									
 
 					break;
@@ -347,8 +348,14 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 							}
 							 switch(set_cmdp - parameter){
 								case MAC:
-									 
-									 break;
+									 /*use pointer cp for search numbers in bufer_in, 
+									 Example how tolower*/
+								/*
+									for(cp = bufer_in; *cp != '\0';  cp++){
+									*cp = tolower(*cp);         
+									} 
+								*/
+									break;
 								case IP:
 
 									break;
