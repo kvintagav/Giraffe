@@ -27,10 +27,16 @@ typedef struct _CONFIG_MSG
 	uint8 Sub[4];
 	uint8 Gw[4];
 	uint8 DNS_Server_IP[4];
+	uint16 port_science;
 	uint8  DHCP;
 
 	uint16 port;
 	uint8 destip[4];
+	
+	uint8 day_set;
+	uint8 month_set;
+	uint16 year_set;
+	
 			
 }
 CONFIG_MSG;
@@ -40,9 +46,10 @@ CONFIG_MSG;
 void CONSOLE_USART_INIT(void);
 void CommandProcessing( char *bufer_in, char *bufer_out);
 void console_send( char* str);
-void 	LED_INIT(void);
+void LED_INIT(void);
 bool ReadConfig(void);
 void PrintVersion( char *bufer_out);
-
+void SettingsDefault(void);
+bool CheckAndWriteVersion(void);
 #endif
 

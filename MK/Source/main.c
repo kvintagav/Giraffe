@@ -90,11 +90,15 @@ void vFreeRTOSInitAll()
 			I2C_EE_INIT();
 			if (ReadConfig()==TRUE)	console_send("\nEEPROM start\r");
 			else console_send("\nEEPROM is not connect \r\n parameters is enabled by default\r");
+		#else
+				SettingsDefault();
+				CheckAndWriteVersion();
+			
 		#endif
 
 		#ifdef FSMC
 			FSMC_FPGA_Init();
-			if (FSMC_FPGA_Detect()==TRUE)	console_send("\n FPGA is connect \r");
+			if (FSMC_FPGA_Detect()==TRUE)	console_send("\nFPGA is connect\r");
 			else console_send("\nFPGA is not detect, check the connection \r");
 		#endif
 
@@ -113,6 +117,7 @@ void vFreeRTOSInitAll()
  
 /*******************************************************************/
 int main(void)
+
 
 {
 	
@@ -135,19 +140,19 @@ int main(void)
 	
 
 	
-	if ((xMutexFSMC != NULL)&&(xSemaphoreEXTI !=NULL)&&(xSemaphoreFSMCDMA!=NULL)&&(xSemaphoreCONSOLE!=NULL))
+	if ((xMutexFSMC != NULL)&&(xSemaphoreEXTI !=NULL)&&(xSemaphoreFSMCDMA!=NULL)&&(xSemaphoreCONSOLE!=NULL)&&(xMutexUSART_CONSOLE!=NULL))
 		{
 			#ifdef FSMC	
-				xTaskCreate(ProcessingIntFPGA,(signed char*)"ProcessingIntFPGA", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+5 , NULL);
-				xTaskCreate(StartCalcBuferFPGA,(signed char*)"StartCalcBufer", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+4 , NULL);
+				xTaskCreate(ProcessingIntFPGA,(signed char*)"ProcessingIntFPGA", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+4 , NULL);
+				xTaskCreate(StartCalcBuferFPGA,(signed char*)"StartCalcBufer", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2 , NULL);
 			#endif
 			
 			#ifdef WIZNET
-				xTaskCreate(TCP_IPConnect,(signed char*)"TCP_IPConnect", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+3 , NULL);
+				xTaskCreate(TCP_IPConnect,(signed char*)"TCP_IPConnect", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2 , NULL);
 			#endif
 			
 			xTaskCreate(vLedTask,(signed char *)"LedTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+1 , NULL);
-			xTaskCreate(ConsoleExchange,(signed char *)"ConsoleExchange", configMINIMAL_STACK_SIZE*3, NULL, tskIDLE_PRIORITY+2 , NULL);
+			xTaskCreate(ConsoleExchange,(signed char *)"ConsoleExchange", configMINIMAL_STACK_SIZE*3, NULL, tskIDLE_PRIORITY+1 , NULL);
 			
 			vTaskStartScheduler();
 		}

@@ -22,7 +22,7 @@
 #include "stdio.h"
 /*WIZNET LIB*/
 
-//#define FSMC
+#define FSMC
 
 #ifdef WIZNET
 	#include "util.h"

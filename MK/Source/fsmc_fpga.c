@@ -213,8 +213,6 @@ void FSMC_FPGA_Reset(void)
 void FSMC_FPGA_GetBufer(void)
 {
   *(bit_bus *)(FPGA_FLASH_START_ADDR | CMD_AREA) = FPGA_CMD_READ_BUFER;
-
-  
 }
 
 /******************************************************************************

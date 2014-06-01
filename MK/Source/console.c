@@ -20,8 +20,8 @@ extern SemaphoreHandle_t xMutexUSART_CONSOLE;
 CONFIG_MSG Config_Msg;
 /********privat function *****************/
 void send_byte(char data);
-void SettingsDefault(void);
-bool CheckAndWriteVersion(void);
+
+//bool CheckAndWriteVersion(void);
 
 
 enum tel_cmd {
@@ -45,21 +45,23 @@ char *commands[] = {
   NULL
 };
 
-enum set_cmd {
+enum set_par {
+	MAC,
   IP,
+	GATEWAY,
 	MASK,
 	DNS,
-	GATEWAY,
 	PORT,
     
 };
 
 // Command table
-char *set_comm[] = {
+char *parameter[] = {
+	"mac",
   "ip",
+	"gateway",
 	"mask",
 	"dns",
-	"gateway",
 	"port",
 	NULL
 };
@@ -124,7 +126,7 @@ void CONSOLE_USART_INIT(void){
 
   /* Enable USART2 clocks */
 
-	USART_InitStructure.USART_BaudRate = 921600;
+	USART_InitStructure.USART_BaudRate = USART_BAUD_RATE;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -221,6 +223,15 @@ void SettingsDefault(void)
 		Config_Msg.Sub[2] = SubNet_3; 
 		Config_Msg.Sub[3] = SubNet_4;
 		
+		// DNS SERVER IP
+		Config_Msg.DNS_Server_IP[0]=DNS_server_IP_1;
+		Config_Msg.DNS_Server_IP[1]=DNS_server_IP_2;
+		Config_Msg.DNS_Server_IP[2]=DNS_server_IP_3;
+		Config_Msg.DNS_Server_IP[3]=DNS_server_IP_4;
+	
+		//Port for socket for translate science data
+		Config_Msg.port_science=PortScience;
+		
 		//Destination IP address for TCP Client
 		Config_Msg.destip[0] = Dest_IP_1; 
 		Config_Msg.destip[1] = Dest_IP_2;
@@ -238,7 +249,7 @@ void SettingsDefault(void)
 bool CheckAndWriteVersion(void)
 {	
 				
-		if ((Config_Msg.version[0]!=	TOP_VERSION)&&(Config_Msg.version[1]!=VERSION)&&(Config_Msg.version[2]!= SUB_VERSION))
+		if ((Config_Msg.version[0]!=	TOP_VERSION)||(Config_Msg.version[1]!=VERSION)||(Config_Msg.version[2]!= SUB_VERSION))
 		{
 			/*Version and Date, update*/
 			Config_Msg.version[2]	=	TOP_VERSION;
@@ -259,7 +270,7 @@ bool CheckAndWriteVersion(void)
 *******************************************************************************/
 void PrintVersion(char *bufer_out)
 {			
-	sprintf(bufer_out,"\n Version: %u.%u.%u Compilation date: %u.%u.%u\r",Config_Msg.version[2],Config_Msg.version[1],\
+	sprintf(bufer_out,"\nVersion: %u.%u.%u Compilation date: %u.%u.%u\r",Config_Msg.version[2],Config_Msg.version[1],\
 	Config_Msg.version[0],Config_Msg.day,Config_Msg.month,Config_Msg.year);	
 
 	
@@ -306,16 +317,63 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 						break;
 					
 					case PRINT:    
-							sprintf(bufer_out,"\nSET IP = %u.%u.%u.%u\r",Config_Msg.Lip[0],Config_Msg.Lip[1],Config_Msg.Lip[2],Config_Msg.Lip[3]);	
+						sprintf(bufer_out,"\nVersion: %u.%u.%u Compilation date: %u.%u.%u\r\
+						\nSET MAC = %u.%u.%u.%u.%u.%u\r\nSET IP = %u.%u.%u.%u\r\
+						\nSET GateWay  = %u.%u.%u.%u\r\nSET  MASK= %u.%u.%u.%u\r\
+						\nSET Port = %u\r\
+						\nSET Server IP  = %u.%u.%u.%u\r\
+						\nSET Server Port = %u\r\
+						\nData settings: %u.%u.%u\r",\
+						Config_Msg.version[2],Config_Msg.version[1],Config_Msg.version[0],Config_Msg.day,Config_Msg.month,Config_Msg.year,\
+						Config_Msg.Mac[0],Config_Msg.Mac[1],Config_Msg.Mac[2],Config_Msg.Mac[3],Config_Msg.Mac[4],Config_Msg.Mac[5],\
+						Config_Msg.Lip[0],Config_Msg.Lip[1],Config_Msg.Lip[2],Config_Msg.Lip[3],\
+						Config_Msg.Gw[0],Config_Msg.Gw[1],Config_Msg.Gw[2],Config_Msg.Gw[3],\
+						Config_Msg.Sub[0],Config_Msg.Sub[1],Config_Msg.Sub[2],Config_Msg.Sub[3],\
+					  Config_Msg.port_science,\
+						Config_Msg.DNS_Server_IP[0],Config_Msg.DNS_Server_IP[1],Config_Msg.DNS_Server_IP[2],Config_Msg.DNS_Server_IP[3],\
+					  Config_Msg.port,\
+					  Config_Msg.day_set,Config_Msg.month_set,Config_Msg.year_set);	
+									
 
 					break;
-					
 					case SETTINGS :         
-						
-					
-						break;
+							for(set_cmdp = parameter; *set_cmdp != NULL; set_cmdp++) {      
+								if(strncmp(*set_cmdp, bufer_in, strlen(*set_cmdp)) == 0) break;      
+							}
+							
+							 if(*set_cmdp == NULL) {
+								sprintf(bufer_out,"\nBAD SET\r");
+								return;
+							}
+							 switch(set_cmdp - parameter){
+								case MAC:
+									 
+									 break;
+								case IP:
+
+									break;
+								case GATEWAY:
+
+									break;
+								case MASK:
+
+									break;
+								case DNS:
+
+									break;
+								case PORT:
+
+									break;
+								default:
+										sprintf(bufer_out,"\nBAD SET\r");
+								 break;
+								 
+							 }
+					break;
 					case DEFAULT :
-							SettingsDefault();
+						SettingsDefault();
+						sprintf(bufer_out,"\nsettings are enabled by defaul \r");	
+					
 					break;				
 					case SAVE :    
 						//	sprintf(bufer_out,"\nenter today's date[format DD.MM.YYYY]:");	
@@ -327,6 +385,7 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 					case REBOOT :     
 						sprintf(bufer_out, "\ndevice rebooot\r");
 						ResetStart();
+					break;
 					default :
 							sprintf(bufer_out,"\nBAD command\r");
 						break;
@@ -335,6 +394,8 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 		}
 		else if (state==DATA)
 		{
+			/*read data */
+			
 			if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
 			else sprintf(bufer_out,"\nsave successfully\r");
 			state=CMD;

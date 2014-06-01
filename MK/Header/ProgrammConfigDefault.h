@@ -27,7 +27,7 @@ NESESSARILY CHANGE WITH THE NEW RELEASE
 #define SIZE_CONS_IN		20  // size input bufer for condole USART
 
 #define BUFFER_SIZE     200  /*Maximum size bufer receive from FPGA 2048*/
-#define TIME_RESET			20   /* 20*256 clk before reset*/
+#define TIME_RESET			200   /* 20*256 clk before reset*/
 
 
 
@@ -67,6 +67,11 @@ Network setting default
 #define SubNet_3	255
 #define SubNet_4	0//SubnetMask Address
 
+#define DNS_server_IP_1	192
+#define DNS_server_IP_2	168
+#define DNS_server_IP_3	0
+#define DNS_server_IP_4	20
+
 #define PortScience 5000
 
 /*Network settings server default*/
@@ -78,15 +83,18 @@ Network setting default
 #define Dest_PORT 	5000 //DST_IP port server
 
 
-
+/***************************************
+USART SETTINGS
+****************************************/
+#define USART_BAUD_RATE 115200
 
 /***************************************
 EEPROM SETTINGS
 ****************************************/
-
 #define WAYT_REQUEST_EEPROM 0xFFFF
 #define I2C_PageSize        16
 #define EE_START_STRUCT			0	
+
 /****************************************
 SEtting w5200
 *****************************************/	

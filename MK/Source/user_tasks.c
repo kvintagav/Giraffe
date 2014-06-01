@@ -5,11 +5,11 @@
 #include "main.h"
 #include "console.h"
 extern SemaphoreHandle_t xMutexFSMC;
+
 extern SemaphoreHandle_t xSemaphoreEXTI;
 extern SemaphoreHandle_t xSemaphoreFSMCDMA;
 extern SemaphoreHandle_t xSemaphoreSPIDMA;
 extern SemaphoreHandle_t xSemaphoreCONSOLE;
-
 extern char bufer_console[SIZE_CONS_IN]; 
 char bufer_cons_out[SIZE_CONS_OUT];
 
@@ -22,18 +22,17 @@ extern bit_bus input_bufer[BUFFER_SIZE];
 void ConsoleExchange (void *pvParameters)
 {
 		xSemaphoreTake( xSemaphoreCONSOLE,mainDONT_BLOCK);
-    PrintVersion(bufer_cons_out);
+  	PrintVersion(bufer_cons_out);
 		console_send(bufer_cons_out);
-		
+		console_send("\n>");	
 		while(1)
     {
 				xSemaphoreTake( xSemaphoreCONSOLE,portMAX_DELAY);
 				CommandProcessing( bufer_console,  bufer_cons_out);
+	
 				console_send(bufer_cons_out);
 				console_send("\n>");
-			
-
-//				print(bufer_cons_out);
+		
 		}
     vTaskDelete(NULL);	
 }

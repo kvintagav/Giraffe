@@ -90,12 +90,27 @@ void USART1_IRQHandler(void)
 			bufer_console[index_buf_cons]=input_data;
 			if (bufer_console[index_buf_cons]=='\r') 
 			{
-				xSemaphoreGiveFromISR( xSemaphoreCONSOLE, &xHigherPriorityTaskWoken );
-				index_buf_cons=0;
+				if (index_buf_cons==0)
+				{	
+	//				USART_SendData(USART,'\n');
+	//				USART_SendData(USART,'\r');
+					
+					USART_SendData(USART,'>');
+					
+				}
+				else
+				{
+					xSemaphoreGiveFromISR( xSemaphoreCONSOLE, &xHigherPriorityTaskWoken );
+					index_buf_cons=0;
+				}
 			}
 			else index_buf_cons++;
 		}
-		else xSemaphoreGiveFromISR( xSemaphoreCONSOLE, &xHigherPriorityTaskWoken );
+		else 
+		{
+			xSemaphoreGiveFromISR( xSemaphoreCONSOLE, &xHigherPriorityTaskWoken );
+			index_buf_cons=0;
+		}
 		
 		if( xHigherPriorityTaskWoken == pdTRUE )
 		{
