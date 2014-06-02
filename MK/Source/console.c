@@ -14,15 +14,17 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 
 extern SemaphoreHandle_t xMutexUSART_CONSOLE;
 CONFIG_MSG Config_Msg;
+
 /********privat function *****************/
 void send_byte(char data);
-
-//bool CheckAndWriteVersion(void);
-
+char * TestCmd(char *bufer);
 
 enum tel_cmd {
   HELP_CMD,
@@ -272,10 +274,53 @@ void PrintVersion(char *bufer_out)
 {			
 	sprintf(bufer_out,"\nVersion: %u.%u.%u Compilation date: %u.%u.%u\r",Config_Msg.version[2],Config_Msg.version[1],\
 	Config_Msg.version[0],Config_Msg.day,Config_Msg.month,Config_Msg.year);	
-
-	
 }
 
+/******************************************************************************
+* Function Name  : PrintVersion
+* Description    : Setting's messadge check for error  
+*******************************************************************************/
+char * TestCmd(char *bufer)
+{
+	char *point;
+	int i=0;
+	char *start;
+	start=bufer;
+	for(point = bufer; *point != '\0';  point++)
+	{
+		if (i<=1)
+		{
+			start++;
+			if (*point==' ') i++;
+		}
+		else 
+		{
+			if (((*point>=0x30)&&(*point<=0x39))||(*point=='.')) ;
+			else return 0;
+		}
+	}
+	return start;
+}
+/******************************************************************************
+* Function Name  : OutNumber
+* Description    : Out nubers from bufer
+*******************************************************************************/
+int OutNumber(char *bufer)
+{
+	char *point;
+	int i=0,data=0;
+	char bufer_int[4]={0,0,0,0};	 
+ 
+	for(point = bufer; *point != '.';  point++)
+	{
+			bufer_int[i]=*point;
+			i++;
+		//	cp++;
+	}
+//	cp++;
+	data=atoi(bufer_int);
+	return data;
+}
 /******************************************************************************
 * Function Name  : CommandProcessing
 * Description    : Processing input command 
@@ -286,7 +331,7 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 	char **cmdp;
 	char **set_cmdp;
 	char *cp;
-	
+
 	char *help = {"\nhelp: Show all available commands\
     \r\n print: show all settings parameter\
     \r\n set: setting relevant parameters, need to save after\
@@ -346,15 +391,13 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 								sprintf(bufer_out,"\nBAD SET\r");
 								return;
 							}
+							 cp=TestCmd(bufer_in);
+							 if ( cp== 0) return;
+							
 							 switch(set_cmdp - parameter){
 								case MAC:
-									 /*use pointer cp for search numbers in bufer_in, 
-									 Example how tolower*/
-								/*
-									for(cp = bufer_in; *cp != '\0';  cp++){
-									*cp = tolower(*cp);         
-									} 
-								*/
+										Config_Msg.Mac[0]= OutNumber(cp);
+									
 									break;
 								case IP:
 
