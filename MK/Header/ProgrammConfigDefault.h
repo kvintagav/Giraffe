@@ -24,11 +24,12 @@ NESESSARILY CHANGE WITH THE NEW RELEASE
 
 
 #define SIZE_CONS_OUT		100 // size out bufer for console USART
-#define SIZE_CONS_IN		20  // size input bufer for condole USART
+#define SIZE_CONS_IN		30  // size input bufer for condole USART
 
-#define BUFFER_SIZE     200  /*Maximum size bufer receive from FPGA 2048*/
-#define TIME_RESET			200   /* 20*256 clk before reset*/
+#define BUFFER_SIZE     200  //Maximum size bufer receive from FPGA 2048
+#define TIME_RESET			200   // 20*256 clk before reset
 
+#define MAX_NUM_PARAMETER 		6		//Maximum parameters in one message
 
 
 /*Priority interrupt */

@@ -15,20 +15,21 @@ typedef  uint8_t fpga_size_byte;
 
 typedef struct _CONFIG_MSG
 {
+	uint16 ID;
 	uint8 version[3];
 	uint8 day;
 	uint8 month;
-	uint16 year;
+	uint8 year;
 	
-	int ID;
+
 	
 	uint8 Mac[6];
 	uint8 Lip[4];
 	uint8 Sub[4];
 	uint8 Gw[4];
 	uint8 DNS_Server_IP[4];
-	uint16 port_science;
-	uint8  DHCP;
+	uint8 port_science;
+	uint8 DHCP;
 
 	uint16 port;
 	uint8 destip[4];

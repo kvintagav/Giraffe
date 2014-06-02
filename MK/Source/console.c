@@ -33,6 +33,12 @@ enum tel_cmd {
 	DEFAULT,
 	SAVE,
 	REBOOT,
+	MAC,
+  IP,
+	GATEWAY,
+	MASK,
+	DNS,
+	PORT,
     
 };
 
@@ -44,29 +50,15 @@ char *commands[] = {
 	"default",
 	"save",
 	"reboot",
-  NULL
-};
-
-enum set_par {
-	MAC,
-  IP,
-	GATEWAY,
-	MASK,
-	DNS,
-	PORT,
-    
-};
-
-// Command table
-char *parameter[] = {
 	"mac",
   "ip",
 	"gateway",
 	"mask",
 	"dns",
 	"port",
-	NULL
+  NULL
 };
+
 
 uint8 state=CMD;
 
@@ -277,50 +269,46 @@ void PrintVersion(char *bufer_out)
 }
 
 /******************************************************************************
-* Function Name  : PrintVersion
-* Description    : Setting's messadge check for error  
+* Function Name  : ReadParameter
+* Description    : read parameters from message  
 *******************************************************************************/
-char * TestCmd(char *bufer)
+bool ReadParameter(char * bufer, int * num_par)
 {
-	char *point;
-	int i=0;
-	char *start;
-	start=bufer;
-	for(point = bufer; *point != '\0';  point++)
+	int  *point=num_par;
+	char 	*buf;
+	uint8 i=0;
+	uint8 j=0;
+	uint8 numb;
+
+	char int_buf[6]={0,0,0,0,0,0};
+	for(buf	= bufer; *buf != '\0';  buf++)
 	{
 		if (i<=1)
 		{
-			start++;
-			if (*point==' ') i++;
+			if (*buf==' ') i++;
 		}
 		else 
 		{
-			if (((*point>=0x30)&&(*point<=0x39))||(*point=='.')) ;
-			else return 0;
+			if (*buf!='.')
+			{
+					*point=atoi(int_buf);
+				numb=0;
+				for (j=0; j<6 ;j++)int_buf[j]=0x00;
+			}
+			else
+			{
+				if ((*point>=0x30)&&(*point<=0x39))int_buf[numb]=*buf;
+				else return FALSE;
+				numb++;
+			}				
 		}
+	
 	}
-	return start;
+	*point=atoi(int_buf);
+	
+	return TRUE;
 }
-/******************************************************************************
-* Function Name  : OutNumber
-* Description    : Out nubers from bufer
-*******************************************************************************/
-int OutNumber(char *bufer)
-{
-	char *point;
-	int i=0,data=0;
-	char bufer_int[4]={0,0,0,0};	 
- 
-	for(point = bufer; *point != '.';  point++)
-	{
-			bufer_int[i]=*point;
-			i++;
-		//	cp++;
-	}
-//	cp++;
-	data=atoi(bufer_int);
-	return data;
-}
+									
 /******************************************************************************
 * Function Name  : CommandProcessing
 * Description    : Processing input command 
@@ -329,9 +317,9 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 {
 	
 	char **cmdp;
-	char **set_cmdp;
 	char *cp;
-
+	int parameter[MAX_NUM_PARAMETER]={0,0,0,0,0,0};
+	
 	char *help = {"\nhelp: Show all available commands\
     \r\n print: show all settings parameter\
     \r\n set: setting relevant parameters, need to save after\
@@ -363,13 +351,13 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 						break;
 					
 					case PRINT:    
-						sprintf(bufer_out,"\nVersion: %u.%u.%u Compilation date: %u.%u.%u\r\
-						\nSET MAC = %u.%u.%u.%u.%u.%u\r\nSET IP = %u.%u.%u.%u\r\
-						\nSET GateWay  = %u.%u.%u.%u\r\nSET  MASK= %u.%u.%u.%u\r\
-						\nSET Port = %u\r\
-						\nSET Server IP  = %u.%u.%u.%u\r\
-						\nSET Server Port = %u\r\
-						\nData settings: %u.%u.%u\r",\
+						sprintf(bufer_out,"\n Version: %u.%u.%u Compilation date: %u.%u.%u\
+						\r\n SET MAC = %u.%u.%u.%u.%u.%u\r\nSET IP = %u.%u.%u.%u\
+						\r\n SET GateWay  = %u.%u.%u.%u\r\nSET  MASK= %u.%u.%u.%u\
+						\r\n SET Port = %u\
+						\r\n SET Server IP  = %u.%u.%u.%u\
+						\r\n SET Server Port = %u\
+						\r\n Data settings: %u.%u.%u\r",\
 						Config_Msg.version[2],Config_Msg.version[1],Config_Msg.version[0],Config_Msg.day,Config_Msg.month,Config_Msg.year,\
 						Config_Msg.Mac[0],Config_Msg.Mac[1],Config_Msg.Mac[2],Config_Msg.Mac[3],Config_Msg.Mac[4],Config_Msg.Mac[5],\
 						Config_Msg.Lip[0],Config_Msg.Lip[1],Config_Msg.Lip[2],Config_Msg.Lip[3],\
@@ -383,30 +371,40 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 
 					break;
 					case SETTINGS :         
-							for(set_cmdp = parameter; *set_cmdp != NULL; set_cmdp++) {      
-								if(strncmp(*set_cmdp, bufer_in, strlen(*set_cmdp)) == 0) break;      
+							for(cmdp = commands; *cmdp != NULL; cmdp++) {      
+								if(strncmp(*cmdp, bufer_in, strlen(*cmdp)) == 0) break;      
 							}
 							
-							 if(*set_cmdp == NULL) {
+							 if(*cmdp == NULL) {
 								sprintf(bufer_out,"\nBAD SET\r");
 								return;
 							}
-							 cp=TestCmd(bufer_in);
-							 if ( cp== 0) return;
-							
-							 switch(set_cmdp - parameter){
+							if (ReadParameter(bufer_in, parameter)==FALSE) return;
+								
+							 switch(cmdp - commands){
 								case MAC:
-										Config_Msg.Mac[0]= OutNumber(cp);
-									
+									Config_Msg.Mac[0]=parameter[0];
+									Config_Msg.Mac[1]=parameter[1];
+									Config_Msg.Mac[2]=parameter[2];
+									Config_Msg.Mac[3]=parameter[3];
+									Config_Msg.Mac[4]=parameter[4];
+									Config_Msg.Mac[5]=parameter[5];
+								
 									break;
 								case IP:
-
+									Config_Msg.Lip[0]=parameter[0];
+									Config_Msg.Lip[1]=parameter[1];
+									Config_Msg.Lip[2]=parameter[2];
+									Config_Msg.Lip[3]=parameter[3];
 									break;
 								case GATEWAY:
-
+									Config_Msg.Gw[0]=parameter[0];
+									Config_Msg.Gw[1]=parameter[1];
+									Config_Msg.Gw[2]=parameter[2];
+									Config_Msg.Gw[3]=parameter[3];
 									break;
 								case MASK:
-
+	
 									break;
 								case DNS:
 
