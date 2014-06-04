@@ -291,13 +291,14 @@ bool ReadParameter(char * bufer, int * num_par)
 		{
 			if (*buf!='.')
 			{
-					*point=atoi(int_buf);
+				*point=atoi(int_buf);
+				point++;
 				numb=0;
 				for (j=0; j<6 ;j++)int_buf[j]=0x00;
 			}
 			else
 			{
-				if ((*point>=0x30)&&(*point<=0x39))int_buf[numb]=*buf;
+				if ((*buf>=0x30)&&(*buf<=0x39))int_buf[numb]=*buf;
 				else return FALSE;
 				numb++;
 			}				
