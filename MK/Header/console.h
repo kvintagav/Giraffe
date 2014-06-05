@@ -19,7 +19,7 @@ typedef struct _CONFIG_MSG
 	uint8 version[3];
 	uint8 day;
 	uint8 month;
-	uint8 year;
+	uint16 year;
 	
 
 	
@@ -28,7 +28,7 @@ typedef struct _CONFIG_MSG
 	uint8 Sub[4];
 	uint8 Gw[4];
 	uint8 DNS_Server_IP[4];
-	uint8 port_science;
+	uint16 port_science;
 	uint8 DHCP;
 
 	uint16 port;

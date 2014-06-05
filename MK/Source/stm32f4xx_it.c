@@ -112,11 +112,11 @@ void USART1_IRQHandler(void)
 			index_buf_cons=0;
 		}
 		
-		if( xHigherPriorityTaskWoken == pdTRUE )
+	/*	if( xHigherPriorityTaskWoken == pdTRUE )
 		{
 			 portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
 		}
-		
+		*/
 
 	
 }

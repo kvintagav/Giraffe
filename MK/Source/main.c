@@ -119,6 +119,14 @@ void vFreeRTOSInitAll()
 int main(void)
 
 
+
+
+
+
+
+
+
+
 {
 	
 	xMutexUSART_CONSOLE = xSemaphoreCreateMutex();
@@ -152,7 +160,7 @@ int main(void)
 			#endif
 			
 			xTaskCreate(vLedTask,(signed char *)"LedTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+1 , NULL);
-			xTaskCreate(ConsoleExchange,(signed char *)"ConsoleExchange", configMINIMAL_STACK_SIZE*3, NULL, tskIDLE_PRIORITY+1 , NULL);
+			xTaskCreate(ConsoleExchange,(signed char *)"ConsoleExchange", configMINIMAL_STACK_SIZE*10, NULL, tskIDLE_PRIORITY+1 , NULL);
 			
 			vTaskStartScheduler();
 		}

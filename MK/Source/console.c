@@ -26,6 +26,7 @@ CONFIG_MSG Config_Msg;
 void send_byte(char data);
 char * TestCmd(char *bufer);
 
+ 
 enum tel_cmd {
   HELP_CMD,
 	PRINT,
@@ -50,7 +51,11 @@ char *commands[] = {
 	"default",
 	"save",
 	"reboot",
-	"mac",
+	NULL
+};
+
+char *com_par[] = {
+  "mac",
   "ip",
 	"gateway",
 	"mask",
@@ -58,7 +63,6 @@ char *commands[] = {
 	"port",
   NULL
 };
-
 
 uint8 state=CMD;
 
@@ -158,19 +162,20 @@ void ResetStart(void)
 *******************************************************************************/
 bool ReadConfig(void)
 {
-	if (I2C_EE_BufferRead((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==TRUE) /*if read struct from eeprom without error*/
+/*	
+	if (I2C_EE_BufferRead((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==TRUE) //if read struct from eeprom without error
 	{
-		/*if  eeprom is empty*/
+		//if  eeprom is empty
 		if((Config_Msg.version[0]==0)&&(Config_Msg.version[1]==0)&&(Config_Msg.version[2]==0))
 		{
-			/*Eeprom is empty. Fill the structure with default values ??and write*/
+			//Eeprom is empty. Fill the structure with default values ??and write
 			SettingsDefault();
 			CheckAndWriteVersion();
 			if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) return FALSE;				
 		}
 		else
 		{
-			/*if eeprom is not empty, check version*/
+			//if eeprom is not empty, check version
 			if (CheckAndWriteVersion()==FALSE)
 			{
 				if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) return FALSE;
@@ -179,12 +184,15 @@ bool ReadConfig(void)
 	}		
 	else
 	{
-			/*if error read from eeprom*/
+			//if error read from eeprom
 			SettingsDefault();
 			return FALSE;
 		
 	}
+	
 	return TRUE;
+*/
+	return FALSE;
 }
 /******************************************************************************
 * Function Name  : SettingsDefault
@@ -278,7 +286,7 @@ bool ReadParameter(char * bufer, int * num_par)
 	char 	*buf;
 	uint8 i=0;
 	uint8 j=0;
-	uint8 numb;
+	uint8 numb=0;
 
 	char int_buf[6]={0,0,0,0,0,0};
 	for(buf	= bufer; *buf != '\0';  buf++)
@@ -289,7 +297,7 @@ bool ReadParameter(char * bufer, int * num_par)
 		}
 		else 
 		{
-			if (*buf!='.')
+			if (*buf=='.')
 			{
 				*point=atoi(int_buf);
 				point++;
@@ -319,7 +327,11 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 	
 	char **cmdp;
 	char *cp;
+	char *buf_par=bufer_in+4;
+	char *argv[AMOUNT_PAR];
+	uint8 argc;
 	int parameter[MAX_NUM_PARAMETER]={0,0,0,0,0,0};
+	//argv[0]=bufer_in;
 	
 	char *help = {"\nhelp: Show all available commands\
     \r\n print: show all settings parameter\
@@ -327,7 +339,8 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 		\r\n default: setting default parameters, need to save after\
 		\r\n save: change settings to save\
 		\r\n reboot: reboot system, start with new settings\r"}; /* command HELP : Message */ 
-
+	
+	
 		if (state==CMD)
 		{
 			for(cp = bufer_in; *cp != '\0';  cp++){
@@ -371,9 +384,10 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 									
 
 					break;
-					case SETTINGS :         
-							for(cmdp = commands; *cmdp != NULL; cmdp++) {      
-								if(strncmp(*cmdp, bufer_in, strlen(*cmdp)) == 0) break;      
+					case SETTINGS : 
+						
+							for(cmdp = com_par; *cmdp != NULL; cmdp++) {      
+								if(strncmp(*cmdp, buf_par, strlen(*cmdp)) == 0) break;      
 							}
 							
 							 if(*cmdp == NULL) {
@@ -384,26 +398,12 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 								
 							 switch(cmdp - commands){
 								case MAC:
-									Config_Msg.Mac[0]=parameter[0];
-									Config_Msg.Mac[1]=parameter[1];
-									Config_Msg.Mac[2]=parameter[2];
-									Config_Msg.Mac[3]=parameter[3];
-									Config_Msg.Mac[4]=parameter[4];
-									Config_Msg.Mac[5]=parameter[5];
 								
 									break;
 								case IP:
-									Config_Msg.Lip[0]=parameter[0];
-									Config_Msg.Lip[1]=parameter[1];
-									Config_Msg.Lip[2]=parameter[2];
-									Config_Msg.Lip[3]=parameter[3];
 									break;
 								case GATEWAY:
-									Config_Msg.Gw[0]=parameter[0];
-									Config_Msg.Gw[1]=parameter[1];
-									Config_Msg.Gw[2]=parameter[2];
-									Config_Msg.Gw[3]=parameter[3];
-									break;
+										break;
 								case MASK:
 	
 									break;
@@ -427,8 +427,9 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 					case SAVE :    
 						//	sprintf(bufer_out,"\nenter today's date[format DD.MM.YYYY]:");	
 						//	state=DATA;
-								if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
-								else sprintf(bufer_out,"\nsave successfully\r");
+								
+						//		if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
+						//		else sprintf(bufer_out,"\nsave successfully\r");
 
 					break;
 					case REBOOT :     
@@ -445,13 +446,30 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 		{
 			/*read data */
 			
-			if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
-			else sprintf(bufer_out,"\nsave successfully\r");
+	//		if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
+	//		else sprintf(bufer_out,"\nsave successfully\r");
 			state=CMD;
 			
 		}
 }
 
+void PARS_Parser(char * bufer, uint8 *argc,char * argv )
+{
+	int i=0;
+	char *buf;
+	for(buf	= bufer; *buf != '\0';  buf++)
+	{
+			if ((*buf==' ')||(*buf=='.'))
+			{
+				
+			}
+			else
+			{
+				
+			}
+		
+	}
+}
 /******************************************************************************
 * Function Name  : send_byte
 * Description    : Send byte to usart
