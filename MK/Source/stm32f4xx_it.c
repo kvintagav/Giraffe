@@ -27,11 +27,14 @@
 #include "stdbool.h"
 #include "fsmc_fpga.h"
 #include "config.h"
+#include "console.h"
 
 extern void Timer2_ISR(void);
 
 char bufer_console[SIZE_CONS_IN]; 
+char bufer_cons_out[SIZE_CONS_OUT];
 vu8 index_buf_cons;
+
 extern SemaphoreHandle_t xMutexFSMC;
 extern SemaphoreHandle_t xSemaphoreEXTI;
 extern SemaphoreHandle_t xSemaphoreFSMCDMA;
@@ -79,46 +82,51 @@ void DMA2_Stream0_IRQHandler(void)
 
 void USART1_IRQHandler(void)
 {
-	long xHigherPriorityTaskWoken = pdFALSE;
+//	long xHigherPriorityTaskWoken = pdFALSE;
 	char input_data; 
 	
-		USART_ClearITPendingBit(USART, USART_IT_RXNE);
-		input_data= USART_ReceiveData(USART);
-		USART_SendData(USART,input_data);
-		if (index_buf_cons<SIZE_CONS_IN) 
+	vTaskSuspendAll();
+	
+	ChangeLED();
+	USART_ClearITPendingBit(USART, USART_IT_RXNE);
+	input_data= USART_ReceiveData(USART);
+	USART_SendData(USART,input_data);
+	if (index_buf_cons<SIZE_CONS_IN) 
+	{
+		if (input_data=='\r') 
 		{
-			bufer_console[index_buf_cons]=input_data;
-			if (bufer_console[index_buf_cons]=='\r') 
-			{
-				if (index_buf_cons==0)
-				{	
-	//				USART_SendData(USART,'\n');
-	//				USART_SendData(USART,'\r');
-					
-					USART_SendData(USART,'>');
-					
-				}
-				else
-				{
-					xSemaphoreGiveFromISR( xSemaphoreCONSOLE, &xHigherPriorityTaskWoken );
-					index_buf_cons=0;
-				}
+			if (index_buf_cons==0)
+			{	
+				USART_SendData(USART,'\n');
+				USART_SendData(USART,'>');
 			}
-			else index_buf_cons++;
+			else
+			{
+//			xSemaphoreGiveFromISR( xSemaphoreCONSOLE, &xHigherPriorityTaskWoken );
+				CommandProcessing( bufer_console,  bufer_cons_out);
+				console_send(bufer_cons_out);
+				console_send("\n>");
+				index_buf_cons=0;
+			}
 		}
 		else 
 		{
-			xSemaphoreGiveFromISR( xSemaphoreCONSOLE, &xHigherPriorityTaskWoken );
-			index_buf_cons=0;
+			bufer_console[index_buf_cons]=input_data;
+			index_buf_cons++;
 		}
-		
-	/*	if( xHigherPriorityTaskWoken == pdTRUE )
-		{
-			 portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
-		}
-		*/
-
-	
+	}
+	else 
+	{
+//		xSemaphoreGiveFromISR( xSemaphoreCONSOLE, &xHigherPriorityTaskWoken );
+		index_buf_cons=0;
+	}
+/*	if( xHigherPriorityTaskWoken == pdTRUE )
+	{
+		 portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
+	}
+	*/
+	ChangeLED();
+	xTaskResumeAll();
 }
 /*******************************************************************************
 * Function Name  : TIM2_IRQHandler

@@ -11,7 +11,7 @@ extern SemaphoreHandle_t xSemaphoreFSMCDMA;
 extern SemaphoreHandle_t xSemaphoreSPIDMA;
 extern SemaphoreHandle_t xSemaphoreCONSOLE;
 extern char bufer_console[SIZE_CONS_IN]; 
-char bufer_cons_out[SIZE_CONS_OUT];
+//char bufer_cons_out[SIZE_CONS_OUT];
 
 extern bit_bus input_bufer[BUFFER_SIZE];
 
@@ -19,6 +19,7 @@ extern bit_bus input_bufer[BUFFER_SIZE];
 * Function Name  : ConsoleExchange
 * Description    : Processing command from debug (USART/TELNET?USB) console
 *******************************************************************************/	
+/*
 void ConsoleExchange (void *pvParameters)
 {
 		xSemaphoreTake( xSemaphoreCONSOLE,mainDONT_BLOCK);
@@ -36,6 +37,7 @@ void ConsoleExchange (void *pvParameters)
 		}
     vTaskDelete(NULL);	
 }
+*/
 /******************************************************************************
 * Function Name  : vLedTask
 * Description    : Change state led with period 1 c
@@ -44,14 +46,8 @@ void vLedTask (void *pvParameters)
 {
     while(1)
     {
-			if ( GPIO_ReadInputDataBit_BOOL(LED_GPIO, LED1) == 0)
-			{
-					GPIO_SetBits(LED_GPIO,LED1);
-			}
-			else
-			{
-					GPIO_ResetBits(LED_GPIO,LED1);
-			}
+			ChangeLED();
+			
 			vTaskDelay(PERIOD_LED_TASK);
 		}
     vTaskDelete(NULL);	

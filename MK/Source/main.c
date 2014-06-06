@@ -25,6 +25,7 @@ SemaphoreHandle_t xSemaphoreCONSOLE= 	NULL;
 
 /*Queue*/
 
+extern char bufer_cons_out[SIZE_CONS_OUT];
 
 /***********************************************/
 void vApplicationTickHook( void )
@@ -93,6 +94,9 @@ void vFreeRTOSInitAll()
 		#else
 				SettingsDefault();
 				CheckAndWriteVersion();
+			  PrintVersion(bufer_cons_out);
+				console_send(bufer_cons_out);
+				
 			
 		#endif
 
@@ -117,15 +121,6 @@ void vFreeRTOSInitAll()
  
 /*******************************************************************/
 int main(void)
-
-
-
-
-
-
-
-
-
 
 {
 	
@@ -160,10 +155,12 @@ int main(void)
 			#endif
 			
 			xTaskCreate(vLedTask,(signed char *)"LedTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+1 , NULL);
-			xTaskCreate(ConsoleExchange,(signed char *)"ConsoleExchange", configMINIMAL_STACK_SIZE*10, NULL, tskIDLE_PRIORITY+1 , NULL);
-			
+//			xTaskCreate(ConsoleExchange,(signed char *)"ConsoleExchange", configMINIMAL_STACK_SIZE*10, NULL, tskIDLE_PRIORITY+1 , NULL);
+			console_send("\n>");	
+
 			vTaskStartScheduler();
 		}
+		
 	for( ;; );
 }
 

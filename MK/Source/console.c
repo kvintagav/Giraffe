@@ -34,13 +34,14 @@ enum tel_cmd {
 	DEFAULT,
 	SAVE,
 	REBOOT,
+	
 	MAC,
-  IP,
+	IP,
 	GATEWAY,
 	MASK,
-	DNS,
 	PORT,
-    
+  SERVIP,
+	SERPORT
 };
 
 // Command table
@@ -51,16 +52,18 @@ char *commands[] = {
 	"default",
 	"save",
 	"reboot",
-	NULL
+/*	NULL
 };
 
-char *com_par[] = {
+char *com_par[] = {*/
   "mac",
   "ip",
 	"gateway",
 	"mask",
-	"dns",
 	"port",
+	"port",
+	"servip",
+	"servport",
   NULL
 };
 
@@ -83,7 +86,21 @@ void LED_INIT(void)
     GPIO_Init(LED_GPIO, &GPIO_InitStructure);
 	  GPIO_ResetBits(LED_GPIO,LED1);
 }
-
+/*********************************************
+* Function Name  : ChangeLED
+* Description    : change led state
+*********************************************/
+void ChangeLED(void)
+{
+	if ( GPIO_ReadInputDataBit_BOOL(LED_GPIO, LED1) == 0)
+		{
+				GPIO_SetBits(LED_GPIO,LED1);
+		}
+		else
+		{
+				GPIO_ResetBits(LED_GPIO,LED1);
+		}
+}			
 /*********************************************
 * Function Name  : DEBUG_USART_INIT
 * Description    : init console for control and debug devices
@@ -280,7 +297,7 @@ void PrintVersion(char *bufer_out)
 * Function Name  : ReadParameter
 * Description    : read parameters from message  
 *******************************************************************************/
-bool ReadParameter(char * bufer, int * num_par)
+bool ReadParameter(char * bufer, int * num_par,uint8 par)
 {
 	int  *point=num_par;
 	char 	*buf;
@@ -291,7 +308,7 @@ bool ReadParameter(char * bufer, int * num_par)
 	char int_buf[6]={0,0,0,0,0,0};
 	for(buf	= bufer; *buf != '\0';  buf++)
 	{
-		if (i<=1)
+		if ((i<=1)&&(par>0))
 		{
 			if (*buf==' ') i++;
 		}
@@ -300,6 +317,7 @@ bool ReadParameter(char * bufer, int * num_par)
 			if (*buf=='.')
 			{
 				*point=atoi(int_buf);
+
 				point++;
 				numb=0;
 				for (j=0; j<6 ;j++)int_buf[j]=0x00;
@@ -324,27 +342,28 @@ bool ReadParameter(char * bufer, int * num_par)
 *******************************************************************************/
 void CommandProcessing( char *bufer_in, char *bufer_out)
 {
-	
+	int i;
 	char **cmdp;
 	char *cp;
 	char *buf_par=bufer_in+4;
-	char *argv[AMOUNT_PAR];
-	uint8 argc;
+//	char *argv[AMOUNT_PAR];
+//	uint8 argc;
 	int parameter[MAX_NUM_PARAMETER]={0,0,0,0,0,0};
 	//argv[0]=bufer_in;
-	
+	/*
 	char *help = {"\nhelp: Show all available commands\
     \r\n print: show all settings parameter\
     \r\n set: setting relevant parameters, need to save after\
 		\r\n default: setting default parameters, need to save after\
 		\r\n save: change settings to save\
-		\r\n reboot: reboot system, start with new settings\r"}; /* command HELP : Message */ 
-	
-	
+		\r\n reboot: reboot system, start with new settings\r"}; 
+	*/
+	char *help = {"\nhelp\r\nprint\r\nset\r\ndefault\r\nsave\r\nreboot\r"}; /* command HELP : Message */ 
 		if (state==CMD)
 		{
+			
 			for(cp = bufer_in; *cp != '\0';  cp++){
-			*cp = tolower(*cp);     /* Translate big letter to small letter */       
+			*cp = tolower(*cp);           
 			} 
 			
 			if(*bufer_in != '\0') {
@@ -365,20 +384,20 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 						break;
 					
 					case PRINT:    
-						sprintf(bufer_out,"\n Version: %u.%u.%u Compilation date: %u.%u.%u\
-						\r\n SET MAC = %u.%u.%u.%u.%u.%u\r\nSET IP = %u.%u.%u.%u\
-						\r\n SET GateWay  = %u.%u.%u.%u\r\nSET  MASK= %u.%u.%u.%u\
-						\r\n SET Port = %u\
-						\r\n SET Server IP  = %u.%u.%u.%u\
-						\r\n SET Server Port = %u\
-						\r\n Data settings: %u.%u.%u\r",\
+						sprintf(bufer_out,"\nVersion: %u.%u.%u Compilation date: %u.%u.%u\
+						\r\nSET MAC = %u.%u.%u.%u.%u.%u\r\nSET IP = %u.%u.%u.%u\
+						\r\nSET GateWay  = %u.%u.%u.%u\r\nSET MASK= %u.%u.%u.%u\
+						\r\nSET Port = %u\
+						\r\nSET Server IP  = %u.%u.%u.%u\
+						\r\nSET Server Port = %u\
+						\r\nData settings: %u.%u.%u\r",\
 						Config_Msg.version[2],Config_Msg.version[1],Config_Msg.version[0],Config_Msg.day,Config_Msg.month,Config_Msg.year,\
 						Config_Msg.Mac[0],Config_Msg.Mac[1],Config_Msg.Mac[2],Config_Msg.Mac[3],Config_Msg.Mac[4],Config_Msg.Mac[5],\
 						Config_Msg.Lip[0],Config_Msg.Lip[1],Config_Msg.Lip[2],Config_Msg.Lip[3],\
 						Config_Msg.Gw[0],Config_Msg.Gw[1],Config_Msg.Gw[2],Config_Msg.Gw[3],\
 						Config_Msg.Sub[0],Config_Msg.Sub[1],Config_Msg.Sub[2],Config_Msg.Sub[3],\
 						Config_Msg.port_science,\
-						Config_Msg.DNS_Server_IP[0],Config_Msg.DNS_Server_IP[1],Config_Msg.DNS_Server_IP[2],Config_Msg.DNS_Server_IP[3],\
+						Config_Msg.destip[0],Config_Msg.destip[1],Config_Msg.destip[2],Config_Msg.destip[3],\
 						Config_Msg.port,\
 						Config_Msg.day_set,Config_Msg.month_set,Config_Msg.year_set);	
 									
@@ -386,7 +405,7 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 					break;
 					case SETTINGS : 
 						
-							for(cmdp = com_par; *cmdp != NULL; cmdp++) {      
+							for(cmdp = commands; *cmdp != NULL; cmdp++) {      
 								if(strncmp(*cmdp, buf_par, strlen(*cmdp)) == 0) break;      
 							}
 							
@@ -394,25 +413,93 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 								sprintf(bufer_out,"\nBAD SET\r");
 								return;
 							}
-							if (ReadParameter(bufer_in, parameter)==FALSE) return;
+							if (ReadParameter(bufer_in, parameter,2)==FALSE) 
+							{
+								sprintf(bufer_out,"\nBAD PARAMETER\r");
+								return;
+							}
 								
 							 switch(cmdp - commands){
 								case MAC:
-								
+										for (i=0;i<6;i++) {
+											if (parameter[i]<255) 
+											{
+												Config_Msg.Mac[i]=parameter[i];
+											}
+											else
+											{
+												sprintf(bufer_out,"\nBAD PARAMETER\r");
+												return;
+											}
+										}
+										sprintf(bufer_out,"\nSET MAC = %u.%u.%u.%u.%u.%u\r",Config_Msg.Mac[0],Config_Msg.Mac[1],Config_Msg.Mac[2],Config_Msg.Mac[3],Config_Msg.Mac[4],Config_Msg.Mac[5]);
 									break;
 								case IP:
+										for (i=0;i<4;i++) {
+											if (parameter[i]<255) 
+											{
+												Config_Msg.Lip[i]=parameter[i];
+											}
+											else
+											{
+												sprintf(bufer_out,"\nBAD PARAMETER\r");
+												return;
+											}
+										}
+										sprintf(bufer_out,"\nSET IP = %u.%u.%u.%u \r",Config_Msg.Lip[0],Config_Msg.Lip[1],Config_Msg.Lip[2],Config_Msg.Lip[3]);
 									break;
 								case GATEWAY:
+										for (i=0;i<4;i++) {
+											if (parameter[i]<255) 
+											{
+												Config_Msg.Gw[i]=parameter[i];
+											}
+											else
+											{
+												sprintf(bufer_out,"\nBAD PARAMETER\r");
+												return;
+											}
+										}
+								sprintf(bufer_out,"\nSET GateWay  = %u.%u.%u.%u\r",Config_Msg.Gw[0],Config_Msg.Gw[1],Config_Msg.Gw[2],Config_Msg.Gw[3] );
 										break;
 								case MASK:
-	
-									break;
-								case DNS:
+									for (i=0;i<4;i++) {
+											if (parameter[i]<255) 
+											{
+												Config_Msg.Gw[i]=parameter[i];
+											}
+											else
+											{
+												sprintf(bufer_out,"\nBAD PARAMETER\r");
+												return;
+											}
+										}
+								sprintf(bufer_out,"\nSET MASK  = %u.%u.%u.%u\r",Config_Msg.Sub[0],Config_Msg.Sub[1],Config_Msg.Sub[2],Config_Msg.Sub[3] );
 
 									break;
-								case PORT:
-
+							  case PORT:
+										
+											Config_Msg.port_science=parameter[0];
+											sprintf(bufer_out,"\nSET PORT  = %u\r",Config_Msg.port_science );
 									break;
+								case SERVIP:
+										for (i=0;i<4;i++) {
+											if (parameter[i]<255) 
+											{
+												Config_Msg.destip[i]=parameter[i];
+											}
+											else
+											{
+												sprintf(bufer_out,"\nBAD PARAMETER\r");
+												return;
+											}
+										}
+										sprintf(bufer_out,"\nSET IP SERVER  = %u.%u.%u.%u\r",Config_Msg.destip[0],Config_Msg.destip[1],Config_Msg.destip[2],Config_Msg.destip[3] );
+									break;
+								case SERPORT:
+												Config_Msg.port=parameter[0];
+												sprintf(bufer_out,"\nSET SERVER PORT  = %u\r",Config_Msg.port );
+								break;
 								default:
 										sprintf(bufer_out,"\nBAD SET\r");
 								 break;
@@ -425,8 +512,8 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 					
 					break;				
 					case SAVE :    
-						//	sprintf(bufer_out,"\nenter today's date[format DD.MM.YYYY]:");	
-						//	state=DATA;
+							sprintf(bufer_out,"\nenter today's date[format DD.MM.YYYY]:");	
+							state=DATA;
 								
 						//		if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
 						//		else sprintf(bufer_out,"\nsave successfully\r");
@@ -436,6 +523,7 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 						sprintf(bufer_out, "\ndevice rebooot\r");
 						ResetStart();
 					break;
+					
 					default :
 							sprintf(bufer_out,"\nBAD command\r");
 						break;
@@ -446,30 +534,29 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 		{
 			/*read data */
 			
-	//		if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
-	//		else sprintf(bufer_out,"\nsave successfully\r");
-			state=CMD;
-			
-		}
-}
-
-void PARS_Parser(char * bufer, uint8 *argc,char * argv )
-{
-	int i=0;
-	char *buf;
-	for(buf	= bufer; *buf != '\0';  buf++)
-	{
-			if ((*buf==' ')||(*buf=='.'))
+			if (ReadParameter(bufer_in, parameter,0)==FALSE) 
 			{
-				
+				sprintf(bufer_out,"\nBAD DATA\r");
+				return;
 			}
 			else
 			{
+				Config_Msg.day_set=parameter[0];
+				Config_Msg.month_set=parameter[1];
+				Config_Msg.year_set=parameter[2];
+	
+				#ifdef EEPROM
+					if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
+					else sprintf(bufer_out,"\nsave successfully\r\nDATA SAVE  = %u.%u.%u\r",Config_Msg.day_set,Config_Msg.month_set,Config_Msg.year_set);	
+				#else
+					sprintf(bufer_out,"\nDATA SAVE  = %u.%u.%u\r",Config_Msg.day_set,Config_Msg.month_set,Config_Msg.year_set);	
+				#endif
 				
-			}
-		
-	}
+				state=CMD;
+			}		
+		}
 }
+
 /******************************************************************************
 * Function Name  : send_byte
 * Description    : Send byte to usart
@@ -487,7 +574,7 @@ void console_send( char* string)
 {
 	int i=0;
 	
-	xSemaphoreTake(xMutexUSART_CONSOLE , portMAX_DELAY);
+//	xSemaphoreTake(xMutexUSART_CONSOLE , portMAX_DELAY);
 
 	
 	while(string[i])
@@ -495,7 +582,7 @@ void console_send( char* string)
 		send_byte(string[i]);
 			i++;
 	}
-	xSemaphoreGive(xMutexUSART_CONSOLE );
+	//xSemaphoreGive(xMutexUSART_CONSOLE );
 
 }
 /******************************************************************************
