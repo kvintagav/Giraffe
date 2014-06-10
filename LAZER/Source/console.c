@@ -57,38 +57,6 @@ char *commands[] = {
 uint8 state=CMD;
 
 /*********************************************
-* Function Name  : LED_INIT
-* Description    : init led for indication work of different process and freertos
-*********************************************/
-void LED_INIT(void)
-{
-		GPIO_InitTypeDef GPIO_InitStructure;
-    RCC_AHB1PeriphClockCmd(LED_GPIO_RCC, ENABLE);
- 
-    GPIO_StructInit(&GPIO_InitStructure);
-    
-	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_Pin = LED1;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-    GPIO_Init(LED_GPIO, &GPIO_InitStructure);
-	  GPIO_ResetBits(LED_GPIO,LED1);
-}
-/*********************************************
-* Function Name  : ChangeLED
-* Description    : change led state
-*********************************************/
-void ChangeLED(void)
-{
-	if ( GPIO_ReadInputDataBit_BOOL(LED_GPIO, LED1) == 0)
-		{
-				GPIO_SetBits(LED_GPIO,LED1);
-		}
-		else
-		{
-				GPIO_ResetBits(LED_GPIO,LED1);
-		}
-}			
-/*********************************************
 * Function Name  : DEBUG_USART_INIT
 * Description    : init console for control and debug devices
 *********************************************/

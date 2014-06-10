@@ -43,11 +43,11 @@ typedef struct _CONFIG_MSG
 CONFIG_MSG;
 
 
-void ChangeLED(void);
+
 void CONSOLE_USART_INIT(void);
 void CommandProcessing( char *bufer_in, char *bufer_out);
 void console_send( char* str);
-void LED_INIT(void);
+
 bool ReadConfig(void);
 void PrintVersion( char *bufer_out);
 void SettingsDefault(void);

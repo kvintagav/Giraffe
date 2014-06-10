@@ -50,6 +50,7 @@ void WIZ_GPIO_Install(void){
 	
   NVIC_InitTypeDef NVIC_InitStructure;
 	GPIO_InitTypeDef GPIO_InitStructure;
+	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
@@ -96,7 +97,6 @@ void WIZ_GPIO_Install(void){
 	
 	
 	//Timer init
-	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 
   // Time base configuration 	
   TIM_TimeBaseStructure.TIM_Period = 1000;          
@@ -120,7 +120,7 @@ void WIZ_GPIO_Install(void){
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
 	
-	
+	Reset_W5200();
 	WIZ_SPI_Init();
 }
 

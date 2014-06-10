@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>Target 1</TargetName>
+      <TargetName>stm32f4_wiznet</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <TargetOption>
@@ -434,6 +434,11 @@
               <FileType>1</FileType>
               <FilePath>.\Source\system_stm32f4xx.c</FilePath>
             </File>
+            <File>
+              <FileName>user.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Source\user.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -571,7 +576,7 @@
       <component Cclass="CMSIS" Cgroup="DSP" Cvendor="ARM" Cversion="1.4.1" condition="CMSIS DSP">
         <package name="CMSIS" schemaVersion="1.0" url="http://www.keil.com/pack/" vendor="ARM" version="3.20.4"/>
         <targetInfos>
-          <targetInfo name="Target 1"/>
+          <targetInfo name="stm32f4_wiznet"/>
         </targetInfos>
       </component>
     </components>

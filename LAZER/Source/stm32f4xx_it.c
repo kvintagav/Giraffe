@@ -26,6 +26,7 @@
 #include "main.h"
 #include "stdbool.h"
 #include "fsmc_fpga.h"
+#include "user.h"
 #include "config.h"
 #include "console.h"
 
@@ -142,6 +143,22 @@ void TIM2_IRQHandler(void)
 
 		Timer2_ISR();
 		
+	}
+}
+/*******************************************************************************
+* Function Name  : TIM2_IRQHandler
+* Description    : This function handles TIM2 global interrupt request.
+*******************************************************************************/
+void TIM3_IRQHandler(void)
+{
+	if(TIM_GetITStatus(TIM3, TIM_IT_Update) == SET)
+	{
+		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+/*
+		This can be code for interrupt
+		
+		*/
+
 	}
 }
 /**

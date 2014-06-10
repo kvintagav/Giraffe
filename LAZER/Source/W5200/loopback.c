@@ -17,9 +17,68 @@ extern CONFIG_MSG Config_Msg;
 extern uint32_t presentTime;
 uint16 any_port = 1000;
 
-uint8 DATA_BUFF_A[SIZE_BUF]; 
+uint8 DATA_BUFF_A[TX_RX_MAX_BUF_SIZE]; 
 
 
+bool motor_tcps(SOCKET s, uint16 port,  int * massiv , int nub_param)
+{	        
+	uint16 RSR_len;
+	uint16 received_len;
+	bool result=FALSE;
+//	uint8 DATA_BUFF_IN[INPUT_SIZE_BUF]; 
+
+//	uint16 sent_data_len = 0;
+	//uint8 tmp_retry_cnt = 0;        
+
+	
+	switch (getSn_SR(s))
+	{
+		case SOCK_ESTABLISHED:					
+			if(ch_status[s]==1)
+			{
+				ch_status[s] = 2;
+			}
+		 if ((RSR_len = getSn_RX_RSR(s)) > 0) 			/* check Rx data */
+			{
+				if (RSR_len > TX_RX_MAX_BUF_SIZE) RSR_len = TX_RX_MAX_BUF_SIZE;
+				received_len = recv(s, DATA_BUFF_A, RSR_len);   
+				if (received_len>0) result= TRUE;		
+				else result=FALSE;
+								
+			}   
+			                        
+		break;
+		case SOCK_CLOSE_WAIT:                           
+
+					if ((RSR_len = getSn_RX_RSR(s)) > 0) 	
+			{
+				if (RSR_len > TX_RX_MAX_BUF_SIZE) RSR_len = TX_RX_MAX_BUF_SIZE;	
+																		
+//				received_len = recv(s, DATA_BUFF_IN, RSR_len);		
+			}
+			disconnect(s);
+			ch_status[s] = 0;
+		break;
+		case SOCK_CLOSED:                                    
+			if(!ch_status[s]) 
+			{
+
+				ch_status[s] = 1;
+			}                
+			if(socket(s,Sn_MR_TCP,port,0x00) == 0)   
+			{
+
+				ch_status[s] = 0;
+			}                                			                
+		break;
+		case SOCK_INIT:   
+			listen(s); 
+		break;
+		default:
+		break;                
+	}
+	return result;
+}
 
 void sender_tcps(SOCKET s, uint16 port)
 {	        
@@ -147,7 +206,7 @@ void loopback_tcps(SOCKET s, uint16 port)
 		{
 			ch_status[s] = 2;
 		}
-        if ((RSR_len = getSn_RX_RSR(s)) > 0) 			/* check Rx data */
+    if ((RSR_len = getSn_RX_RSR(s)) > 0) 			/* check Rx data */
 		{
 			if (RSR_len > TX_RX_MAX_BUF_SIZE) RSR_len = TX_RX_MAX_BUF_SIZE;	/* if Rx data size is lager than TX_RX_MAX_BUF_SIZE */
 			/* the data size to read is MAX_BUF_SIZE. */

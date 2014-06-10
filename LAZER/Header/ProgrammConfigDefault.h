@@ -115,6 +115,7 @@ SEtting w5200
 
 // SRAM address range is 0x2000 0000 ~ 0x2000 4FFF (20KB)
 #define TX_RX_MAX_BUF_SIZE	2048
+
 #define TX_BUF	0x20004000
 #define RX_BUF	(TX_BUF+TX_RX_MAX_BUF_SIZE)
 #define ApplicationAddress 	0x08004000

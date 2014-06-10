@@ -9,15 +9,20 @@
 
 #include "main.h"
 #include "fsmc_fpga.h"
-#include "user_tasks.h"
+#include "user.h"
 #include "console.h"
 
 
-
+#define  NUMB_PARAM 8
+int msg_massiv[NUMB_PARAM];
 
 /*Queue*/
 
 extern char bufer_cons_out[SIZE_CONS_OUT];
+extern CONFIG_MSG Config_Msg;
+
+extern uint8 DATA_BUFF_A[TX_RX_MAX_BUF_SIZE]; 
+
 
 
 
@@ -44,6 +49,7 @@ void InitAll()
 		#endif
 
 			WIZ_GPIO_Install();
+
 			WIZ_Config();
 			console_send("\nWIZNET start\r");
 	
@@ -60,8 +66,12 @@ int main(void)
 {
   InitAll();
 		
+	socket(0, Sn_MR_TCP, Config_Msg.port_science, 0);
+
 	while(1)
 	{
+		 if (motor_tcps( 0,Config_Msg.port_science,msg_massiv,NUMB_PARAM)==TRUE) ReadParameter( DATA_BUFF_A,msg_massiv ,1);
+
 	}
 }
 

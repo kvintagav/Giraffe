@@ -4,7 +4,7 @@
  *      *** Do not modify ! ***
  *
  * Project: 'LAZER' 
- * Target:  'Target 1' 
+ * Target:  'stm32f4_wiznet' 
  */
 
 #ifndef RTE_COMPONENTS_H
