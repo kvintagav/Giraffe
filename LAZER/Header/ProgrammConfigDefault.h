@@ -87,9 +87,9 @@ Network setting default
 /***************************************
 USART SETTINGS
 ****************************************/
-#define USART_BAUD_RATE 921600
+#define USART_BAUD_RATE 115200
 
-#define AMOUNT_PAR 10
+
 /***************************************
 EEPROM SETTINGS
 ****************************************/

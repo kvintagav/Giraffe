@@ -47,19 +47,6 @@ enum tel_cmd {
 // Command table
 char *commands[] = {
   "help",
-	"print",
-	"set",
-	"default",
-	"save",
-	"reboot",
-/*	NULL
-};
-
-char *com_par[] = {*/
-  "mac",
-  "ip",
-	"gateway",
-	"mask",
 	"port",
 	"port",
 	"servip",
@@ -297,7 +284,7 @@ void PrintVersion(char *bufer_out)
 * Function Name  : ReadParameter
 * Description    : read parameters from message  
 *******************************************************************************/
-bool ReadParameter(char * bufer, int * num_par,uint8 par)
+bool ReadParameter(char * bufer, int * num_par,uint8 space)
 {
 	int  *point=num_par;
 	char 	*buf;
@@ -308,7 +295,7 @@ bool ReadParameter(char * bufer, int * num_par,uint8 par)
 	char int_buf[6]={0,0,0,0,0,0};
 	for(buf	= bufer; *buf != '\0';  buf++)
 	{
-		if ((i<=1)&&(par>0))
+		if (i!=space)//((i<=1)&&(par>0))
 		{
 			if (*buf==' ') i++;
 		}

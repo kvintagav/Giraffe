@@ -210,11 +210,11 @@ void UsageFault_Handler(void)
   * @param  None
   * @retval None
   */
-/*
+
 void SVC_Handler(void)
 {
 }
-*/
+
 /**
   * @brief  This function handles Debug Monitor exception.
   * @param  None
@@ -230,22 +230,22 @@ void DebugMon_Handler(void)
   * @retval None
   */
 
-/*
+
 void PendSV_Handler(void)
 {
 }
-*/
+
 /**
   * @brief  This function handles SysTick Handler.
   * @param  None
   * @retval None
   */
-/*
+
 void SysTick_Handler(void)
 {
  
 }
-*/
+
 
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

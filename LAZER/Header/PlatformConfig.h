@@ -11,49 +11,49 @@ typedef uint8_t bit_data;
 
 
 /* WIZNET SPI Settings*/
-#define WIZ_SPI_PORT_RCC				RCC_APB1Periph_SPI2
-#define WIZ_PORT_SETTINGS				GPIOE
-#define WIZ_RESET		        		GPIO_Pin_2	// out
-#define WIZ_PWDN		        		GPIO_Pin_1	// out
+#define WIZ_SPI_PORT_RCC			RCC_APB1Periph_SPI2
+#define WIZ_PORT_SETTINGS			GPIOE
+#define WIZ_RESET		        	GPIO_Pin_2	// out
+#define WIZ_PWDN		        	GPIO_Pin_1	// out
 
-#define WIZ_PORT_INT					  GPIOE
-#define WIZ_INT			        		GPIO_Pin_3  // in
+#define WIZ_PORT_INT					GPIOE
+#define WIZ_INT			        	GPIO_Pin_3  // in
 
-#define WIZ_SPI 						SPI2
+#define WIZ_SPI 							SPI2
 #define WIZ_SPI_PORT 					GPIOB
 #define WIZ_SCS			  				GPIO_Pin_12	// out //nss
-#define WIZ_SCLK						GPIO_Pin_13	// out
-#define WIZ_MISO						GPIO_Pin_14	// in
-#define WIZ_MOSI						GPIO_Pin_15	// out
+#define WIZ_SCLK							GPIO_Pin_13	// out
+#define WIZ_MISO							GPIO_Pin_14	// in
+#define WIZ_MOSI							GPIO_Pin_15	// out
 
-#define GPIO_AF_SPI 						GPIO_AF_SPI2
-#define WIZ_SCLK_AF 						GPIO_PinSource13
-#define WIZ_MISO_AF 						GPIO_PinSource14
-#define WIZ_MOSI_AF 						GPIO_PinSource15
+#define GPIO_AF_SPI 					GPIO_AF_SPI2
+#define WIZ_SCLK_AF 					GPIO_PinSource13
+#define WIZ_MISO_AF 					GPIO_PinSource14
+#define WIZ_MOSI_AF 					GPIO_PinSource15
 
 /*USART settings*/	
 
 #define USART									USART1
-#define USART_CLK             				RCC_APB2Periph_USART1
+#define USART_CLK             RCC_APB2Periph_USART1
 #define USART_PORT 						RCC_AHB1Periph_GPIOA 
 #define USART_GPIO						GPIOA
 #define USART_GPIO_RX					GPIO_Pin_10
 #define USART_GPIO_TX					GPIO_Pin_9	
-#define USART_AF           				GPIO_AF_USART1
-#define USART_TX_SOURCE       			GPIO_PinSource9
-#define USART_RX_SOURCE       			GPIO_PinSource10
+#define USART_AF           		GPIO_AF_USART1
+#define USART_TX_SOURCE       GPIO_PinSource9
+#define USART_RX_SOURCE       GPIO_PinSource10
 #define USART_IRQ							USART1_IRQn
 
 /*LED GPIO Settings*/
 
-#define LED_GPIO_RCC 						RCC_AHB1Periph_GPIOD
-#define LED_GPIO 								GPIOD
-#define LED1										GPIO_Pin_2	// out
+#define LED_GPIO_RCC 					RCC_AHB1Periph_GPIOD
+#define LED_GPIO 							GPIOD
+#define LED1									GPIO_Pin_2	// out
 
 /*Interrut from FPGA*/
 
-#define EXT_INT_FPGA_Channel 		EXTI9_5_IRQn
-#define EXT_LINE_INT_FPGA 			EXTI_Line6
+#define EXT_INT_FPGA_Channel 	EXTI9_5_IRQn
+#define EXT_LINE_INT_FPGA 		EXTI_Line6
 
 /*FSMC width bus*/
 
