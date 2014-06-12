@@ -12,6 +12,7 @@ typedef uint8_t bit_data;
 /*USER TIM*/
 
 #define TIM_MOTOR TIM3
+#define RCC_TIM_MOTOR RCC_APB1Periph_TIM3
 
 /* WIZNET SPI Settings*/
 #define WIZ_SPI_PORT_RCC			RCC_APB1Periph_SPI2

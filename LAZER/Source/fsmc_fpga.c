@@ -183,13 +183,13 @@ void FSMC_FPGA_Init(void)
 bool FSMC_FPGA_Detect(void)
 {
 	uint16_t  status = 0x00;
-	bool result=FALSE;
+//	bool result=FALSE;
   *(bit_bus *)(FPGA_FLASH_START_ADDR | CMD_AREA) = FPGA_CMD_DETECT;
 	status = *(bit_bus *)(FPGA_FLASH_START_ADDR | DATA_AREA);
 	if (status==FPGA_DETECT) return(TRUE);
 	else  return (FALSE);
 	
-	return result;
+//	return result;
 }
 /******************************************************************************
 * Function Name  : FSMC_NAND_Reset

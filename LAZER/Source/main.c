@@ -34,24 +34,28 @@ void InitAll()
 
 		LED_INIT();
 		
-		
+		I2C_INIT();
+	
 		#ifdef EEPROM
-			I2C_EE_INIT();
+			
 			if (ReadConfig()==TRUE)	console_send("\nEEPROM start\r");
 			else console_send("\nEEPROM is not connect \r\n parameters is enabled by default\r");
 		#else
-				SettingsDefault();
-				CheckAndWriteVersion();
-			  PrintVersion(bufer_cons_out);
-				console_send(bufer_cons_out);
-				
+		SettingsDefault();
+		CheckAndWriteVersion();
+		PrintVersion(bufer_cons_out);
+		console_send(bufer_cons_out);
+		
 			
 		#endif
+	
+		TIM_INIT(); //init user timer 9600 khz
+	
+		(SysTick_Config(SystemCoreClock / 16));
+		WIZ_GPIO_Install();
 
-			WIZ_GPIO_Install();
-
-			WIZ_Config();
-			console_send("\nWIZNET start\r");
+		WIZ_Config();
+		console_send("\nWIZNET start\r");
 	
 	
 }

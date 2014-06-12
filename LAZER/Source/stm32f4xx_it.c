@@ -35,13 +35,8 @@ extern void Timer2_ISR(void);
 char bufer_console[SIZE_CONS_IN]; 
 char bufer_cons_out[SIZE_CONS_OUT];
 vu8 index_buf_cons;
-/*
-extern SemaphoreHandle_t xMutexFSMC;
-extern SemaphoreHandle_t xSemaphoreEXTI;
-extern SemaphoreHandle_t xSemaphoreFSMCDMA;
-extern SemaphoreHandle_t xSemaphoreSPIDMA;
-extern SemaphoreHandle_t xSemaphoreCONSOLE;
-*/
+uint8 led_delay;
+
 /******************************************************************************/
 /*            Cortex-M3 Processor Exceptions Handlers                         */
 /******************************************************************************/
@@ -79,6 +74,21 @@ void DMA2_Stream0_IRQHandler(void)
   }
 */	
 }
+
+/*********************************************************************
+* Function Name  : SysTick_Handler
+* Description    :  This function change led.
+**********************************************************************/
+void SysTick_Handler(void)
+{
+	led_delay++;
+	if (led_delay>=16)
+	{
+		ChangeLED();
+		led_delay=0;
+	}
+}
+
 /*********************************************************************
 * Function Name  : USARTx_IRQHandler
 * Description    : This function handles byte from host
@@ -86,7 +96,6 @@ void DMA2_Stream0_IRQHandler(void)
 
 void USART1_IRQHandler(void)
 {
-//	long xHigherPriorityTaskWoken = pdFALSE;
 	char input_data; 
 
 	
@@ -105,7 +114,6 @@ void USART1_IRQHandler(void)
 			}
 			else
 			{
-//			xSemaphoreGiveFromISR( xSemaphoreCONSOLE, &xHigherPriorityTaskWoken );
 				CommandProcessing( bufer_console,  bufer_cons_out);
 				console_send(bufer_cons_out);
 				console_send("\n>");
@@ -120,14 +128,9 @@ void USART1_IRQHandler(void)
 	}
 	else 
 	{
-//		xSemaphoreGiveFromISR( xSemaphoreCONSOLE, &xHigherPriorityTaskWoken );
-		index_buf_cons=0;
+			index_buf_cons=0;
 	}
-/*	if( xHigherPriorityTaskWoken == pdTRUE )
-	{
-		 portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
-	}
-	*/
+
 	ChangeLED();
 
 }
@@ -154,10 +157,9 @@ void TIM3_IRQHandler(void)
 	if(TIM_GetITStatus(TIM3, TIM_IT_Update) == SET)
 	{
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-/*
-		This can be code for interrupt
-		
-		*/
+	
+		TIM_USER_HANDLER(); 	//	This can be code for interrupt
+
 
 	}
 }
@@ -258,10 +260,6 @@ void PendSV_Handler(void)
   * @retval None
   */
 
-void SysTick_Handler(void)
-{
- 
-}
 
 
 
