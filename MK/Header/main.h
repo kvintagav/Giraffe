@@ -39,7 +39,9 @@
 
 /*Config Gpio for platform */
 #ifdef DISCOVERY
- #include "PlatformConfigDiscovery.h"
+	#include "PlatformConfigDiscovery.h"
+#else 
+	#include "PlatformConfig.h"
 #endif
 
 #include "ProgrammConfigDefault.h"
