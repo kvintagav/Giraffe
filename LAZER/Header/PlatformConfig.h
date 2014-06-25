@@ -17,8 +17,9 @@ typedef uint8_t bit_data;
 /* WIZNET SPI Settings*/
 #define WIZ_SPI_PORT_RCC			RCC_APB1Periph_SPI2
 #define WIZ_PORT_SETTINGS			GPIOE
-#define WIZ_RESET		        	GPIO_Pin_2	// out
 #define WIZ_PWDN		        	GPIO_Pin_1	// out
+#define WIZ_RESET		        	GPIO_Pin_2	// out
+
 
 #define WIZ_PORT_INT					GPIOE
 #define WIZ_INT			        	GPIO_Pin_3  // in

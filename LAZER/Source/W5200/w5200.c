@@ -58,11 +58,9 @@ void WIZ_GPIO_Install(void){
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2,ENABLE);
-	#ifdef RCC_APB2Periph_SPI1
-		RCC_APB2PeriphClockCmd(WIZ_SPI_PORT_RCC, ENABLE);
-	#else
+
 		RCC_APB1PeriphClockCmd(WIZ_SPI_PORT_RCC, ENABLE);
-	#endif
+
 	
 	/*SPI FOR WIZNET*/
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;

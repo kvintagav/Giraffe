@@ -323,7 +323,7 @@ bool I2CWaitEvent( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT)
 {
 	int eetime=WAYT_REQUEST_EEPROM;
 	
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))
+  while(!I2C_CheckEvent(I2C, I2C_EVENT))
    {
     if(eetime==0) return EE_ERROR;
 		else (eetime--);
