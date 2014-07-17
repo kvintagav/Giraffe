@@ -308,7 +308,7 @@ bool ReadParameter(char * bufer, int * num_par,uint8 par)
 	char int_buf[6]={0,0,0,0,0,0};
 	for(buf	= bufer; *buf != '\0';  buf++)
 	{
-		if ((i<=1)&&(par>0))
+		if (i!=par)//((i<=1)&&(par>0))
 		{
 			if (*buf==' ') i++;
 		}

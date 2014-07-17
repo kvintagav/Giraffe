@@ -12,10 +12,16 @@
 #include "user.h"
 #include "console.h"
 
+#include "motor.h"
 
-#define  NUMB_PARAM 8
-int msg_massiv[NUMB_PARAM];
+#include "string.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "stdio.h"
 
+#define  NUMB_PARAM 10
+int InParMassiv[NUMB_PARAM];
+char command[10];
 /*Queue*/
 
 extern char bufer_cons_out[SIZE_CONS_OUT];
@@ -74,8 +80,14 @@ int main(void)
 
 	while(1)
 	{
-		 if (motor_tcps( 0,Config_Msg.port_science,msg_massiv,NUMB_PARAM)==TRUE) ReadParameter( DATA_BUFF_A,msg_massiv ,1);
-
+		 if (motor_tcps( 0,Config_Msg.port_science,msg_massiv,NUMB_PARAM)==TRUE) 
+		 {
+			 ParsingParameter(DATA_BUFF_A, InParMassiv, command);
+			 if   (strstr( command,"MOTOR")!=NULL)
+			 {
+				 int turn_motor(InParMassiv[0],InParMassiv[1], InParMassiv[1] );
+			 }
+		 }
 	}
 }
 

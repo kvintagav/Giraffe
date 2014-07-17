@@ -3,6 +3,21 @@
 #include "user.h"
 
 
+/*********************************************
+* Function Name  : ChangeLED
+* Description    : change led state
+*********************************************/
+void ChangeLED(void)
+{
+	if ( GPIO_ReadInputDataBit_BOOL(LED_GPIO, LED1) == 0)
+		{
+				GPIO_SetBits(LED_GPIO,LED1);
+		}
+		else
+		{
+				GPIO_ResetBits(LED_GPIO,LED1);
+		}
+}		
 
 /*********************************************
 * Function Name  : LED_INIT
@@ -21,21 +36,7 @@ void LED_INIT(void)
     GPIO_Init(LED_GPIO, &GPIO_InitStructure);
 	  GPIO_ResetBits(LED_GPIO,LED1);
 }
-/*********************************************
-* Function Name  : ChangeLED
-* Description    : change led state
-*********************************************/
-void ChangeLED(void)
-{
-	if ( GPIO_ReadInputDataBit_BOOL(LED_GPIO, LED1) == 0)
-		{
-				GPIO_SetBits(LED_GPIO,LED1);
-		}
-		else
-		{
-				GPIO_ResetBits(LED_GPIO,LED1);
-		}
-}		
+
 
 void I2C_INIT(void)
 {

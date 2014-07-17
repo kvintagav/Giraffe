@@ -47,6 +47,19 @@ enum tel_cmd {
 // Command table
 char *commands[] = {
   "help",
+	"print",
+	"set",
+	"default",
+	"save",
+	"reboot",
+/*	NULL
+};
+
+char *com_par[] = {*/
+  "mac",
+  "ip",
+	"gateway",
+	"mask",
 	"port",
 	"port",
 	"servip",
@@ -249,6 +262,57 @@ void PrintVersion(char *bufer_out)
 }
 
 /******************************************************************************
+* Function Name  : ParsingParameter from host server tcp/ip
+* Description    : Parsing parameters from message  
+*******************************************************************************/
+bool ParsingParameter(char * bufer , int * num_par,  char * name_command)
+{
+	int *point=num_par;
+	char *buf;
+	int numb , j;
+	bool cmd_par =0;
+	char int_buf[6]={0,0,0,0,0,0};
+	
+	for (buf = bufer; *buf != '\0' ; buf++)
+	{
+		if (cmd_par==0)
+		{
+			if ((*buf!='.') || (*buf!=',') || (*buf!=' '))
+			{
+				*name_command=*buf;
+				
+			}
+			else
+			{
+				cmd_par=1;
+			}
+			
+		}
+		else
+		{
+			if ((*buf!='.') ||(*buf!=',') || (*buf!=' '))
+			{
+				*point=atoi(bufer);
+
+				point++;
+				numb=0;
+				for (j=0; j<6 ;j++)int_buf[j]=0x00;
+				
+			}
+			else
+			{
+				if ((*buf>=0x30)&&(*buf<=0x39))int_buf[numb]=*buf;
+				else return FALSE;
+				numb++;
+			}
+		}
+	}
+	*point=atoi(int_buf);
+	
+	return TRUE;
+}
+
+/******************************************************************************
 * Function Name  : ReadParameter
 * Description    : read parameters from message  
 *******************************************************************************/
@@ -269,7 +333,7 @@ bool ReadParameter(char * bufer, int * num_par,uint8 space)
 		}
 		else 
 		{
-			if (*buf=='.')
+			if ((*buf=='.') ||(*buf==','))
 			{
 				*point=atoi(int_buf);
 
