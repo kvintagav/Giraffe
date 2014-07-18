@@ -28,7 +28,7 @@ extern char bufer_cons_out[SIZE_CONS_OUT];
 extern CONFIG_MSG Config_Msg;
 
 extern uint8 DATA_BUFF_A[TX_RX_MAX_BUF_SIZE]; 
-
+extern MOTOR_STATE motor[MOUNT_DRIVERS];
 
 
 
@@ -63,7 +63,8 @@ void InitAll()
 		WIZ_Config();
 		console_send("\nWIZNET start\r");
 	
-	
+		init_motor();
+		
 }
  
  
@@ -80,12 +81,15 @@ int main(void)
 
 	while(1)
 	{
-		 if (motor_tcps( 0,Config_Msg.port_science,msg_massiv,NUMB_PARAM)==TRUE) 
+		 if (motor_tcps( 0,Config_Msg.port_science)==TRUE) 
 		 {
 			 ParsingParameter(DATA_BUFF_A, InParMassiv, command);
 			 if   (strstr( command,"MOTOR")!=NULL)
 			 {
-				 int turn_motor(InParMassiv[0],InParMassiv[1], InParMassiv[1] );
+				 if (motorTurn(InParMassiv[0]-1,InParMassiv[1], InParMassiv[2] )==ERROR)
+				 {	
+					 // send corner turn motor 
+				 }
 			 }
 		 }
 	}

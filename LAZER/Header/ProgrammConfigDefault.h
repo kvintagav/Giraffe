@@ -6,6 +6,15 @@
 
 #include "Types.h"
 
+/*ADDRESS  I2C DRIVER PCA9539PW*/
+#define ADDRES_DRIVER_0 78
+#define ADDRES_DRIVER_1 79
+
+
+
+#define MOUNT_DRIVERS 4 //mount motor driver
+ 
+
 /*ID DEVICE*/
 #define ID_DEFAULT 	0
 /*******************************************

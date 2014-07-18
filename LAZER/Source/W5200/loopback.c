@@ -20,7 +20,7 @@ uint16 any_port = 1000;
 uint8 DATA_BUFF_A[TX_RX_MAX_BUF_SIZE]; 
 
 
-bool motor_tcps(SOCKET s, uint16 port,  int * massiv , int nub_param)
+bool motor_tcps(SOCKET s, uint16 port)
 {	        
 	uint16 RSR_len;
 	uint16 received_len;
