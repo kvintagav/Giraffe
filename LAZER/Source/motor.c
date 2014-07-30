@@ -55,7 +55,7 @@ bool motorSendI2C(uint16 number, uint8 address)
   I2C_GenerateSTOP(I2C, ENABLE);
 	
 	return NO_ERROR;
-	return TRUE;
+	
 }
 
 bool motorRecvI2C(uint16 number, uint8 address)
@@ -87,21 +87,5 @@ bool motorPower(int motor_number, bool power)
 	return motorSendI2C(send_number , motor[motor_number].address_i2c);
 }
 
-/*******************************************************************************
-* Function Name  : I2C_WaitEvent
-* Description    : wait event from i2c
-*******************************************************************************/
-bool I2CWaitEvent( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT)
-{
-	int eetime=WAYT_REQUEST_EEPROM;
-	
-  while(!I2C_CheckEvent(I2C, I2C_EVENT))
-   {
-    if(eetime==0) return EE_ERROR;
-		else (eetime--);
-  }
-	 
-	return NO_ERROR;
-	
-}
+
 

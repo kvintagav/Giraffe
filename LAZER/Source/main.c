@@ -78,10 +78,14 @@ int main(void)
   InitAll();
 		
 	socket(0, Sn_MR_TCP, Config_Msg.port_science, 0);
+		
+	//socket(1, Sn_MR_TCP, Config_Msg.port_science+1, 0);
 
 	while(1)
 	{
-		 if (motor_tcps( 0,Config_Msg.port_science)==TRUE) 
+		 loopback_tcps(0, Config_Msg.port_science);
+		/*
+		 if (motor_tcps( 1,Config_Msg.port_science+1)==TRUE) 
 		 {
 			 ParsingParameter(DATA_BUFF_A, InParMassiv, command);
 			 if   (strstr( command,"MOTOR")!=NULL)
@@ -92,6 +96,7 @@ int main(void)
 				 }
 			 }
 		 }
+		*/
 	}
 }
 
