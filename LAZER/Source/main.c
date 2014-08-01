@@ -11,7 +11,7 @@
 #include "fsmc_fpga.h"
 #include "user.h"
 #include "console.h"
-
+#include "eeprom.h"
 #include "motor.h"
 
 #include "string.h"
@@ -47,23 +47,23 @@ void InitAll()
 			if (ReadConfig()==TRUE)	console_send("\nEEPROM start\r");
 			else console_send("\nEEPROM is not connect \r\n parameters is enabled by default\r");
 		#else
-		SettingsDefault();
-		CheckAndWriteVersion();
-		PrintVersion(bufer_cons_out);
-		console_send(bufer_cons_out);
+			SettingsDefault();
+			CheckAndWriteVersion();
+			PrintVersion(bufer_cons_out);
+			console_send(bufer_cons_out);
 		
 			
 		#endif
 	
-		TIM_INIT(); //init user timer 9600 khz
-	
+	//	TIM_INIT(); //init user timer 9600 khz
+	//	init_motor();	
 		(SysTick_Config(SystemCoreClock / 16));
 		WIZ_GPIO_Install();
 
 		WIZ_Config();
 		console_send("\nWIZNET start\r");
 	
-		init_motor();
+
 		
 }
  

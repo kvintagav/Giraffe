@@ -9,6 +9,7 @@
 
 #include "console.h"
 #include "main.h"
+#include "eeprom.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -146,8 +147,11 @@ void ResetStart(void)
 * Description    : settings all parameter if eeprom don't read or empty
 *******************************************************************************/
 bool ReadConfig(void)
-{
-/*	
+{	
+ // SettingsDefault();
+//	CheckAndWriteVersion();
+//	I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg));
+		
 	if (I2C_EE_BufferRead((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==TRUE) //if read struct from eeprom without error
 	{
 		//if  eeprom is empty
@@ -176,7 +180,7 @@ bool ReadConfig(void)
 	}
 	
 	return TRUE;
-*/
+
 	return FALSE;
 }
 /******************************************************************************
@@ -534,8 +538,8 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 							sprintf(bufer_out,"\nenter today's date[format DD.MM.YYYY]:");	
 							state=DATA;
 								
-						//		if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
-						//		else sprintf(bufer_out,"\nsave successfully\r");
+								if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
+								else sprintf(bufer_out,"\nsave successfully\r");
 
 					break;
 					case REBOOT :     
