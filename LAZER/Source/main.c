@@ -61,7 +61,7 @@ void InitAll()
 		WIZ_GPIO_Install();
 
 		WIZ_Config();
-		console_send("\nWIZNET start\r");
+		console_send("\nWIZNET start\r\n\r>");
 	
 
 		

@@ -53,10 +53,7 @@ char *commands[] = {
 	"default",
 	"save",
 	"reboot",
-/*	NULL
-};
 
-char *com_par[] = {*/
   "mac",
   "ip",
 	"gateway",
@@ -87,9 +84,10 @@ void CONSOLE_USART_INIT(void){
 	RCC_AHB1PeriphClockCmd(USART_PORT , ENABLE);
 
   /* Configure    USART2 Tx as alternate function push-pull */
-
+ 
+	
   GPIO_InitStructure.GPIO_Pin = USART_GPIO_TX;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
@@ -98,11 +96,6 @@ void CONSOLE_USART_INIT(void){
 
   /* Configure    USART2 Rx as input floating */
   GPIO_InitStructure.GPIO_Pin =  USART_GPIO_RX;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-
-  
   GPIO_Init(USART_GPIO, &GPIO_InitStructure);
 	
 	GPIO_PinAFConfig( USART_GPIO, USART_TX_SOURCE, USART_AF );
@@ -148,7 +141,12 @@ void ResetStart(void)
 *******************************************************************************/
 bool ReadConfig(void)
 {	
- // SettingsDefault();
+		uint8 buferIn[8]  = {0,1,2,3,4,5,6,7};
+		uint8 buferOut[8] = {0,0,0,0,0,0,0,0};
+		I2C_EE_BufferWrite(buferIn,EE_START_STRUCT,sizeof(buferIn));
+		I2C_EE_BufferRead(buferOut,EE_START_STRUCT,sizeof(buferOut));
+		
+//  SettingsDefault();
 //	CheckAndWriteVersion();
 //	I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg));
 		

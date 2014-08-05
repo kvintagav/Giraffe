@@ -23,6 +23,14 @@ void I2C_EE_INIT(void){
 	/* enable APB1 peripheral clock for I2C*/
 	RCC_APB1PeriphClockCmd(I2C_RCC , ENABLE);
   RCC_AHB1PeriphClockCmd(I2C_RCC_PORT , ENABLE); 
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+	RCC_APB1PeriphResetCmd(I2C_RCC , ENABLE);
+  RCC_APB1PeriphResetCmd(I2C_RCC, DISABLE);
+	
+	
+	GPIO_PinAFConfig(I2C_PORT, I2C_SDA_SOURCE, I2C_GPIO_AF); //
+	GPIO_PinAFConfig(I2C_PORT, I2C_SCL_SOURCE, I2C_GPIO_AF);
  
 	/* This sequence sets up the I2C_SDA and I2C_SCL pins
 	 * so they work correctly with the I2C peripheral
@@ -34,14 +42,10 @@ void I2C_EE_INIT(void){
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;// this activates the pullup resistors on the IO pins
 	GPIO_Init(I2C_PORT, &GPIO_InitStruct);// now all the values are passed to the GPIO_Init() 
  
-	GPIO_PinAFConfig(I2C_PORT, I2C_SDA_SOURCE, I2C_GPIO_AF); //
-	GPIO_PinAFConfig(I2C_PORT, I2C_SCL_SOURCE, I2C_GPIO_AF);
- 
+
 	 /* Configure I2C */
 	I2C_DeInit(I2C);
 
-	/* Enable the I2C peripheral */
-	I2C_Cmd(I2C, ENABLE);
 
 	/* Set the I2C structure parameters */
 	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
@@ -51,7 +55,11 @@ void I2C_EE_INIT(void){
 	I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_InitStruct.I2C_ClockSpeed = 30000;
 
+	/* Enable the I2C peripheral */
+	I2C_Cmd(I2C, ENABLE);
+
 	/* Initialize the I2C peripheral w/ selected parameters */
+	
 	I2C_Init(I2C,&I2C_InitStruct);
 	
 }
@@ -150,19 +158,19 @@ bool I2C_EE_PageWrite(u8* pBuffer, u8 WriteAddr, u8 NumByteToWrite)
   I2C_GenerateSTART(I2C, ENABLE);
   
   /* Test on EV5 and clear it */
- 	if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
+ 	if (I2CWaitEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
   
   /* Send EEPROM address for write */
   I2C_Send7bitAddress(I2C, EEPROM_ADDRESS, I2C_Direction_Transmitter);
 
   /* Test on EV6 and clear it */
-	if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
+	if (I2CWaitEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
 	
   /* Send the EEPROM's internal address to write to */    
   I2C_SendData(I2C, WriteAddr);  
 
   /* Test on EV8 and clear it */
-	while(! I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
+	if( I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
 	
   /* While there is data to be written */
   while(NumByteToWrite--)  
@@ -174,7 +182,7 @@ bool I2C_EE_PageWrite(u8* pBuffer, u8 WriteAddr, u8 NumByteToWrite)
     pBuffer++; 
   
     /* Test on EV8 and clear it */
-		while (!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
+		if (I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
 	
   }
 
@@ -194,19 +202,19 @@ bool I2C_EE_ByteWrite(u8* pBuffer, u8 WriteAddr)
   I2C_GenerateSTART(I2C, ENABLE);
 
   /* Test on EV5 and clear it */
-	if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
+	if (I2CWaitEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
 	
   /* Send EEPROM address for write */
   I2C_Send7bitAddress(I2C, EEPROM_ADDRESS, I2C_Direction_Transmitter);
   
   /* Test on EV6 and clear it */
-	if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
+	if (I2CWaitEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
 	
   /* Send the EEPROM's internal address to write to */
   I2C_SendData(I2C, WriteAddr);
   
   /* Test on EV8 and clear it */
-  if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
+  if (I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
 	
   /* Send the byte to be written */
   I2C_SendData(I2C, *pBuffer); 
@@ -325,8 +333,8 @@ bool I2CWaitEvent( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT)
 	
   while(!I2C_CheckEvent(I2C, I2C_EVENT))
    {
-    if(eetime==0) return EE_ERROR;
-		else (eetime--);
+    if((eetime--)==0) return EE_ERROR;
+		
   }
 	 
 	return NO_ERROR;
