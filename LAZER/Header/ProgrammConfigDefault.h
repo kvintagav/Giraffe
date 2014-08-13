@@ -96,7 +96,7 @@ Network setting default
 /***************************************
 USART SETTINGS
 ****************************************/
-#define USART_BAUD_RATE 115200
+#define USART_BAUD_RATE 57600
 
 
 /***************************************
