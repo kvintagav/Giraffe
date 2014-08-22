@@ -5,6 +5,11 @@
 
 #include "main.h"
 
+#define INPUTPORT 				0
+#define OUTPUTPORT				2
+#define POLARITYPORT 			4
+#define CONFIGURATIONPORT	6
+
 #define DISABLE 0
 #define ENABLE 	1
 
@@ -35,10 +40,6 @@
 1.6 en		1
 1.7 en		2
 
-
-
-
-
 */
 
 
@@ -56,5 +57,5 @@ MOTOR_STATE;
 
 int motorTurn(int number,int direction, int corner );
 void init_motor(void);
-
+void motorTest(void);
 #endif

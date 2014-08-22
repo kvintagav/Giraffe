@@ -4,7 +4,7 @@
 MOTOR_STATE motor[MOUNT_DRIVERS];
 
 bool I2CWaitEvent( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT);
-
+bool motorSendI2C(uint8 address, uint8 cmd ,uint8 port0 ,uint8 port1);
 bool motorPower(int motor_number, bool power);
 
 void init_motor(void)
@@ -22,37 +22,51 @@ void init_motor(void)
 			}
 	}
 }
-
-bool motorSendI2C(uint16 number, uint8 address)
+void motorTest(void)
 {
+	motorSendI2C(ADDRES_DRIVER_0,OUTPUTPORT,0xA5,0xA5);
+	
+}
+
+bool motorSendI2C(uint8 address, uint8 cmd ,uint8 port0 ,uint8 port1)
+{
+	
+	while(I2C_GetFlagStatus(I2C, I2C_FLAG_BUSY)){};
+	
  /* Send STRAT condition */
   I2C_GenerateSTART(I2C, ENABLE);
 
   /* Test on EV5 and clear it */
-	if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
+	while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)){};
 	
   /* Send EEPROM address for write */
-  I2C_Send7bitAddress(I2C, EEPROM_ADDRESS, I2C_Direction_Transmitter);
+  I2C_Send7bitAddress(I2C, address, I2C_Direction_Transmitter);
   
   /* Test on EV6 and clear it */
-	if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
-	
-  /* Send the EEPROM's internal address to write to */
-  I2C_SendData(I2C, address);
-  
-  /* Test on EV8 and clear it */
-  if (I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
+	while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)){};
 	
   /* Send the byte to be written */
-  I2C_SendData(I2C,number); 
+  I2C_SendData(I2C,cmd); 
    
   /* Test on EV8 and clear it */
 	
-  if (I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
+  while(!I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
   
+	 /* Send the byte to be written */
+  I2C_SendData(I2C,port0); 
+   
+  /* Test on EV8 and clear it */
 	
+  while(!I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
+ /* Send the byte to be written */
+  I2C_SendData(I2C,port1); 
+   
+  /* Test on EV8 and clear it */
+	
+  while(!I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
+ 
   /* Send STOP condition */
-  I2C_GenerateSTOP(I2C, ENABLE);
+	I2C_GenerateSTOP(I2C, ENABLE);
 	
 	return NO_ERROR;
 	
@@ -84,7 +98,8 @@ bool motorPower(int motor_number, bool power)
 	{
 		if (power==ENABLE)	send_number|=MASK_ENABLE_1 ;
 	}
-	return motorSendI2C(send_number , motor[motor_number].address_i2c);
+//	return motorSendI2C(send_number , motor[motor_number].address_i2c);
+	return TRUE;
 }
 
 

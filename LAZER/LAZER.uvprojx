@@ -346,7 +346,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>0</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>0</OneElfS>
@@ -362,7 +362,7 @@
             <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_STDPERIPH_DRIVER, STM32F4XX, DEBUG,EEPROM,STM32F40_41xxx</Define>
+              <Define>USE_STDPERIPH_DRIVER, STM32F4XX, DEBUG,STM32F40_41xxx</Define>
               <Undefine></Undefine>
               <IncludePath>.\Header;.\Header\W5200;.\STM32f4xx_StdPeriphDriver\inc</IncludePath>
             </VariousControls>

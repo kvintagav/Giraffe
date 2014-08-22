@@ -83,7 +83,9 @@ int main(void)
 
 	while(1)
 	{
-		 loopback_tcps(0, Config_Msg.port_science);
+		motorTest();	
+		 //loopback_tcps(0, Config_Msg.port_science);
+		
 		/*
 		 if (motor_tcps( 1,Config_Msg.port_science+1)==TRUE) 
 		 {

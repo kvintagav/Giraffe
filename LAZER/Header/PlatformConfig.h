@@ -82,8 +82,8 @@ typedef uint8_t bit_data;
 #define GPIO_Pin_SDA 									GPIO_Pin_7
 #define GPIO_Pin_SCL 									GPIO_Pin_6
 #define I2C_PORT											GPIOB
-#define I2C_SDA_SOURCE								GPIO_PinSource6
-#define I2C_SCL_SOURCE								GPIO_PinSource7
+#define I2C_SDA_SOURCE								GPIO_PinSource7
+#define I2C_SCL_SOURCE								GPIO_PinSource6
 #define I2C_GPIO_AF										GPIO_AF_I2C1 
 
 #define EEPROM_ADDRESS								0xA4

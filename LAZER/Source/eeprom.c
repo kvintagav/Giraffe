@@ -186,7 +186,7 @@ bool I2C_EE_PageWrite(u8* pBuffer, u8 WriteAddr, u8 NumByteToWrite)
 	
   }
 
-  /* Send STOP condition */
+  
   I2C_GenerateSTOP(I2C, ENABLE);
 	
 	return NO_ERROR;
