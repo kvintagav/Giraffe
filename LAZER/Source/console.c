@@ -179,7 +179,6 @@ bool ReadConfig(void)
 	
 	return TRUE;
 
-	return FALSE;
 }
 /******************************************************************************
 * Function Name  : SettingsDefault

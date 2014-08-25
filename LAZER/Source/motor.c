@@ -31,11 +31,13 @@ void motorTest(void)
 bool motorSendI2C(uint8 address, uint8 cmd ,uint8 port0 ,uint8 port1)
 {
 	
-	while(I2C_GetFlagStatus(I2C, I2C_FLAG_BUSY)){};
+	//while(I2C_GetFlagStatus(I2C, I2C_FLAG_BUSY)){};
 	
+		
  /* Send STRAT condition */
-  I2C_GenerateSTART(I2C, ENABLE);
+   I2C_GenerateSTART(I2C, ENABLE);
 
+		
   /* Test on EV5 and clear it */
 	while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)){};
 	

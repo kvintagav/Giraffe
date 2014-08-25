@@ -58,14 +58,14 @@ void I2C_INIT(void)
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF; // the pins are configured as alternate function so the USART peripheral has access to them
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;// this defines the IO speed and has nothing to do with the baudrate!
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_OD;// this defines the output type as open drain
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;// this activates the pullup resistors on the IO pins
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;// this activates the pullup resistors on the IO pins
 	GPIO_Init(I2C_PORT, &GPIO_InitStruct);// now all the values are passed to the GPIO_Init() 
  
- 
+
 		/* Set the I2C structure parameters */
 	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
 	I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;
-	I2C_InitStruct.I2C_OwnAddress1 = 0x10;
+	I2C_InitStruct.I2C_OwnAddress1 = 0x00;
 	I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_InitStruct.I2C_ClockSpeed = 100000;
@@ -76,6 +76,7 @@ void I2C_INIT(void)
 	/* Initialize the I2C peripheral w/ selected parameters */
 	I2C_Init(I2C,&I2C_InitStruct);
 
+ // I2C_AcknowledgeConfig( I2C,ENABLE);
 
 
 
