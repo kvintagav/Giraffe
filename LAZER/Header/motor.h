@@ -19,8 +19,8 @@
 #define MASK_ENABLE_0  0x00C0
 #define MASK_ENABLE_1  0x0300
 
-/*structure PCA9539PW
-	MOTOR1
+/*structure PCA9539PW /1
+	MOTOR1 
 0.0 sens 	1
 0.1 sens 	2
 0.2 obm 	1
@@ -30,7 +30,28 @@
 0.6 en		1
 0.7 en		2
 
-	MOTOR2
+	MOTOR2 
+1.0 en 		1
+1.1 en	 	2
+1.2 obm 	1
+1.3 obm 	2
+1.4 obm 	3
+1.5 obm 	4
+1.6 sens	1
+1.7 sens	2
+
+structure PCA9539PW /2
+	MOTOR3 
+0.0 en 		1
+0.1 en	 	2
+0.2 obm 	1
+0.3 obm 	2
+0.4 obm 	3
+0.5 obm 	4
+0.6 sens	1
+0.7 sens	2
+
+	MOTOR4 
 1.0 sens 	1
 1.1 sens 	2
 1.2 obm 	1
@@ -39,6 +60,8 @@
 1.5 obm 	4
 1.6 en		1
 1.7 en		2
+
+
 
 */
 
@@ -52,6 +75,10 @@ typedef struct _MOTOR_STATE
 	bool trailer_right;
 	uint8 error;
 	uint8 address_i2c;
+	uint8 mask_enable;
+	uint8 mask_senser;
+	
+	bool port;
 }
 MOTOR_STATE;
 

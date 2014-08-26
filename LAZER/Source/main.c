@@ -56,7 +56,7 @@ void InitAll()
 		#endif
 	
 	//	TIM_INIT(); //init user timer 9600 khz
-	//	init_motor();	
+		init_motor();	
 		(SysTick_Config(SystemCoreClock / 16));
 		WIZ_GPIO_Install();
 
@@ -85,17 +85,14 @@ int main(void)
 	while(1)
 	{
 		motorTest();
-			while(i)
-			{
-				i--;
-			}
-		 //loopback_tcps(0, Config_Msg.port_science);
+			
+		 loopback_tcps(0, Config_Msg.port_science);
 		
-		/*
+		
 		 if (motor_tcps( 1,Config_Msg.port_science+1)==TRUE) 
 		 {
 			 ParsingParameter(DATA_BUFF_A, InParMassiv, command);
-			 if   (strstr( command,"MOTOR")!=NULL)
+			 if   (strstr( command,"DRIVE")!=NULL)
 			 {
 				 if (motorTurn(InParMassiv[0]-1,InParMassiv[1], InParMassiv[2] )==ERROR)
 				 {	
@@ -103,7 +100,7 @@ int main(void)
 				 }
 			 }
 		 }
-		*/
+		
 	}
 }
 
