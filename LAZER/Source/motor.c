@@ -4,7 +4,7 @@
 MOTOR_STATE motor[MOUNT_DRIVERS];
 
 bool I2CWaitEvent( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT);
-bool motorSendI2C(uint8 address, uint8 cmd ,uint8 port0 ,uint8 port1);
+bool motorSendI2C(uint8 address, uint8 cmd ,uint8 port0 );
 bool motorPower(int motor_number, bool power);
 
 void init_motor(void)
@@ -24,11 +24,18 @@ void init_motor(void)
 }
 void motorTest(void)
 {
-	motorSendI2C(ADDRES_DRIVER_0,OUTPUTPORT,0xA5,0xA5);
+	motorSendI2C(ADDRES_DRIVER_0,CONFIGURATIONPORT,0);
+	motorSendI2C(ADDRES_DRIVER_0,CONFIGURATIONPORT+1,0);
 	
+	
+	while(1)
+	{
+		motorSendI2C(ADDRES_DRIVER_0,OUTPUTPORT,255);
+		motorSendI2C(ADDRES_DRIVER_0,OUTPUTPORT+1,255);
+	}
 }
 
-bool motorSendI2C(uint8 address, uint8 cmd ,uint8 port0 ,uint8 port1)
+bool motorSendI2C(uint8 address, uint8 cmd ,uint8 port0 )
 {
 	
 	//while(I2C_GetFlagStatus(I2C, I2C_FLAG_BUSY)){};
@@ -52,20 +59,20 @@ bool motorSendI2C(uint8 address, uint8 cmd ,uint8 port0 ,uint8 port1)
    
   /* Test on EV8 and clear it */
 	
-  while(!I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
+  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
   
 	 /* Send the byte to be written */
   I2C_SendData(I2C,port0); 
    
   /* Test on EV8 and clear it */
 	
-  while(!I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
+  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
  /* Send the byte to be written */
-  I2C_SendData(I2C,port1); 
+ // I2C_SendData(I2C,port1); 
    
   /* Test on EV8 and clear it */
 	
-  while(!I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
+ // while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
  
   /* Send STOP condition */
 	I2C_GenerateSTOP(I2C, ENABLE);

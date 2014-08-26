@@ -75,6 +75,7 @@ void InitAll()
 int main(void)
 
 {
+	int i;
   InitAll();
 		
 	socket(0, Sn_MR_TCP, Config_Msg.port_science, 0);
@@ -83,7 +84,11 @@ int main(void)
 
 	while(1)
 	{
-		motorTest();	
+		motorTest();
+			while(i)
+			{
+				i--;
+			}
 		 //loopback_tcps(0, Config_Msg.port_science);
 		
 		/*

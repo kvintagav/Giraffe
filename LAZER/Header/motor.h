@@ -10,8 +10,8 @@
 #define POLARITYPORT 			4
 #define CONFIGURATIONPORT	6
 
-#define DISABLE 0
-#define ENABLE 	1
+//#define DISABLE 0
+//#define ENABLE 	1
 
 #define EE_ERROR 0
 #define NO_ERROR 1

@@ -68,7 +68,7 @@ void I2C_INIT(void)
 	I2C_InitStruct.I2C_OwnAddress1 = 0x00;
 	I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
-	I2C_InitStruct.I2C_ClockSpeed = 100000;
+	I2C_InitStruct.I2C_ClockSpeed = 400000;
 	
 	/* Enable the I2C peripheral */
 	I2C_Cmd(I2C, ENABLE);
