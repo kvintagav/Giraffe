@@ -97,8 +97,6 @@ void SysTick_Handler(void)
 void USART1_IRQHandler(void)
 {
 	char input_data; 
-
-	
 	ChangeLED();
 	USART_ClearITPendingBit(USART, USART_IT_RXNE);
 	input_data= USART_ReceiveData(USART);
@@ -130,9 +128,7 @@ void USART1_IRQHandler(void)
 	{
 			index_buf_cons=0;
 	}
-
 	ChangeLED();
-
 }
 /*******************************************************************************
 * Function Name  : TIM2_IRQHandler

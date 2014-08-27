@@ -24,5 +24,6 @@ bool I2C_EE_PageWrite(u8* pBuffer, u8 WriteAddr, u8 NumByteToWrite);
 bool I2C_EE_ByteWrite(u8* pBuffer, u8 WriteAddr);
 bool I2C_EE_BufferRead(u8* pBuffer, u8 ReadAddr, u16 NumByteToRead);
 void I2C_EE_WaitEepromStandbyState(void);
+bool I2CWaitEvent( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT);
 
 #endif

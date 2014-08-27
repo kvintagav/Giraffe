@@ -5,10 +5,10 @@
 
 #include "main.h"
 
-#define INPUTPORT 				0
-#define OUTPUTPORT				2
-#define POLARITYPORT 			4
-#define CONFIGURATIONPORT	6
+#define INPORT 		0
+#define OUTPORT		2
+#define POLARPORT	4
+#define CONFPORT	6
 
 //#define DISABLE 0
 //#define ENABLE 	1
@@ -71,13 +71,12 @@ typedef struct _MOTOR_STATE
 	
 	uint16 corner_current;
 	uint16 corner_new;
-	bool trailer_left;
-	bool trailer_right;
+	bool senser_left;
+	bool senser_right;
 	uint8 error;
 	uint8 address_i2c;
 	uint8 mask_enable;
 	uint8 mask_senser;
-	
 	bool port;
 }
 MOTOR_STATE;

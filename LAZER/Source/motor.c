@@ -1,70 +1,57 @@
 
 #include "motor.h"
-
+#include "eeprom.h"
 MOTOR_STATE motor[MOUNT_DRIVERS];
 
-bool I2CWaitEvent( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT);
-bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data );
 
+bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data );
 bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data );
-bool motorPower(int motor_number, bool power);
 
 void init_motor(void)
 {	
 	int i;
 	for(i = 0 ; i < MOUNT_DRIVERS ; i++)
 	{
-			if ((i==0) || (i==1)) 
-			{
-				motor[i].address_i2c=ADDRES_DRIVER_0;
-				motor[i].port=0;
-			}
-			else 
-			{
-				motor[i].address_i2c=ADDRES_DRIVER_1;
-				motor[i].port=1;
-			}
-		
-			if ((i==0) || (i==3))	
-			{
-				motor[i].mask_enable=0xC0;
-				motor[i].mask_senser=0x03;
-			}
-			else 
-			{
-				motor[i].mask_enable=0x03;
-				motor[i].mask_senser=0xC0;
-				
-				
-			}
-			motorSendI2C(motor[i].address_i2c,CONFIGURATIONPORT+motor[i].port,motor[i].mask_senser);
-	
+			if ((i==0) || (i==1)) 	motor[i].address_i2c=ADDRES_DRIVER_0;
+			else										motor[i].address_i2c=ADDRES_DRIVER_1;
+			
+			if ((i==0) || (i==2)) 	motor[i].port=0;				
+			else										motor[i].port=1;
+			
+			if ((i==0) || (i==3))		motor[i].mask_enable=0xC0;
+			else										motor[i].mask_enable=0x03;
+			
+			if ((i==0) || (i==3))		motor[i].mask_senser=0x03;
+			else										motor[i].mask_senser=0xC0;
+			
+			motorSendI2C(motor[i].address_i2c,CONFPORT+motor[i].port,motor[i].mask_senser);
 	}
-
-
-	
 }
 
-int motorTurn(int number,int direction, int corner )
+int motorTurn(int numb_motor,int direction, int corner )
 {
-	if (number>(MOUNT_DRIVERS-1)) return -1;
-	motorPower(number, ENABLE);
-
+//	uint8 address = motor[numb_motor].address_i2c;
+//	uint8 port = motor[numb_motor].port;
+	uint8 value = motor[numb_motor].mask_enable;
 	
-	motorPower(number, DISABLE);
+	if (numb_motor>(MOUNT_DRIVERS-1)) return -1;
+	motorSendI2C(motor[numb_motor].address_i2c,OUTPORT+motor[numb_motor].port,value); //ENABLE
+	
+	
+	
+	motorSendI2C(motor[numb_motor].address_i2c,OUTPORT+motor[numb_motor].port,0x00); //DISABLE
 	return 1;
 }
 
 void motorTest(void)
 {
-	motorSendI2C(ADDRES_DRIVER_0,CONFIGURATIONPORT,0);
-	motorSendI2C(ADDRES_DRIVER_0,CONFIGURATIONPORT+1,0);
-	
-	
+	motorSendI2C(ADDRES_DRIVER_0,CONFPORT,0);
+	motorSendI2C(ADDRES_DRIVER_0,CONFPORT+1,0);
+
 	while(1)
 	{
-		motorSendI2C(ADDRES_DRIVER_0,OUTPUTPORT,255);
-		motorSendI2C(ADDRES_DRIVER_0,OUTPUTPORT+1,255);
+		motorSendI2C(ADDRES_DRIVER_0,OUTPORT,255);
+		motorSendI2C(ADDRES_DRIVER_0,OUTPORT+1,255);
 	}
 }
 
@@ -88,7 +75,7 @@ bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data )
 	return 1;
 }
 
- c
+bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
 {
 	uint8 *read_data=data;
 	
@@ -109,22 +96,6 @@ bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data )
 	return 1;
 }
 
-
-
-bool motorPower(int motor_number, bool power)
-{
-	uint16  send_number=0;
-	if (motor_number%2==0)
-	{
-		if (power==ENABLE)	send_number|=MASK_ENABLE_0 ;
-	}
-	else
-	{
-		if (power==ENABLE)	send_number|=MASK_ENABLE_1 ;
-	}
-//	return motorSendI2C(send_number , motor[motor_number].address_i2c);
-	return TRUE;
-}
 
 
 
