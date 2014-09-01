@@ -362,7 +362,7 @@
             <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_STDPERIPH_DRIVER, STM32F4XX, DEBUG</Define>
+              <Define>USE_STDPERIPH_DRIVER, STM32F4XX, DEBUG,DISCOVERY</Define>
               <Undefine></Undefine>
               <IncludePath>.\Header;.\Header\freertos;.\Header\W5200;.\RTE\Device\STM32F407VG;.\STM32f4xx_StdPeriphDriver\inc</IncludePath>
             </VariousControls>

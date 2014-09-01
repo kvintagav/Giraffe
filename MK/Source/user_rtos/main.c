@@ -78,6 +78,8 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 }
 /*-----------------------------------------------------------*/
 
+
+
 /*******************************************************************/
 void vFreeRTOSInitAll()
 {
@@ -85,7 +87,9 @@ void vFreeRTOSInitAll()
 		console_send("\r\n\r\nDevice_start\r");
 
 		LED_INIT();
-		
+	
+	
+	
 		
 		#ifdef EEPROM
 			I2C_EE_INIT();
@@ -115,10 +119,89 @@ void vFreeRTOSInitAll()
 	
 }
  
+ void TEST_INIT(void)
+{
+	
+		GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_AHB1PeriphClockCmd(LED_GPIO_RCC, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
  
+    GPIO_StructInit(&GPIO_InitStructure);
+	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_Pin = LED1;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_Init(LED_GPIO, &GPIO_InitStructure);
+	  GPIO_SetBits(LED_GPIO,LED1);
+	
+	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12|GPIO_Pin_14|GPIO_Pin_15;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_Init(LED_GPIO, &GPIO_InitStructure);
+	  
+		GPIO_SetBits(LED_GPIO,GPIO_Pin_12);
+		GPIO_SetBits(LED_GPIO,GPIO_Pin_14);
+		GPIO_SetBits(LED_GPIO,GPIO_Pin_15);
+	
+	
+	
+		  
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	  GPIO_Init(GPIOA, &GPIO_InitStructure);
+	
+  
+	
+}
  
+void vLedTask2(void *pvParameters)
+{
+	bool led=true;
+	
+    while(1)
+    {
+			if (led)
+			{
+				GPIO_ResetBits(LED_GPIO,GPIO_Pin_15);
+				led=0;
+			}	
+			else
+			{
+				GPIO_SetBits(LED_GPIO,GPIO_Pin_15);
+				led=1;
+			}
+			vTaskDelay(5000);
+		}
+    vTaskDelete(NULL);	
+}
 
- 
+ void vLedTask1 (void *pvParameters)
+{
+	bool led=true;
+	
+    while(1)
+    {
+			ChangeLED();
+			if ( GPIO_ReadInputDataBit_BOOL(GPIOA,GPIO_Pin_0))
+			{
+				xTaskCreate(vLedTask2,(signed char *)"LedTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+1 , NULL);	
+
+					if (led)
+					{
+						GPIO_ResetBits(LED_GPIO,GPIO_Pin_15);
+						led=false;
+					}	
+					else 
+					{
+						GPIO_SetBits(LED_GPIO,GPIO_Pin_15);
+						led=true;
+					}
+			}
+			
+			vTaskDelay(PERIOD_LED_TASK);
+		}
+    vTaskDelete(NULL);	
+}
 /*******************************************************************/
 int main(void)
 
@@ -140,7 +223,9 @@ int main(void)
 	#endif
 		
   vFreeRTOSInitAll();
+	//	TEST_INIT();
 	
+//	xTaskCreate(vLedTask1,(signed char *)"LedTask", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+1 , NULL);	
 
 	
 	if ((xMutexFSMC != NULL)&&(xSemaphoreEXTI !=NULL)&&(xSemaphoreFSMCDMA!=NULL)&&(xSemaphoreCONSOLE!=NULL)&&(xMutexUSART_CONSOLE!=NULL))
@@ -160,7 +245,9 @@ int main(void)
 
 			vTaskStartScheduler();
 		}
-		
+
+	
+	vTaskStartScheduler();
 	for( ;; );
 }
 
