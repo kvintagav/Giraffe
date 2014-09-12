@@ -10,14 +10,20 @@
 #define POLARPORT	4
 #define CONFPORT	6
 
+
 //#define DISABLE 0
 //#define ENABLE 	1
 
 #define EE_ERROR 0
 #define NO_ERROR 1
 
-#define MASK_ENABLE_0  0x00C0
-#define MASK_ENABLE_1  0x0300
+//#define MASK_ENABLE_0  0x00C0
+//#define MASK_ENABLE_1  0x0300
+
+#define FAZA0 0x0C
+#define FAZA1 0x18
+#define FAZA2 0x30
+#define FAZA3 0x24
 
 /*structure PCA9539PW /1
 	MOTOR1 
@@ -69,19 +75,19 @@ structure PCA9539PW /2
 typedef struct _MOTOR_STATE
 {
 	
-	uint16 corner_current;
-	uint16 corner_new;
 	bool senser_left;
 	bool senser_right;
-	uint8 error;
 	uint8 address_i2c;
 	uint8 mask_enable;
 	uint8 mask_senser;
 	bool port;
+	uint8 current_faza;
 }
 MOTOR_STATE;
 
-int motorTurn(int number,int direction, int corner );
+bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data );
+bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data );
+int motorTurn(int number,int direction, int tick );
 void init_motor(void);
 void motorTest(void);
 

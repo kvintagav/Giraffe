@@ -57,7 +57,7 @@ void InitAll()
 	
 	//	TIM_INIT(); //init user timer 9600 khz
 		init_motor();	
-		(SysTick_Config(SystemCoreClock / 16));
+		(SysTick_Config(SystemCoreClock / 1000));
 		WIZ_GPIO_Install();
 
 		WIZ_Config();
@@ -78,14 +78,22 @@ int main(void)
 //	int i;
   InitAll();
 		
-	socket(0, Sn_MR_TCP, Config_Msg.port_science, 0);
+	/* Функции для работы с I2C 	
+		bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data )
+	пример	motorSendI2C(ADDRES_DRIVER_0,OUTPORT,255);
 		
-	//socket(1, Sn_MR_TCP, Config_Msg.port_science+1, 0);
 
+		bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
+	пример	motorRecvI2C(ADDRES_DRIVER_0, INPORT , &koncevic1);
+	в motorRecv значёк & ОБЯЗАТЕЛЕН - это указатель, без него работать не будет
+	*/
+	//socket(0, Sn_MR_TCP, Config_Msg.port_science, 0);
+		
+	
 	while(1)
 	{
 		motorTest();
-			
+	/*		
 		 loopback_tcps(0, Config_Msg.port_science);
 		
 		
@@ -100,7 +108,7 @@ int main(void)
 				 }
 			 }
 		 }
-		
+		*/
 	}
 }
 
