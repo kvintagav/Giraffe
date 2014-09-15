@@ -12,10 +12,15 @@ void ChangeLED(void)
 	if ( GPIO_ReadInputDataBit_BOOL(LED_GPIO, LED1) == 0)
 		{
 				GPIO_SetBits(LED_GPIO,LED1);
+		//	  GPIO_SetBits(GPIOB,GPIO_Pin_6);
+	//		  GPIO_SetBits(GPIOB,GPIO_Pin_7);
+			
 		}
 		else
 		{
 				GPIO_ResetBits(LED_GPIO,LED1);
+		//		GPIO_ResetBits(GPIOB,GPIO_Pin_6);
+			//  GPIO_ResetBits(GPIOB,GPIO_Pin_7);
 		}
 }		
 
@@ -70,11 +75,12 @@ void I2C_INIT(void)
 	I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_InitStruct.I2C_ClockSpeed = 400000;
 	
+	/* Initialize the I2C peripheral w/ selected parameters */
+	I2C_Init(I2C,&I2C_InitStruct);
+
 	/* Enable the I2C peripheral */
 	I2C_Cmd(I2C, ENABLE);
 
-	/* Initialize the I2C peripheral w/ selected parameters */
-	I2C_Init(I2C,&I2C_InitStruct);
 
  // I2C_AcknowledgeConfig( I2C,ENABLE);
 

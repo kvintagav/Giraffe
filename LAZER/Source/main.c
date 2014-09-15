@@ -35,11 +35,26 @@ extern MOTOR_STATE motor[MOUNT_DRIVERS];
 /*******************************************************************/
 void InitAll()
 {
+	 GPIO_InitTypeDef GPIO_InitStructure;
+
 		CONSOLE_USART_INIT();
 		console_send("\r\n\r\nDevice_start\r");
 
 		LED_INIT();
 		
+/*	  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+ 
+    GPIO_StructInit(&GPIO_InitStructure);
+    
+	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6|GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+	  GPIO_ResetBits(GPIOB,GPIO_Pin_6);
+	  GPIO_ResetBits(GPIOB,GPIO_Pin_7);
+	*/
+	
+	
 		I2C_INIT();
 	
 		#ifdef EEPROM
@@ -56,13 +71,13 @@ void InitAll()
 		#endif
 	
 	//	TIM_INIT(); //init user timer 9600 khz
-		init_motor();	
-		(SysTick_Config(SystemCoreClock / 1000));
-		WIZ_GPIO_Install();
+//		init_motor();	
+		(SysTick_Config(SystemCoreClock / 16));
+	/*	WIZ_GPIO_Install();
 
 		WIZ_Config();
 		console_send("\nWIZNET start\r\n\r>");
-	
+	*/
 
 		
 }

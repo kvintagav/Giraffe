@@ -95,6 +95,11 @@ void motorTest(void)
 	}
 	*/
 	
+	motorSendI2C(ADDRES_DRIVER_1,CONFPORT,0);
+	motorSendI2C(ADDRES_DRIVER_1,CONFPORT+1,0);
+	
+	motorSendI2C(ADDRES_DRIVER_0,OUTPORT,255);
+	motorSendI2C(ADDRES_DRIVER_0,OUTPORT+1,255);
 	
 }
 
@@ -104,6 +109,7 @@ void motorTest(void)
 *****************************************/
 bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data )
 {
+	/*
 	//Generate START
   I2C_GenerateSTART(I2C, ENABLE);
 	if(I2CWaitEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR ) return EE_ERROR;
@@ -124,6 +130,45 @@ bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data )
   I2C_GenerateSTOP(I2C, ENABLE);
 	
 	return 1;
+	*/
+	 /* Send STRAT condition */
+	 
+	I2C_GenerateSTART(I2C, ENABLE);
+
+		
+  /* Test on EV5 and clear it */
+	while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)){};
+	
+  /* Send EEPROM address for write */
+  I2C_Send7bitAddress(I2C, address, I2C_Direction_Transmitter);
+  
+  /* Test on EV6 and clear it */
+	while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)){};
+	
+  /* Send the byte to be written */
+  I2C_SendData(I2C,cmd); 
+   
+  /* Test on EV8 and clear it */
+	
+  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
+  
+	 /* Send the byte to be written */
+  I2C_SendData(I2C,data); 
+   
+  /* Test on EV8 and clear it */
+	
+  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
+ /* Send the byte to be written */
+ // I2C_SendData(I2C,port1); 
+   
+  /* Test on EV8 and clear it */
+	
+ // while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
+ 
+  /* Send STOP condition */
+	I2C_GenerateSTOP(I2C, ENABLE);
+	
+	return NO_ERROR;
 }
 
 /****************************************

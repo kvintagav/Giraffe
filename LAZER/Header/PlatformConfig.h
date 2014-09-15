@@ -75,7 +75,7 @@ typedef uint8_t bit_data;
 #define DMA_FSMC_IT_TCIF_CHECK 				DMA_IT_TCIF0
 
 /*Settings for I2C*/
-
+/*
 #define I2C                          	I2C1
 #define I2C_RCC 											RCC_APB1Periph_I2C1
 #define I2C_RCC_PORT 									RCC_AHB1Periph_GPIOB
@@ -85,6 +85,16 @@ typedef uint8_t bit_data;
 #define I2C_SCL_SOURCE								GPIO_PinSource6
 #define I2C_SDA_SOURCE								GPIO_PinSource7
 #define I2C_GPIO_AF										GPIO_AF_I2C1 
+*/
+#define I2C                          	I2C2
+#define I2C_RCC 											RCC_APB1Periph_I2C2
+#define I2C_RCC_PORT 									RCC_AHB1Periph_GPIOB
+#define GPIO_Pin_SCL 									GPIO_Pin_10
+#define GPIO_Pin_SDA 									GPIO_Pin_11
+#define I2C_PORT											GPIOB
+#define I2C_SCL_SOURCE								GPIO_PinSource10
+#define I2C_SDA_SOURCE								GPIO_PinSource11
+#define I2C_GPIO_AF										GPIO_AF_I2C2 
 
 #define EEPROM_ADDRESS								0xA4
 
