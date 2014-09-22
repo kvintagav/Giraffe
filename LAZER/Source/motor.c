@@ -3,7 +3,7 @@
 #include "eeprom.h"
 MOTOR_STATE motor[MOUNT_DRIVERS];
 
-
+uint8 value ;
 bool I2CWaitEventMotor( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT);
 void init_motor(void)
 {	
@@ -24,16 +24,20 @@ void init_motor(void)
 		
 			motor[i].current_faza=0;
 		
-  		motorSendI2C(motor[i].address_i2c,CONFPORT+motor[i].port,motor[i].mask_senser);
+  		motorSendI2C(motor[i].address_i2c,CONFPORT+motor[i].port,0x00);
+			motorSendI2C(motor[i].address_i2c,OUTPORT+motor[i].port,0x00);
+		
 	}
 }
 
+
 int motorTurn(int number,int direction, int tick )
 {
-	uint8 value = motor[number].mask_enable;
-	int i;
+
+	int i,j;
 	uint8 address = motor[number].address_i2c;
 	uint8 outport = OUTPORT+motor[number].port;
+		 value = motor[number].mask_enable;
 	if (number>(MOUNT_DRIVERS-1)) return -1;
 	
 	motorSendI2C(address,outport, value); //ENABLE
@@ -65,7 +69,8 @@ int motorTurn(int number,int direction, int tick )
 		}
 		value|=motor[number].mask_enable;
 		motorSendI2C(address , outport , value);
-		//задержка
+			
+		for (j=0;j<1000000;j++){};
 	}
 
 		
@@ -95,12 +100,14 @@ void motorTest(void)
 	}
 	*/
 	
+	motorTurn(0,1,100 );
+	/*
 	motorSendI2C(ADDRES_DRIVER_1,CONFPORT,0);
 	motorSendI2C(ADDRES_DRIVER_1,CONFPORT+1,0);
 	
 	motorSendI2C(ADDRES_DRIVER_0,OUTPORT,255);
 	motorSendI2C(ADDRES_DRIVER_0,OUTPORT+1,255);
-	
+	*/
 }
 
 /****************************************

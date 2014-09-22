@@ -71,14 +71,14 @@ void InitAll()
 		#endif
 	
 	//	TIM_INIT(); //init user timer 9600 khz
-//		init_motor();	
-		(SysTick_Config(SystemCoreClock / 16));
-	/*	WIZ_GPIO_Install();
+	//	init_motor();	
+	
+		WIZ_GPIO_Install();
 
 		WIZ_Config();
 		console_send("\nWIZNET start\r\n\r>");
-	*/
-
+	
+	(SysTick_Config(SystemCoreClock / 16));
 		
 }
  
@@ -102,28 +102,28 @@ int main(void)
 	пример	motorRecvI2C(ADDRES_DRIVER_0, INPORT , &koncevic1);
 	в motorRecv значёк & ОБЯЗАТЕЛЕН - это указатель, без него работать не будет
 	*/
-	//socket(0, Sn_MR_TCP, Config_Msg.port_science, 0);
+	socket(0, Sn_MR_TCP, Config_Msg.port_science, 0);
 		
 	
 	while(1)
 	{
-		motorTest();
-	/*		
-		 loopback_tcps(0, Config_Msg.port_science);
+	//	motorTest();
+			
+		/// loopback_tcps(0, Config_Msg.port_science);
 		
 		
-		 if (motor_tcps( 1,Config_Msg.port_science+1)==TRUE) 
+		 if (motor_tcps( 0,Config_Msg.port_science)==TRUE) 
 		 {
 			 ParsingParameter(DATA_BUFF_A, InParMassiv, command);
 			 if   (strstr( command,"DRIVE")!=NULL)
 			 {
-				 if (motorTurn(InParMassiv[0]-1,InParMassiv[1], InParMassiv[2] )==ERROR)
+				 if (motorTurn(InParMassiv[1]-1,InParMassiv[0], InParMassiv[2] )==ERROR)
 				 {	
 					 // send corner turn motor 
 				 }
 			 }
 		 }
-		*/
+		
 	}
 }
 
