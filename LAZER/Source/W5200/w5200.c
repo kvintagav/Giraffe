@@ -76,9 +76,9 @@ void WIZ_GPIO_Install(void){
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_InitStructure.GPIO_Pin = WIZ_SCS;
-	GPIO_Init(WIZ_SPI_PORT, &GPIO_InitStructure);
+	GPIO_Init(WIZ_NSS_PORT, &GPIO_InitStructure);
 	
-	GPIO_ResetBits(WIZ_SPI_PORT, WIZ_SCS);
+	GPIO_ResetBits(WIZ_SCS_NSS);
 
 	GPIO_PinAFConfig(WIZ_SPI_PORT, WIZ_SCLK_AF, GPIO_AF_SPI);
 	GPIO_PinAFConfig(WIZ_SPI_PORT, WIZ_MOSI_AF, GPIO_AF_SPI);

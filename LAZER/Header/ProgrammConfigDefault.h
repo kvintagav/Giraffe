@@ -65,7 +65,7 @@ Network setting default
 #define IP_1 	 		192
 #define IP_2			168
 #define IP_3			10
-#define IP_4			51//IP Address
+#define IP_4			31//IP Address
 
 #define GateWay_1	192
 #define GateWay_2 168

@@ -22,7 +22,7 @@ void WIZ_SPI_Init(void)
 		  SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
 		  SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
 		  SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
-		  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
+		  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;
 		  SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
 		  SPI_InitStructure.SPI_CRCPolynomial = 7;
 		  SPI_Init(WIZ_SPI, &SPI_InitStructure);
@@ -37,9 +37,9 @@ void WIZ_SPI_Init(void)
 void WIZ_CS(uint8_t val)
 {
 	if (val == LOW) {
-   		GPIO_ResetBits(WIZ_SPI_PORT, WIZ_SCS); 
+   		GPIO_ResetBits(WIZ_SCS_NSS); 
 	}else if (val == HIGH){
-   		GPIO_SetBits(WIZ_SPI_PORT, WIZ_SCS); 
+   		GPIO_SetBits(WIZ_SCS_NSS); 
 	}
 }
 

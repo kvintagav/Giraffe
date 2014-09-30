@@ -70,7 +70,7 @@ int motorTurn(int number,int direction, int tick )
 		value|=motor[number].mask_enable;
 		motorSendI2C(address , outport , value);
 			
-		for (j=0;j<1000000;j++){};
+		for (j=0;j<10000000;j++){};
 	}
 
 		
@@ -95,12 +95,12 @@ void motorTest(void)
 		motorSendI2C(ADDRES_DRIVER_0,OUTPORT,255);
 		motorSendI2C(ADDRES_DRIVER_0,OUTPORT+1,255);
 		
-		motorRecvI2C(ADDRES_DRIVER_0, INPORT , &koncevic1);
+		motorRecvI2C(ADDRES_DRI                         VER_0, INPORT , &koncevic1);
 		motorRecvI2C(ADDRES_DRIVER_0, INPORT+1 , &koncevic2);
 	}
 	*/
 	
-	motorTurn(0,1,100 );
+	motorTurn(0,1,10 );
 	/*
 	motorSendI2C(ADDRES_DRIVER_1,CONFPORT,0);
 	motorSendI2C(ADDRES_DRIVER_1,CONFPORT+1,0);

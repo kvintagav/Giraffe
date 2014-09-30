@@ -42,18 +42,18 @@ void InitAll()
 
 		LED_INIT();
 		
-/*	  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+	  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
  
     GPIO_StructInit(&GPIO_InitStructure);
     
 	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6|GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
-	  GPIO_ResetBits(GPIOB,GPIO_Pin_6);
-	  GPIO_ResetBits(GPIOB,GPIO_Pin_7);
-	*/
+    GPIO_Init(GPIOE, &GPIO_InitStructure);
 	
+	  GPIO_SetBits(GPIOE,GPIO_Pin_1);
+
+
 	
 		I2C_INIT();
 	
@@ -71,8 +71,8 @@ void InitAll()
 		#endif
 	
 	//	TIM_INIT(); //init user timer 9600 khz
-	//	init_motor();	
-	
+		init_motor();	
+
 		WIZ_GPIO_Install();
 
 		WIZ_Config();
@@ -90,7 +90,7 @@ void InitAll()
 int main(void)
 
 {
-//	int i;
+	int i;
   InitAll();
 		
 	/* Функции для работы с I2C 	
@@ -107,10 +107,15 @@ int main(void)
 	
 	while(1)
 	{
-	//	motorTest();
-			
-		/// loopback_tcps(0, Config_Msg.port_science);
+	/*	motorTest();
+		i=100000000;
+		while(i!=0)
+		{
+			i--;
+		}
+	*/	/// loopback_tcps(0, Config_Msg.port_science);
 		
+	
 		
 		 if (motor_tcps( 0,Config_Msg.port_science)==TRUE) 
 		 {
