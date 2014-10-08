@@ -42,20 +42,7 @@ void InitAll()
 
 		LED_INIT();
 		
-	  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
- 
-    GPIO_StructInit(&GPIO_InitStructure);
-    
-	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-    GPIO_Init(GPIOE, &GPIO_InitStructure);
-	
-	  GPIO_SetBits(GPIOE,GPIO_Pin_1);
-
-
-	
-		I2C_INIT();
+	//	I2C_INIT();
 	
 		#ifdef EEPROM
 			
@@ -72,13 +59,13 @@ void InitAll()
 	
 	//	TIM_INIT(); //init user timer 9600 khz
 		init_motor();	
-
+	(SysTick_Config(SystemCoreClock / 16));
 		WIZ_GPIO_Install();
-
+	
 		WIZ_Config();
 		console_send("\nWIZNET start\r\n\r>");
 	
-	(SysTick_Config(SystemCoreClock / 16));
+
 		
 }
  
@@ -113,9 +100,10 @@ int main(void)
 		{
 			i--;
 		}
-	*/	/// loopback_tcps(0, Config_Msg.port_science);
+		*/
+		loopback_tcps(0, Config_Msg.port_science);
 		
-	
+/*	
 		
 		 if (motor_tcps( 0,Config_Msg.port_science)==TRUE) 
 		 {
@@ -128,7 +116,7 @@ int main(void)
 				 }
 			 }
 		 }
-		
+	*/	
 	}
 }
 

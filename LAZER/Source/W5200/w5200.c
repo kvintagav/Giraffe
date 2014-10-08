@@ -78,7 +78,7 @@ void WIZ_GPIO_Install(void){
 	GPIO_InitStructure.GPIO_Pin = WIZ_SCS;
 	GPIO_Init(WIZ_NSS_PORT, &GPIO_InitStructure);
 	
-	GPIO_ResetBits(WIZ_SCS_NSS);
+	GPIO_SetBits(WIZ_SCS_NSS);
 
 	GPIO_PinAFConfig(WIZ_SPI_PORT, WIZ_SCLK_AF, GPIO_AF_SPI);
 	GPIO_PinAFConfig(WIZ_SPI_PORT, WIZ_MOSI_AF, GPIO_AF_SPI);
@@ -93,7 +93,8 @@ void WIZ_GPIO_Install(void){
 	GPIO_InitStructure.GPIO_Pin = WIZ_RESET | WIZ_PWDN ;
 	GPIO_Init(WIZ_PORT_SETTINGS, &GPIO_InitStructure);
 	
-	
+	//GPIO_SetBits(WIZ_PORT_SETTINGS, WIZ_RESET);
+  //GPIO_ResetBits(WIZ_PORT_SETTINGS, WIZ_PWDN); 
 	//Timer init
 
   // Time base configuration 	

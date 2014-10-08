@@ -53,8 +53,6 @@ void I2C_INIT(void)
 	RCC_APB1PeriphClockCmd(I2C_RCC , ENABLE);
   RCC_AHB1PeriphClockCmd(I2C_RCC_PORT , ENABLE); 
  
-	GPIO_PinAFConfig(I2C_PORT, I2C_SDA_SOURCE, I2C_GPIO_AF); //
-	GPIO_PinAFConfig(I2C_PORT, I2C_SCL_SOURCE, I2C_GPIO_AF);
 
 	/* This sequence sets up the I2C_SDA and I2C_SCL pins
 	 * so they work correctly with the I2C peripheral
@@ -66,26 +64,39 @@ void I2C_INIT(void)
 	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;// this activates the pullup resistors on the IO pins
 	GPIO_Init(I2C_PORT, &GPIO_InitStruct);// now all the values are passed to the GPIO_Init() 
  
+	GPIO_PinAFConfig(I2C_PORT, I2C_SDA_SOURCE, I2C_GPIO_AF); //
+	GPIO_PinAFConfig(I2C_PORT, I2C_SCL_SOURCE, I2C_GPIO_AF);
 
-		/* Set the I2C structure parameters */
-	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
+	/*	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
 	I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;
 	I2C_InitStruct.I2C_OwnAddress1 = 0x00;
 	I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_InitStruct.I2C_ClockSpeed = 400000;
 	
-	/* Initialize the I2C peripheral w/ selected parameters */
 	I2C_Init(I2C,&I2C_InitStruct);
-
-	/* Enable the I2C peripheral */
 	I2C_Cmd(I2C, ENABLE);
-
+*/
 
  // I2C_AcknowledgeConfig( I2C,ENABLE);
 
 
+ /* Configure I2C */
+	I2C_DeInit(I2C);
 
+	/* Enable the I2C peripheral */
+	I2C_Cmd(I2C, ENABLE);
+
+	/* Set the I2C structure parameters */
+	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
+	I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;
+	I2C_InitStruct.I2C_OwnAddress1 = 0xEE;
+	I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
+	I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
+	I2C_InitStruct.I2C_ClockSpeed = 30000;
+
+	/* Initialize the I2C peripheral w/ selected parameters */
+	I2C_Init(I2C,&I2C_InitStruct);
 
 
 	

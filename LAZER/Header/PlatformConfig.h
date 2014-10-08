@@ -22,8 +22,8 @@ typedef uint8_t bit_data;
 #define WIZ_RESET		        	GPIO_Pin_2	// out
 
 
-#define WIZ_SCS_NSS						GPIOE,GPIO_Pin_12
-
+#define WIZ_SCS_NSS						GPIOB,GPIO_Pin_12
+#define WIZ_NSS_PORT					GPIOB
 
 #define WIZ_PORT_INT					GPIOE
 #define WIZ_INT			        	GPIO_Pin_3  // in
@@ -39,32 +39,8 @@ typedef uint8_t bit_data;
 #define WIZ_SCLK_AF 					GPIO_PinSource13
 #define WIZ_MISO_AF 					GPIO_PinSource14
 #define WIZ_MOSI_AF 					GPIO_PinSource15
-/*
-#define WIZ_SPI_PORT_RCC			RCC_APB1Periph_SPI3
-#define WIZ_PORT_SETTINGS			GPIOA
-#define WIZ_PWDN		        	GPIO_Pin_2	// out
-#define WIZ_RESET		        	GPIO_Pin_3	// out
 
 
-#define WIZ_PORT_INT					GPIOE
-#define WIZ_INT			        	GPIO_Pin_3  // in
-
-#define WIZ_SCS_NSS						GPIOE,GPIO_Pin_6
-
-#define WIZ_NSS_PORT					GPIOE
-#define WIZ_SCS			  				GPIO_Pin_6	// out //nss
-
-#define WIZ_SPI 							SPI3
-#define WIZ_SPI_PORT 					GPIOC
-#define WIZ_SCLK							GPIO_Pin_10	// out
-#define WIZ_MISO							GPIO_Pin_11	// in
-#define WIZ_MOSI							GPIO_Pin_12	// out
-
-#define GPIO_AF_SPI 					GPIO_AF_SPI3
-#define WIZ_SCLK_AF 					GPIO_PinSource10
-#define WIZ_MISO_AF 					GPIO_PinSource11
-#define WIZ_MOSI_AF 					GPIO_PinSource12
-*/
 /*USART settings*/	
 
 #define USART									USART1
