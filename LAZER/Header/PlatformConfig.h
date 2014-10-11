@@ -15,15 +15,11 @@ typedef uint8_t bit_data;
 #define RCC_TIM_MOTOR RCC_APB1Periph_TIM3
 
 /* WIZNET SPI Settings*/
-
 #define WIZ_SPI_PORT_RCC			RCC_APB1Periph_SPI2
 #define WIZ_PORT_SETTINGS			GPIOE
 #define WIZ_PWDN		        	GPIO_Pin_1	// out
 #define WIZ_RESET		        	GPIO_Pin_2	// out
 
-
-#define WIZ_SCS_NSS						GPIOB,GPIO_Pin_12
-#define WIZ_NSS_PORT					GPIOB
 
 #define WIZ_PORT_INT					GPIOE
 #define WIZ_INT			        	GPIO_Pin_3  // in
@@ -39,7 +35,6 @@ typedef uint8_t bit_data;
 #define WIZ_SCLK_AF 					GPIO_PinSource13
 #define WIZ_MISO_AF 					GPIO_PinSource14
 #define WIZ_MOSI_AF 					GPIO_PinSource15
-
 
 /*USART settings*/	
 
@@ -80,6 +75,7 @@ typedef uint8_t bit_data;
 #define DMA_FSMC_IT_TCIF_CHECK 				DMA_IT_TCIF0
 
 /*Settings for I2C*/
+
 /*
 #define I2C                          	I2C1
 #define I2C_RCC 											RCC_APB1Periph_I2C1
@@ -101,5 +97,5 @@ typedef uint8_t bit_data;
 #define I2C_SDA_SOURCE								GPIO_PinSource11
 #define I2C_GPIO_AF										GPIO_AF_I2C2 
 
-#define EEPROM_ADDRESS								0xA4
+#define EEPROM_ADDRESS								0xFF
 

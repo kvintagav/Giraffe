@@ -53,7 +53,7 @@ void PrintVersion( char *bufer_out);
 void SettingsDefault(void);
 bool CheckAndWriteVersion(void);
 bool ReadParameter(char * bufer, int * num_par,uint8 space);
-bool ParsingParameter(char * bufer , int * num_par,  char * name_command);
+bool ParsingParameter(uint8 * bufer , int * num_par);
 
 #endif
 

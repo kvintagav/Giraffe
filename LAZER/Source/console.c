@@ -9,7 +9,6 @@
 
 #include "console.h"
 #include "main.h"
-#include "eeprom.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -53,7 +52,10 @@ char *commands[] = {
 	"default",
 	"save",
 	"reboot",
+/*	NULL
+};
 
+char *com_par[] = {*/
   "mac",
   "ip",
 	"gateway",
@@ -84,10 +86,9 @@ void CONSOLE_USART_INIT(void){
 	RCC_AHB1PeriphClockCmd(USART_PORT , ENABLE);
 
   /* Configure    USART2 Tx as alternate function push-pull */
- 
-	
+
   GPIO_InitStructure.GPIO_Pin = USART_GPIO_TX;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
@@ -96,6 +97,11 @@ void CONSOLE_USART_INIT(void){
 
   /* Configure    USART2 Rx as input floating */
   GPIO_InitStructure.GPIO_Pin =  USART_GPIO_RX;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+
+  
   GPIO_Init(USART_GPIO, &GPIO_InitStructure);
 	
 	GPIO_PinAFConfig( USART_GPIO, USART_TX_SOURCE, USART_AF );
@@ -140,16 +146,8 @@ void ResetStart(void)
 * Description    : settings all parameter if eeprom don't read or empty
 *******************************************************************************/
 bool ReadConfig(void)
-{	
-		uint8 buferIn[8]  = {0,1,2,3,4,5,6,7};
-		uint8 buferOut[8] = {0,0,0,0,0,0,0,0};
-		I2C_EE_BufferWrite(buferIn,EE_START_STRUCT,sizeof(buferIn));
-		I2C_EE_BufferRead(buferOut,EE_START_STRUCT,sizeof(buferOut));
-		
-//  SettingsDefault();
-//	CheckAndWriteVersion();
-//	I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg));
-		
+{
+/*	
 	if (I2C_EE_BufferRead((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==TRUE) //if read struct from eeprom without error
 	{
 		//if  eeprom is empty
@@ -178,7 +176,8 @@ bool ReadConfig(void)
 	}
 	
 	return TRUE;
-
+*/
+	return FALSE;
 }
 /******************************************************************************
 * Function Name  : SettingsDefault
@@ -266,58 +265,37 @@ void PrintVersion(char *bufer_out)
 * Function Name  : ParsingParameter from host server tcp/ip
 * Description    : Parsing parameters from message  
 *******************************************************************************/
-bool ParsingParameter(char * bufer , int * num_par,  char * name_command)
+bool ParsingParameter(uint8 * bufer , int * num_par)
 {
 	int *point=num_par;
-	char *buf;
-	int numb , j;
+	uint8 *buf;
+	int numb=0 , j;
 	bool cmd_par =0;
 	char int_buf[6]={0,0,0,0,0,0};
 	
 	for (buf = bufer; *buf != '\0' ; buf++)
 	{
-		if (cmd_par==0)
+		if ((*buf>=0x30)&&(*buf<=0x39))
 		{
-			if ((*buf!='.') || (*buf!=',') || (*buf!=' '))
-			{
-				*name_command=*buf;
-				
-			}
-			else
-			{
-				cmd_par=1;
-			}
-			
+			*point=*point*10;
+			 numb++;
+			*point+=(*buf-0x30);
 		}
-		else
+		else if (*buf==',')
 		{
-			if ((*buf!='.') ||(*buf!=',') || (*buf!=' '))
-			{
-				*point=atoi(bufer);
-
-				point++;
-				numb=0;
-				for (j=0; j<6 ;j++)int_buf[j]=0x00;
-				
-			}
-			else
-			{
-				if ((*buf>=0x30)&&(*buf<=0x39))int_buf[numb]=*buf;
-				else return FALSE;
-				numb++;
-			}
+				if(numb!=0)
+					point++;
 		}
-	}
-	*point=atoi(int_buf);
 	
+	}
 	return TRUE;
+	
 }
-
 /******************************************************************************
 * Function Name  : ReadParameter
 * Description    : read parameters from message  
 *******************************************************************************/
-bool ReadParameter(char * bufer, int * num_par,uint8 space)
+bool ReadParameter(char * bufer, int * num_par, uint8 space)
 {
 	int  *point=num_par;
 	char 	*buf;
@@ -535,8 +513,8 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 							sprintf(bufer_out,"\nenter today's date[format DD.MM.YYYY]:");	
 							state=DATA;
 								
-								if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
-								else sprintf(bufer_out,"\nsave successfully\r");
+						//		if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
+						//		else sprintf(bufer_out,"\nsave successfully\r");
 
 					break;
 					case REBOOT :     

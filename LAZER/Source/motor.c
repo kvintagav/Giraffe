@@ -31,14 +31,14 @@ void init_motor(void)
 }
 
 
-int motorTurn(int number,int direction, int tick )
+int motorTurn(int direction,int number, int tick )
 {
 
 	int i,j;
 	uint8 address = motor[number].address_i2c;
 	uint8 outport = OUTPORT+motor[number].port;
 		 value = motor[number].mask_enable;
-	if (number>(MOUNT_DRIVERS-1)) return -1;
+	if ((number>(MOUNT_DRIVERS-1))||(number<0)) return -1;
 	
 	motorSendI2C(address,outport, value); //ENABLE
 	
@@ -70,44 +70,25 @@ int motorTurn(int number,int direction, int tick )
 		value|=motor[number].mask_enable;
 		motorSendI2C(address , outport , value);
 			
-		for (j=0;j<10000000;j++){};
+
+		for (j=0;j<5000000;j++){};
 	}
 
 		
 	
-	
 	motorSendI2C(address,outport,0x00); //DISABLE
-	return 1;
+	return tick;
 }
 
 void motorTest(void)
 {
-/*Здесь можно писать свой код для тестирования*/
-/*	uint8 koncevic1;
-	uint8 koncevic2;
-	
-	
-	motorSendI2C(ADDRES_DRIVER_0,CONFPORT,0);
-	motorSendI2C(ADDRES_DRIVER_0,CONFPORT+1,0);
 
-	while(1)
-	{
-		motorSendI2C(ADDRES_DRIVER_0,OUTPORT,255);
-		motorSendI2C(ADDRES_DRIVER_0,OUTPORT+1,255);
-		
-		motorRecvI2C(ADDRES_DRI                         VER_0, INPORT , &koncevic1);
-		motorRecvI2C(ADDRES_DRIVER_0, INPORT+1 , &koncevic2);
-	}
-	*/
+	motorTurn(1,0,2 );
+	motorTurn(1,1,2 );
+	motorTurn(1,2,2 );
+	motorTurn(1,3,2 );
 	
-	motorTurn(0,1,10 );
-	/*
-	motorSendI2C(ADDRES_DRIVER_1,CONFPORT,0);
-	motorSendI2C(ADDRES_DRIVER_1,CONFPORT+1,0);
-	
-	motorSendI2C(ADDRES_DRIVER_0,OUTPORT,255);
-	motorSendI2C(ADDRES_DRIVER_0,OUTPORT+1,255);
-	*/
+
 }
 
 /****************************************
@@ -187,19 +168,19 @@ bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
 	uint8 *read_data=data;
 	//Generate start
 	I2C_GenerateSTART(I2C, ENABLE);
-	if(I2CWaitEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR ) return EE_ERROR;
+	if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR ) return EE_ERROR;
  	
 	//Send Address
 	I2C_Send7bitAddress(I2C, address, I2C_Direction_Transmitter);
-  if(I2CWaitEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR ) return EE_ERROR;
+  if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR ) return EE_ERROR;
   
 	//Send command
 	I2C_SendData(I2C,cmd); 
-  if(I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
+  if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
   
 	//Read data 
 	*read_data=I2C_ReceiveData(I2C); 
-  if(I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
+  if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
   
 	//Generate Stop
   I2C_GenerateSTOP(I2C, ENABLE);

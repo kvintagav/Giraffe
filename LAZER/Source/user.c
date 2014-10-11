@@ -12,15 +12,10 @@ void ChangeLED(void)
 	if ( GPIO_ReadInputDataBit_BOOL(LED_GPIO, LED1) == 0)
 		{
 				GPIO_SetBits(LED_GPIO,LED1);
-		//	  GPIO_SetBits(GPIOB,GPIO_Pin_6);
-	//		  GPIO_SetBits(GPIOB,GPIO_Pin_7);
-			
 		}
 		else
 		{
 				GPIO_ResetBits(LED_GPIO,LED1);
-		//		GPIO_ResetBits(GPIOB,GPIO_Pin_6);
-			//  GPIO_ResetBits(GPIOB,GPIO_Pin_7);
 		}
 }		
 
@@ -53,51 +48,33 @@ void I2C_INIT(void)
 	RCC_APB1PeriphClockCmd(I2C_RCC , ENABLE);
   RCC_AHB1PeriphClockCmd(I2C_RCC_PORT , ENABLE); 
  
-
-	/* This sequence sets up the I2C_SDA and I2C_SCL pins
-	 * so they work correctly with the I2C peripheral
-	 */
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_SCL | GPIO_Pin_SDA ; // Pins (I2C_SCL) and (I2C_SDA)
-	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF; // the pins are configured as alternate function so the USART peripheral has access to them
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;// this defines the IO speed and has nothing to do with the baudrate!
-	GPIO_InitStruct.GPIO_OType = GPIO_OType_OD;// this defines the output type as open drain
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;// this activates the pullup resistors on the IO pins
-	GPIO_Init(I2C_PORT, &GPIO_InitStruct);// now all the values are passed to the GPIO_Init() 
- 
 	GPIO_PinAFConfig(I2C_PORT, I2C_SDA_SOURCE, I2C_GPIO_AF); //
 	GPIO_PinAFConfig(I2C_PORT, I2C_SCL_SOURCE, I2C_GPIO_AF);
+	
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_SCL | GPIO_Pin_SDA ; // Pins (I2C_SCL) and (I2C_SDA)
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF; // the pins are configured as alternate function so the USART peripheral has access to them
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_2MHz;// this defines the IO speed and has nothing to do with the baudrate!
+	GPIO_InitStruct.GPIO_OType = GPIO_OType_OD;// this defines the output type as open drain
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;// this activates the pullup resistors on the IO pins
+	GPIO_Init(I2C_PORT, &GPIO_InitStruct);// now all the values are passed to the GPIO_Init() 
+ 
+	
+	 /* Configure I2C */
+	//I2C_DeInit(I2C);
 
-	/*	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
+	/* Enable the I2C peripheral */
+	
+	/* Set the I2C structure parameters */
+	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
 	I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;
 	I2C_InitStruct.I2C_OwnAddress1 = 0x00;
 	I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_InitStruct.I2C_ClockSpeed = 400000;
-	
-	I2C_Init(I2C,&I2C_InitStruct);
-	I2C_Cmd(I2C, ENABLE);
-*/
-
- // I2C_AcknowledgeConfig( I2C,ENABLE);
-
-
- /* Configure I2C */
-	I2C_DeInit(I2C);
-
-	/* Enable the I2C peripheral */
-	I2C_Cmd(I2C, ENABLE);
-
-	/* Set the I2C structure parameters */
-	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
-	I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;
-	I2C_InitStruct.I2C_OwnAddress1 = 0xEE;
-	I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
-	I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
-	I2C_InitStruct.I2C_ClockSpeed = 30000;
 
 	/* Initialize the I2C peripheral w/ selected parameters */
 	I2C_Init(I2C,&I2C_InitStruct);
-
+	I2C_Cmd(I2C, ENABLE);
 
 	
 }

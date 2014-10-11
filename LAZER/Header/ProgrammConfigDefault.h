@@ -12,6 +12,8 @@
 
 
 
+
+
 #define MOUNT_DRIVERS 4 //mount motor driver
  
 
@@ -87,7 +89,7 @@ Network setting default
 /*Network settings server default*/
 #define Dest_IP_1 	192
 #define Dest_IP_2 	168
-#define Dest_IP_3 	0
+#define Dest_IP_3 	10
 #define Dest_IP_4 	101 //DST_IP Address server
 
 #define Dest_PORT 	5000 //DST_IP port server
@@ -96,7 +98,7 @@ Network setting default
 /***************************************
 USART SETTINGS
 ****************************************/
-#define USART_BAUD_RATE 57600
+#define USART_BAUD_RATE 115200
 
 
 /***************************************

@@ -1,13 +1,20 @@
 
-#include <stdio.h>
-
 #include "stm32f4xx.h"
+//#include "config.h"
 #include "w5200.h"
 #include "socket.h"
 #include "util.h"
 #include "loopback.h"
 #include "console.h"
+//#include "main.h"
+//#include "control_fpga.h"
+#include <stdio.h>
+
 #include "motor.h"
+
+#define  NUMB_PARAM 10
+
+char command[10];
 
 #define tick_second 1
 
@@ -20,12 +27,13 @@ uint8 DATA_BUFF_A[TX_RX_MAX_BUF_SIZE];
 
 
 int motor_tcps(SOCKET s, uint16 port)
-{	        
-	 uint16 RSR_len;
-    uint16 received_len;
-
-    uint16 sent_data_len = 0;
-    uint8 tmp_retry_cnt = 0;        
+{	       
+	int InParMassiv[4]={0,0,0,0};	
+	uint16 RSR_len=0;
+	uint16 received_len=0;
+	
+	uint16 sent_data_len = 0;
+	uint8 tmp_retry_cnt = 0;        
 	
 	switch (getSn_SR(s))
 	{
@@ -38,8 +46,14 @@ int motor_tcps(SOCKET s, uint16 port)
 		{
 			if (RSR_len > TX_RX_MAX_BUF_SIZE) RSR_len = TX_RX_MAX_BUF_SIZE;	/* if Rx data size is lager than TX_RX_MAX_BUF_SIZE */
 			/* the data size to read is MAX_BUF_SIZE. */
-				received_len = recv(s, DATA_BUFF_A, RSR_len);   									/* read the received data */
-			
+				received_len = recv(s, DATA_BUFF_A, RSR_len); 
+
+			if   (strstr( DATA_BUFF_A,"MOTOR")!=NULL)
+			{
+				ParsingParameter(DATA_BUFF_A , InParMassiv);
+				motorTurn(InParMassiv[0],InParMassiv[1]-1, InParMassiv[2] );
+			}
+			/* read the received data */
 	            sent_data_len = send(s, DATA_BUFF_A, received_len, (bool)WINDOWFULL_FLAG_OFF,MCU);    	/* sent the received data */
 	        	if(sent_data_len != received_len) /* only assert when windowfull */
 	            {
@@ -89,6 +103,7 @@ int motor_tcps(SOCKET s, uint16 port)
     break;                
 	}
 	
+	 return 1;
 }
 
 void sender_tcps(SOCKET s, uint16 port)
@@ -270,7 +285,6 @@ void loopback_tcps(SOCKET s, uint16 port)
     default:
     break;                
 	}
-	
 }
 
 void loopback_tcpc(SOCKET s, uint16 port)

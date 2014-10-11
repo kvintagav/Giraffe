@@ -37,9 +37,9 @@ void WIZ_SPI_Init(void)
 void WIZ_CS(uint8_t val)
 {
 	if (val == LOW) {
-   		GPIO_ResetBits(WIZ_SCS_NSS); 
+   		GPIO_ResetBits(WIZ_SPI_PORT, WIZ_SCS); 
 	}else if (val == HIGH){
-   		GPIO_SetBits(WIZ_SCS_NSS); 
+   		GPIO_SetBits(WIZ_SPI_PORT, WIZ_SCS); 
 	}
 }
 
