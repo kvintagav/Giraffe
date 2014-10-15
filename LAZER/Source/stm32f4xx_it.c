@@ -29,6 +29,7 @@
 #include "user.h"
 #include "config.h"
 #include "console.h"
+#include "motor.h"
 
 extern void Timer2_ISR(void);
 
@@ -40,6 +41,24 @@ uint8 led_delay;
 /******************************************************************************/
 /*            Cortex-M3 Processor Exceptions Handlers                         */
 /******************************************************************************/
+
+
+void EXTI2_IRQHandler (void)
+{
+	if(EXTI_GetITStatus(INT_PCA9539_1_IRQLine) != RESET)
+  {
+    motor_senser(); 
+    EXTI_ClearITPendingBit(INT_PCA9539_1_IRQLine);
+  }
+}
+void EXTI3_IRQHandler (void)
+{
+	if(EXTI_GetITStatus(INT_PCA9539_2_IRQLine) != RESET)
+  {
+    motor_senser(); 
+    EXTI_ClearITPendingBit(INT_PCA9539_2_IRQLine);
+  }
+}
 
 /*************************************************************
 * Function Name  : EXTI9_5_IRQHandler

@@ -75,8 +75,8 @@ structure PCA9539PW /2
 typedef struct _MOTOR_STATE
 {
 	
-	bool senser_left;
-	bool senser_right;
+	bool senser_open;
+	bool senser_close;
 	uint8 address_i2c;
 	uint8 mask_enable;
 	uint8 mask_senser;
@@ -90,5 +90,7 @@ bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data );
 int motorTurn(int number,int direction, int tick );
 void init_motor(void);
 void motorTest(void);
+void init_gpio_motor(void);
+void motor_senser(void);
 
 #endif

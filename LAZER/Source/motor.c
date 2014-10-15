@@ -3,8 +3,60 @@
 #include "eeprom.h"
 MOTOR_STATE motor[MOUNT_DRIVERS];
 
-uint8 value ;
+
 bool I2CWaitEventMotor( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT);
+bool senser;
+
+void init_gpio_motor(void)
+{
+	EXTI_InitTypeDef   EXTI_InitStructure;
+  GPIO_InitTypeDef   GPIO_InitStructure;
+  NVIC_InitTypeDef   NVIC_InitStructure;
+	
+  RCC_AHB1PeriphClockCmd( INT_PCA9539_1_RCC, ENABLE);
+	RCC_AHB1PeriphClockCmd( INT_PCA9539_2_RCC, ENABLE);
+  
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+  
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  
+	GPIO_InitStructure.GPIO_Pin = INT_PCA9539_1_GPIO;
+  GPIO_Init(INT_PCA9539_1_PORT, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin = INT_PCA9539_2_GPIO;
+  GPIO_Init(INT_PCA9539_2_PORT, &GPIO_InitStructure);
+	
+  SYSCFG_EXTILineConfig(INT_PCA9539_1_PortSource, INT_PCA9539_1_PinSource);
+  SYSCFG_EXTILineConfig(INT_PCA9539_2_PortSource, INT_PCA9539_2_PinSource);
+
+  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
+  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+  
+	EXTI_InitStructure.EXTI_Line = INT_PCA9539_1_IRQLine;
+  EXTI_Init(&EXTI_InitStructure);
+
+  EXTI_InitStructure.EXTI_Line = INT_PCA9539_2_IRQLine;
+	EXTI_Init(&EXTI_InitStructure);
+  
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  
+	NVIC_InitStructure.NVIC_IRQChannel = INT_PCA9539_1_IRQChannel;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0E;
+  NVIC_Init(&NVIC_InitStructure);
+	
+	NVIC_InitStructure.NVIC_IRQChannel = INT_PCA9539_2_IRQChannel;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
+  NVIC_Init(&NVIC_InitStructure);
+	
+}
+void motor_senser(void)
+{
+	senser=true;
+}	
+
 void init_motor(void)
 {	
 	int i;
@@ -23,8 +75,9 @@ void init_motor(void)
 			else										motor[i].mask_senser=0xC0;
 		
 			motor[i].current_faza=0;
-		
-  		motorSendI2C(motor[i].address_i2c,CONFPORT+motor[i].port,0x00);
+			motor[i].senser_open = false;
+			motor[i].senser_close = false;
+  		motorSendI2C(motor[i].address_i2c,CONFPORT+motor[i].port,motor[i].mask_senser);
 			motorSendI2C(motor[i].address_i2c,OUTPORT+motor[i].port,0x00);
 		
 	}
@@ -34,48 +87,59 @@ void init_motor(void)
 int motorTurn(int direction,int number, int tick )
 {
 
-	int i,j;
+	uint8 value ;
+	int tick_numb,j;
 	uint8 address = motor[number].address_i2c;
 	uint8 outport = OUTPORT+motor[number].port;
-		 value = motor[number].mask_enable;
 	if ((number>(MOUNT_DRIVERS-1))||(number<0)) return -1;
+	value = motor[number].mask_enable;
 	
+	tick_numb=tick;
 	motorSendI2C(address,outport, value); //ENABLE
 	
-	for (i=0 ; i < tick  ; i++ )
+	while (tick_numb)
 	{
-		switch (motor[number].current_faza)
+		if (!senser)
 		{
-			case 0: 
-				motor[number].current_faza=(direction) ?1 : 3; 
-				value=(direction) ? FAZA1 : FAZA3;
-			break;
-			case 1: 
-				motor[number].current_faza=(direction) ?2 : 0; 
-				value=(direction) ? FAZA2 : FAZA0;
-			break;
-			case 2: 
-				motor[number].current_faza=(direction) ?3 : 1; 
-				value=(direction) ? FAZA3 : FAZA1;
-			break;
-			case 3: 
-				motor[number].current_faza=(direction) ?0 : 2; 
-				value=(direction) ? FAZA0 : FAZA2;
-			break;
-			default:
-				motor[number].current_faza=0; 
-				value= FAZA0;
-			break;
+			switch (motor[number].current_faza)
+			{
+				case 0: 
+					motor[number].current_faza=(direction) ?1 : 3; 
+					value=(direction) ? FAZA1 : FAZA3;
+				break;
+				case 1: 
+					motor[number].current_faza=(direction) ?2 : 0; 
+					value=(direction) ? FAZA2 : FAZA0;
+				break;
+				case 2: 
+					motor[number].current_faza=(direction) ?3 : 1; 
+					value=(direction) ? FAZA3 : FAZA1;
+				break;
+				case 3: 
+					motor[number].current_faza=(direction) ?0 : 2; 
+					value=(direction) ? FAZA0 : FAZA2;
+				break;
+				default:
+					motor[number].current_faza=0; 
+					value= FAZA0;
+				break;
+			}
+			value|=motor[number].mask_enable;
+			motorSendI2C(address , outport , value);
+				
+
+			for (j=0;j<5000000;j++){};
+			tick_numb--;
 		}
-		value|=motor[number].mask_enable;
-		motorSendI2C(address , outport , value);
+		else 
+		{
 			
-
-		for (j=0;j<5000000;j++){};
-	}
-
+			senser=false;
+			motorSendI2C(address,outport,0x00); //DISABLE
+			return (tick-tick_numb);	
+		}
 		
-	
+	}
 	motorSendI2C(address,outport,0x00); //DISABLE
 	return tick;
 }

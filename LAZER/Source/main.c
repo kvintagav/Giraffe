@@ -53,7 +53,7 @@ void InitAll()
 			
 		#endif
 	
-	//	TIM_INIT(); //init user timer 9600 khz
+		init_gpio_motor();
 		init_motor();	
 		motorTest();
 		(SysTick_Config(SystemCoreClock / 16));

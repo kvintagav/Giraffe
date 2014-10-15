@@ -62,8 +62,7 @@ typedef uint8_t bit_data;
 
 /*FSMC width bus*/
 
-#define FSMC_8bit
-//#define FSMC_16bit
+#define FSMC_8bit// FSMC_16bit
 
 /*Settings for DMA FSMC*/
 
@@ -99,3 +98,23 @@ typedef uint8_t bit_data;
 
 #define EEPROM_ADDRESS								0xFF
 
+
+/*Settings Interrupt for PCA9539*/
+
+#define INT_PCA9539_1_GPIO						GPIO_Pin_2
+#define INT_PCA9539_1_PORT						GPIOC
+#define INT_PCA9539_1_RCC 						RCC_AHB1Periph_GPIOC
+#define INT_PCA9539_1_IRQChannel			EXTI2_IRQn
+#define INT_PCA9539_1_IRQLine 				EXTI_Line2
+#define INT_PCA9539_1_PortSource      EXTI_PortSourceGPIOC
+#define INT_PCA9539_1_PinSource 			EXTI_PinSource2
+
+#define INT_PCA9539_2_GPIO						GPIO_Pin_3
+#define INT_PCA9539_2_PORT						GPIOC
+#define INT_PCA9539_2_RCC 						RCC_AHB1Periph_GPIOC
+#define INT_PCA9539_2_IRQChannel			EXTI3_IRQn
+#define INT_PCA9539_2_IRQLine 				EXTI_Line3
+#define INT_PCA9539_2_PortSource      EXTI_PortSourceGPIOC
+#define INT_PCA9539_2_PinSource 			EXTI_PinSource3
+
+/*Settings Reset for PCA9539*/
