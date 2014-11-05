@@ -9,7 +9,7 @@
 //#include "main.h"
 //#include "control_fpga.h"
 #include <stdio.h>
-
+#include <string.h>
 #include "motor.h"
 
 #define  NUMB_PARAM 10
@@ -25,10 +25,19 @@ uint16 any_port = 1000;
 
 uint8 DATA_BUFF_A[TX_RX_MAX_BUF_SIZE]; 
 
+void clearBuffer()
+{
+	int index = 0;
+	while (DATA_BUFF_A[index]!=0x00)
+	{
+		DATA_BUFF_A[index]=0;
+		index++;
+	}
+}
 
 int motor_tcps(SOCKET s, uint16 port)
 {	       
-	int InParMassiv[4]={0,0,0,0};	
+	int InParMassiv[4]={0,0,0,0};
 	uint16 RSR_len=0;
 	uint16 received_len=0;
 	
@@ -51,29 +60,53 @@ int motor_tcps(SOCKET s, uint16 port)
 			if   (strstr( DATA_BUFF_A,"MOTOR")!=NULL)
 			{
 				ParsingParameter(DATA_BUFF_A , InParMassiv);
-				motorTurn(InParMassiv[0],InParMassiv[1]-1, InParMassiv[2] );
+				#ifdef FOUR_MOTORS
+					motorTurnOnPercent(InParMassiv[0]-1, InParMassiv[1] );
+					
+
+				#endif
+				
+				#ifdef ONE_MOTOR
+					motorTurn(InParMassiv[0]);
+				#endif
+				
+				clearBuffer();
+				strncpy(DATA_BUFF_A,"MOTOR,OK",9);
 			}
-			/* read the received data */
-	            sent_data_len = send(s, DATA_BUFF_A, received_len, (bool)WINDOWFULL_FLAG_OFF,MCU);    	/* sent the received data */
-	        	if(sent_data_len != received_len) /* only assert when windowfull */
-	            {
-	            	init_windowfull_retry_cnt(s);                              
-	                while(sent_data_len !=  received_len) 
-	                {
-	                	tmp_retry_cnt = incr_windowfull_retry_cnt(s);
-	                    if(tmp_retry_cnt <= WINDOWFULL_MAX_RETRY_NUM) 
-	                    {
-	                    	sent_data_len += send(s, DATA_BUFF_A, received_len, (bool)WINDOWFULL_FLAG_ON,MCU); 
-	                        Delay_ms(WINDOWFULL_WAIT_TIME);
-	                    } 
-	                    else 
-	                    {
-	                        close(s);
-	                    	while(1);  // if the 'Windowfull' occers, socket close and sending process stop.
-	                        // user can be customize(WINDOWFULL_MAX_RETRY_NUM, Windowfull handling ...)
-	                    }
-	                }                               
-	            }
+			else if (strstr( DATA_BUFF_A,"GETTYPE")!=NULL)
+			{
+				clearBuffer();
+				#ifdef FOUR_MOTORS
+					strncpy(DATA_BUFF_A,"FOUR_MOTORS",11);
+				#endif
+				
+				#ifdef ONE_MOTOR
+					strncpy(DATA_BUFF_A,"ONE_MOTOR",9);
+				#endif
+				
+			}
+			received_len=strlen(DATA_BUFF_A);
+			
+					sent_data_len = send(s, DATA_BUFF_A, received_len, (bool)WINDOWFULL_FLAG_OFF,MCU);    	/* sent the received data */
+					if(sent_data_len != received_len) /* only assert when windowfull */
+						{
+							init_windowfull_retry_cnt(s);                              
+								while(sent_data_len !=  received_len) 
+								{
+									tmp_retry_cnt = incr_windowfull_retry_cnt(s);
+										if(tmp_retry_cnt <= WINDOWFULL_MAX_RETRY_NUM) 
+										{
+											sent_data_len += send(s, DATA_BUFF_A, received_len, (bool)WINDOWFULL_FLAG_ON,MCU); 
+												Delay_ms(WINDOWFULL_WAIT_TIME);
+										} 
+										else 
+										{
+												close(s);
+											while(1);  // if the 'Windowfull' occers, socket close and sending process stop.
+												// user can be customize(WINDOWFULL_MAX_RETRY_NUM, Windowfull handling ...)
+										}
+								}                               
+						}
             	
 		}                             
 	break;

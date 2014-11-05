@@ -47,7 +47,7 @@ void EXTI2_IRQHandler (void)
 {
 	if(EXTI_GetITStatus(INT_PCA9539_1_IRQLine) != RESET)
   {
-    motor_senser(); 
+    motorSenser(); 
     EXTI_ClearITPendingBit(INT_PCA9539_1_IRQLine);
   }
 }
@@ -55,7 +55,7 @@ void EXTI3_IRQHandler (void)
 {
 	if(EXTI_GetITStatus(INT_PCA9539_2_IRQLine) != RESET)
   {
-    motor_senser(); 
+    motorSenser(); 
     EXTI_ClearITPendingBit(INT_PCA9539_2_IRQLine);
   }
 }

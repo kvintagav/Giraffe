@@ -14,8 +14,7 @@
 
 
 
-#define MOUNT_DRIVERS 4 //mount motor driver
- 
+
 
 /*ID DEVICE*/
 #define ID_DEFAULT 	0
