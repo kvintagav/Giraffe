@@ -6,6 +6,19 @@
 
 #include "Types.h"
 
+
+/**************************
+*Type contrroler 
+* ONE_MOTOR - one motor 
+* FOUR_MOTORS - four motors
+***************************/
+//#define ONE_MOTOR  
+#define FOUR_MOTORS  
+
+/***************************/
+
+
+
 /*ADDRESS  I2C DRIVER PCA9539PW*/
 #define ADDRES_DRIVER_0 232
 #define ADDRES_DRIVER_1 234

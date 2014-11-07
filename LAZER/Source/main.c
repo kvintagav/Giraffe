@@ -62,9 +62,9 @@ void InitAll()
 		
 		#ifdef FOUR_MOTORS
 			motorInitGpio();
-			init_motor();	
+			motorInit();	
 			motorTest();
-			
+			motorSettings();
 		#endif	
 		
 		#ifdef ONE_MOTOR

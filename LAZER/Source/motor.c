@@ -6,6 +6,9 @@ MOTOR_STATE motor[NUMBERS_MOTOR];
 
 bool I2CWaitEventMotor( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT);
 bool senser_pressed;
+int openHole(int motor_number);
+int closeHole(int motor_number);
+int turnOutMotorFromSenser(int motor_number);
 
 void motorInitGpio(void)
 {
@@ -71,12 +74,16 @@ void motorInit(void)
 			if ((i==0) || (i==3))		motor[i].mask_enable=0xC0;
 			else										motor[i].mask_enable=0x03;
 			
-			if ((i==0) || (i==3))		motor[i].mask_senser=0x03;
-			else										motor[i].mask_senser=0xC0;
+			if ((i==0) || (i==3))		
+			{
+				motor[i].mask_senser=0x03;
+			}
+			else
+			{
+				motor[i].mask_senser=0xC0;
+			}
 		
 			motor[i].current_faza=0;
-			motor[i].senser_open = false;
-			motor[i].senser_close = false;
   		motorSendI2C(motor[i].address_i2c,CONFPORT+motor[i].port,motor[i].mask_senser);
 			motorSendI2C(motor[i].address_i2c,OUTPORT+motor[i].port,0x00);
 		
@@ -87,21 +94,36 @@ int motorTurnOnPercent(int motor_number , int percent)
 {
 	int numbers_tick;
 	if ((motor_number>(NUMBERS_MOTOR-1))||(motor_number<0)) return -1;
+	if ((percent>100)|| (percent<0)) return -1;
+	
 	if (motor[motor_number].max_count_tick!=0)
-	{	
-		if (percent>motor[motor_number].current_percent)
+	{
+		if (percent == 0) 
 		{
-			numbers_tick = (int)((motor[motor_number].max_count_tick*(percent-motor[motor_number].current_percent))/100);
-			motorTurn(motor_number,CLOSE,numbers_tick,false);
+			openHole(motor_number);
+			turnOutMotorFromSenser(motor_number);
 		}
-		else
+		else if (percent == 100) 
 		{
-			numbers_tick = (int)((motor[motor_number].max_count_tick*(motor[motor_number].current_percent-percent))/100);
-			motorTurn(motor_number,OPEN,numbers_tick,false);
+			closeHole(motor_number);
+			turnOutMotorFromSenser(motor_number);
 		}
+		else 
+		{
+			if (percent > motor[motor_number].current_percent)
+			{
+				numbers_tick = (int)((motor[motor_number].max_count_tick*(percent-motor[motor_number].current_percent))/100);
+				motorTurn(motor_number,CLOSE,numbers_tick,false);
+			}
+			else
+			{
+				numbers_tick = (int)((motor[motor_number].max_count_tick*(motor[motor_number].current_percent-percent))/100);
+				motorTurn(motor_number,OPEN,numbers_tick,false);
+			}
+		}
+		motor[motor_number].current_percent=percent;
 	}
 	else return -1;
-		
 	return numbers_tick; 
 }
 int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
@@ -160,27 +182,70 @@ int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 	return tick_numb;
 }
 
-int open_hole(int motor_number)
+int turnOutMotorFromSenser(int motor_number)
 {
-	motorTurn(motor_number,OPEN,0,true);
+	uint8 read_data = 0;
+	uint8 addr = motor[motor_number].address_i2c;
+	uint8 inport = INPORT+motor[motor_number].port; 
+	int mount_tick;
+	bool turn_motor= true;
+	while (turn_motor)
+	{
+		motorRecvI2C(addr, inport ,&read_data );
+		if (read_data==motor[motor_number].mask_senser_open)
+		{
+			motorTurn(motor_number,CLOSE,1,false);
+			mount_tick++;
+		}
+		else if (read_data==motor[motor_number].mask_senser_close)
+		{
+			motorTurn(motor_number,OPEN,1,false);
+			mount_tick++;
+		}
+		else  turn_motor=0;
+		
+	}
+	return mount_tick;
+}
+int openHole(int motor_number)
+{
+	return motorTurn(motor_number,OPEN,0,true);
 }
 
-int close_hole(int motor_number)
+int closeHole(int motor_number)
 {
-	motorTurn(motor_number,CLOSE,0,true);
+	return motorTurn(motor_number,CLOSE,0,true);
 }
-	
+
 void motorSettings(void)
 {
 	int motor_number;
 	int mount_tick;
+	uint8 read_data;
+	uint8 addr = 0 ;
+	uint8 inport = 0 ;
 	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR ; motor_number++)
 	{
-		open_hole(motor_number);
-		mount_tick = close_hole(motor_number);
-		mount_tick += open_hole(motor_number);
-		motor[motor_number].max_count_tick=(int)(mount_tick/2);
+		addr = motor[motor_number].address_i2c;
+		inport = INPORT + motor[motor_number].port;
+		
+		openHole(motor_number);
+		
+		motorRecvI2C(addr, inport ,&read_data );
+		read_data|=motor[motor_number].mask_senser;
+		motor[motor_number].mask_senser_open=read_data;
+		
+		mount_tick = closeHole(motor_number);
+		
+		motorRecvI2C(addr, inport ,&read_data );
+		read_data|=motor[motor_number].mask_senser;
+		motor[motor_number].mask_senser_close=read_data;
+		
+		mount_tick += openHole(motor_number);
+		motor[motor_number].max_count_tick=(int)(mount_tick>>1);
 		motor[motor_number].current_percent=0;
+		
+		turnOutMotorFromSenser(motor_number);
 	}
 }
 
@@ -287,7 +352,7 @@ bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
 	//Generate Stop
   I2C_GenerateSTOP(I2C, ENABLE);
 	
-	return 1;
+	return true;
 }
 
 

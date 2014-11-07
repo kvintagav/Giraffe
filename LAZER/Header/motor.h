@@ -80,14 +80,14 @@ typedef struct _MOTOR_STATE
 	uint8 address_i2c;
 	uint8 mask_enable;
 	uint8 mask_senser;
+	uint8 mask_senser_open;
+	uint8 mask_senser_close;
 	bool port;
 	uint8 current_faza;
 	int current_tick;
 	int current_percent;
 	int max_count_tick;
-	bool senser_open;
-	bool senser_close;
-
+	
 }
 MOTOR_STATE;
 
@@ -96,7 +96,7 @@ bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data );
 int motorTurn(int number, bool direction,int tick ,bool turn_to_senser);
 int motorTurnOnPercent(int number , int percent);
 void motorSettings(void);
-void init_motor(void);
+void motorInit(void);
 void motorTest(void);
 void motorInitGpio(void);
 void motorSenser(void);
