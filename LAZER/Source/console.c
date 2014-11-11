@@ -147,7 +147,7 @@ void ResetStart(void)
 *******************************************************************************/
 bool ReadConfig(void)
 {
-/*	
+	
 	if (I2C_EE_BufferRead((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==TRUE) //if read struct from eeprom without error
 	{
 		//if  eeprom is empty
@@ -176,8 +176,8 @@ bool ReadConfig(void)
 	}
 	
 	return TRUE;
-*/
-	return FALSE;
+
+	//return FALSE;
 }
 /******************************************************************************
 * Function Name  : SettingsDefault
@@ -512,10 +512,12 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 					case SAVE :    
 							sprintf(bufer_out,"\nenter today's date[format DD.MM.YYYY]:");	
 							state=DATA;
-								
-						//		if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
-						//		else sprintf(bufer_out,"\nsave successfully\r");
-
+					
+							#ifdef EEPROM
+								if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
+								else sprintf(bufer_out,"\nsave successfully\r");
+							#endif
+					
 					break;
 					case REBOOT :     
 						sprintf(bufer_out, "\ndevice rebooot\r");

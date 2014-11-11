@@ -38,6 +38,7 @@ typedef struct _CONFIG_MSG
 	uint8 month_set;
 	uint16 year_set;
 	
+	char type_device[20];
 			
 }
 CONFIG_MSG;

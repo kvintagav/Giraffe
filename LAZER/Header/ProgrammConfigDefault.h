@@ -3,9 +3,7 @@
 #define PROGRAMM_CONFIG_DEFAULT_H
 
 #include "stm32f4xx.h"
-
 #include "Types.h"
-
 
 /**************************
 *Type contrroler 
@@ -35,12 +33,15 @@
 VERSION Programm and DATA Relelease 
 NESESSARILY CHANGE WITH THE NEW RELEASE
 ********************************************/
-#define TOP_VERSION 	0
+#define TOP_VERSION 	1
 #define VERSION 			1
 #define SUB_VERSION		0
+/*
+TOP_VERSION = 1  - version programm for ONE MOTOR and FOUR MOTORS
 
-#define DAY_VERSION		29
-#define MONTH_VERSION	05
+*/
+#define DAY_VERSION		11
+#define MONTH_VERSION	11
 #define YEAR_VERSION	2014
 /*******************************************/
 

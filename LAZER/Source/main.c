@@ -46,11 +46,16 @@ void InitAll()
 		
 		LED_INIT();
 		I2C_INIT();
+		I2C_EE_INIT();
 	
 		#ifdef EEPROM
 			
 			if (ReadConfig()==TRUE)	console_send("\nEEPROM start\r");
-			else console_send("\nEEPROM is not connect \r\n parameters is enabled by default\r");
+			else 
+			{
+				console_send("\nEEPROM is not connect \r\n parameters is enabled by default\r");
+				SettingsDefault();
+			}
 		#else
 			SettingsDefault();
 			CheckAndWriteVersion();
@@ -61,10 +66,12 @@ void InitAll()
 		(SysTick_Config(SystemCoreClock / 16));
 		
 		#ifdef FOUR_MOTORS
+		
 			motorInitGpio();
 			motorInit();	
 			motorTest();
 			motorSettings();
+		
 		#endif	
 		
 		#ifdef ONE_MOTOR
