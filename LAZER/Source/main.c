@@ -41,7 +41,7 @@ void InitAll()
 		#endif	
 		
 		#ifdef ONE_MOTOR
-			console_send("\r\n\One motor device start\r");
+			console_send("\r\nOne motor device start\r");
 		#endif
 		
 		LED_INIT();
@@ -69,13 +69,14 @@ void InitAll()
 		
 			motorInitGpio();
 			motorInit();	
-			motorTest();
+
 			motorSettings();
 		
 		#endif	
 		
 		#ifdef ONE_MOTOR
-		
+			DMOT_INIT();
+			Set_OKO ();
 		#endif
 		
 		WIZ_GPIO_Install();

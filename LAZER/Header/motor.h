@@ -5,6 +5,10 @@
 
 #include "main.h"
 
+
+#define DELAY_MOTOR 2000000
+#define MAX_NUMBERS_TICKS 1000
+
 #define INPORT 		0
 #define OUTPORT		2
 #define POLARPORT	4
@@ -19,13 +23,25 @@
 #define EE_ERROR 0
 #define NO_ERROR 1
 
-//#define MASK_ENABLE_0  0x00C0
-//#define MASK_ENABLE_1  0x0300
-
+/*
+// for 4-faze turn
 #define FAZA0 0x0C
 #define FAZA1 0x18
 #define FAZA2 0x30
 #define FAZA3 0x24
+*/
+
+
+// for 8-faze turn
+#define FAZA0 0x0C
+#define FAZA1 0x08
+#define FAZA2 0x18
+#define FAZA3 0x10
+#define FAZA4 0x30
+#define FAZA5 0x20
+#define FAZA6 0x24
+#define FAZA7 0x04
+
 
 /*structure PCA9539PW /1
 	MOTOR1 
@@ -87,6 +103,7 @@ typedef struct _MOTOR_STATE
 	int current_tick;
 	int current_percent;
 	int max_count_tick;
+	bool work;
 	
 }
 MOTOR_STATE;

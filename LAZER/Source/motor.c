@@ -93,8 +93,7 @@ void motorInit(void)
 int motorTurnOnPercent(int motor_number , int percent)
 {
 	int numbers_tick;
-	if ((motor_number>(NUMBERS_MOTOR-1))||(motor_number<0)) return -1;
-	if ((percent>100)|| (percent<0)) return -1;
+	if ((motor_number>(NUMBERS_MOTOR-1))||(motor_number<0)||(percent>100)|| (percent<0)||(motor[motor_number].work==false)) return -1;
 	
 	if (motor[motor_number].max_count_tick!=0)
 	{
@@ -144,6 +143,7 @@ int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 		{
 			switch (motor[number].current_faza)
 			{
+				/*
 				case 0: 
 					motor[number].current_faza=(direction) ?1 : 3; 
 					value=(direction) ? FAZA1 : FAZA3;
@@ -164,12 +164,54 @@ int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 					motor[number].current_faza=0; 
 					value= FAZA0;
 				break;
+				*/
+				case 0: 
+					motor[number].current_faza=(direction) ?1 : 7; 
+					value=(direction) ? FAZA1 : FAZA7;
+				break;
+				case 1: 
+					motor[number].current_faza=(direction) ?2 : 0; 
+					value=(direction) ? FAZA2 : FAZA0;
+				break;
+				case 2: 
+					motor[number].current_faza=(direction) ?3 : 1; 
+					value=(direction) ? FAZA3 : FAZA1;
+				break;
+				case 3: 
+					motor[number].current_faza=(direction) ?4 : 2; 
+					value=(direction) ? FAZA4 : FAZA2;
+				break;
+				case 4: 
+					motor[number].current_faza=(direction) ?5 : 3; 
+					value=(direction) ? FAZA5 : FAZA3;
+				break;
+				case 5: 
+					motor[number].current_faza=(direction) ?6 : 4; 
+					value=(direction) ? FAZA6 : FAZA4;
+				break;
+				case 6: 
+					motor[number].current_faza=(direction) ?7 : 5; 
+					value=(direction) ? FAZA7 : FAZA5;
+				break;
+				case 7: 
+					motor[number].current_faza=(direction) ?0 : 6; 
+					value=(direction) ? FAZA0 : FAZA6;
+				break;
+				default:
+					motor[number].current_faza=0; 
+					value= FAZA0;
+				break;
 			}
 			value|=motor[number].mask_enable;
 			motorSendI2C(address , outport , value);
-			for (j=0;j<2000000;j++){};
+			for (j=0;j<DELAY_MOTOR  ;j++){};
 			tick_numb++;
 			if ((!turn_to_senser)&&(tick_numb==tick)) work_motor = false;
+				
+			if (tick_numb>=MAX_NUMBERS_TICKS)
+			{
+				work_motor = false;
+			}
 		}
 		else 
 		{
@@ -226,26 +268,42 @@ void motorSettings(void)
 	uint8 inport = 0 ;
 	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR ; motor_number++)
 	{
-		addr = motor[motor_number].address_i2c;
-		inport = INPORT + motor[motor_number].port;
-		
-		openHole(motor_number);
-		
-		motorRecvI2C(addr, inport ,&read_data );
-		read_data|=motor[motor_number].mask_senser;
-		motor[motor_number].mask_senser_open=read_data;
-		
-		mount_tick = closeHole(motor_number);
-		
-		motorRecvI2C(addr, inport ,&read_data );
-		read_data|=motor[motor_number].mask_senser;
-		motor[motor_number].mask_senser_close=read_data;
-		
-		mount_tick += openHole(motor_number);
-		motor[motor_number].max_count_tick=(int)(mount_tick>>1);
-		motor[motor_number].current_percent=0;
-		
-		turnOutMotorFromSenser(motor_number);
+		if (motor[motor_number].work==true)
+		{
+			addr = motor[motor_number].address_i2c;
+			inport = INPORT + motor[motor_number].port;
+			
+			if (openHole(motor_number)>=MAX_NUMBERS_TICKS)
+			{	
+				motor[motor_number].work=true;
+
+				motorRecvI2C(addr, inport ,&read_data );
+				
+				read_data|=motor[motor_number].mask_senser;
+				motor[motor_number].mask_senser_open=read_data;
+				
+				mount_tick = closeHole(motor_number);
+				
+				motorRecvI2C(addr, inport ,&read_data );
+				read_data|=motor[motor_number].mask_senser;
+				motor[motor_number].mask_senser_close=read_data;
+				
+				mount_tick += openHole(motor_number);
+				motor[motor_number].max_count_tick=(int)(mount_tick>>1);
+				motor[motor_number].current_percent=0;
+
+				turnOutMotorFromSenser(motor_number);
+			}	
+			else 
+			{
+				motor[motor_number].work=false;
+				motor[motor_number].mask_senser=0;
+				motor[motor_number].mask_senser_open=0;
+				motor[motor_number].mask_senser_close=0;
+				motor[motor_number].max_count_tick=0;
+				motor[motor_number].current_percent=0;
+			}
+		}
 	}
 }
 
@@ -255,6 +313,7 @@ void motorTest(void)
 	for (index = 0 ; index<NUMBERS_MOTOR ; index++)
 	{
 		motorTurn(index,true,1,false);
+		
 	}
 }
 

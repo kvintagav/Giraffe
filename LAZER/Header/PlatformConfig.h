@@ -118,4 +118,21 @@ typedef uint8_t bit_data;
 #define INT_PCA9539_2_PortSource      EXTI_PortSourceGPIOC
 #define INT_PCA9539_2_PinSource 			EXTI_PinSource3
 
+
+/*DMOT GPIO Settings*/
+
+#define DMOT_GPIO_RCC 				RCC_AHB1Periph_GPIOC
+#define DMOT_GPIO 						GPIOC
+#define DMOT0									GPIO_Pin_0	// out
+#define DMOT1									GPIO_Pin_1	// out
+#define DMOT2									GPIO_Pin_2	// out
+#define DMOT3									GPIO_Pin_3	// out
+
+/*DCON GPIO Settings*/
+#define DCON_GPIO_RCC 				RCC_AHB1Periph_GPIOC
+#define DCON_GPIO 						GPIOC
+#define DCON1									GPIO_Pin_6	// in
+#define DCON2									GPIO_Pin_7	// in
+
+
 /*Settings Reset for PCA9539*/

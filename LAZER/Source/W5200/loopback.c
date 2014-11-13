@@ -4,6 +4,7 @@
 #include "w5200.h"
 #include "socket.h"
 #include "util.h"
+#include "user.h"
 #include "loopback.h"
 #include "console.h"
 //#include "main.h"
@@ -67,7 +68,7 @@ int motor_tcps(SOCKET s, uint16 port)
 				#endif
 				
 				#ifdef ONE_MOTOR
-					motorTurn(InParMassiv[0]);
+					 Otkr_Zakr(InParMassiv[0]);
 				#endif
 				
 				clearBuffer();
