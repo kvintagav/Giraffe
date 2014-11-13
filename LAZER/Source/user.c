@@ -3,6 +3,9 @@
 #include "user.h"
 #include <stdbool.h>
 
+#define OPEN 1
+#define CLOSE 0
+
 uint16  cnt;
 int16  	R_cnt;					// polojenie diafragmy
 int16  	R_max;

@@ -6,8 +6,8 @@
 #include "main.h"
 
 
-#define DELAY_MOTOR 2000000
-#define MAX_NUMBERS_TICKS 1000
+#define DELAY_MOTOR 500000
+#define MAX_NUMBERS_TICKS 600
 
 #define INPORT 		0
 #define OUTPORT		2
@@ -15,8 +15,8 @@
 #define CONFPORT	6
 
 
-#define OPEN true
-#define CLOSE false
+#define OPEN false
+#define CLOSE true
 	
 #define NUMBERS_MOTOR 4
 

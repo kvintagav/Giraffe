@@ -69,7 +69,7 @@ void InitAll()
 		
 			motorInitGpio();
 			motorInit();	
-
+			motorTest();
 			motorSettings();
 		
 		#endif	

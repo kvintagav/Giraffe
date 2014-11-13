@@ -23,7 +23,8 @@ void motorInitGpio(void)
   
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+
 	GPIO_InitStructure.GPIO_Pin = INT_PCA9539_1_GPIO;
   GPIO_Init(INT_PCA9539_1_PORT, &GPIO_InitStructure);
 	
@@ -58,6 +59,8 @@ void motorInitGpio(void)
 void motorSenser(void)
 {
 	senser_pressed=true;
+	//senser_pressed=false;
+	
 }	
 
 void motorInit(void)
@@ -82,9 +85,12 @@ void motorInit(void)
 			{
 				motor[i].mask_senser=0xC0;
 			}
-		
+			motor[i].work = true;
 			motor[i].current_faza=0;
+			
+			
   		motorSendI2C(motor[i].address_i2c,CONFPORT+motor[i].port,motor[i].mask_senser);
+			
 			motorSendI2C(motor[i].address_i2c,OUTPORT+motor[i].port,0x00);
 		
 	}
@@ -143,28 +149,7 @@ int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 		{
 			switch (motor[number].current_faza)
 			{
-				/*
-				case 0: 
-					motor[number].current_faza=(direction) ?1 : 3; 
-					value=(direction) ? FAZA1 : FAZA3;
-				break;
-				case 1: 
-					motor[number].current_faza=(direction) ?2 : 0; 
-					value=(direction) ? FAZA2 : FAZA0;
-				break;
-				case 2: 
-					motor[number].current_faza=(direction) ?3 : 1; 
-					value=(direction) ? FAZA3 : FAZA1;
-				break;
-				case 3: 
-					motor[number].current_faza=(direction) ?0 : 2; 
-					value=(direction) ? FAZA0 : FAZA2;
-				break;
-				default:
-					motor[number].current_faza=0; 
-					value= FAZA0;
-				break;
-				*/
+
 				case 0: 
 					motor[number].current_faza=(direction) ?1 : 7; 
 					value=(direction) ? FAZA1 : FAZA7;
@@ -266,7 +251,7 @@ void motorSettings(void)
 	uint8 read_data;
 	uint8 addr = 0 ;
 	uint8 inport = 0 ;
-	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR ; motor_number++)
+	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
 	{
 		if (motor[motor_number].work==true)
 		{
@@ -312,7 +297,7 @@ void motorTest(void)
 	int index;
 	for (index = 0 ; index<NUMBERS_MOTOR ; index++)
 	{
-		motorTurn(index,true,1,false);
+		motorTurn(index,false,1,false);
 		
 	}
 }
