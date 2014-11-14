@@ -151,7 +151,7 @@ bool ReadConfig(void)
 	if (I2C_EE_BufferRead((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==TRUE) //if read struct from eeprom without error
 	{
 		//if  eeprom is empty
-		if((Config_Msg.version[0]==0)&&(Config_Msg.version[1]==0)&&(Config_Msg.version[2]==0))
+		if(((Config_Msg.version[0]==0)||(Config_Msg.version[0]==0xFF))&&((Config_Msg.version[1]==0)||(Config_Msg.version[1]==0xFF))&&((Config_Msg.version[2]==0)||(Config_Msg.version[2]==0xFF)))
 		{
 			//Eeprom is empty. Fill the structure with default values ??and write
 			SettingsDefault();

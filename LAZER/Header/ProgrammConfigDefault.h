@@ -117,7 +117,7 @@ USART SETTINGS
 /***************************************
 EEPROM SETTINGS
 ****************************************/
-#define WAYT_REQUEST_EEPROM 0xFFFF
+#define WAYT_REQUEST_EEPROM 0xFFFFF
 #define I2C_PageSize        16
 #define EE_START_STRUCT			0	
 

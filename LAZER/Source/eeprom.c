@@ -30,9 +30,9 @@ void I2C_EE_INIT(void){
 	
 	GPIO_InitStruct.GPIO_Pin = GPIO_EE_Pin_SCL | GPIO_EE_Pin_SDA ; // Pins (I2C_SCL) and (I2C_SDA)
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF; // the pins are configured as alternate function so the USART peripheral has access to them
-	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_2MHz;// this defines the IO speed and has nothing to do with the baudrate!
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;// this defines the IO speed and has nothing to do with the baudrate!
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_OD;// this defines the output type as open drain
-	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_UP;// this activates the pullup resistors on the IO pins
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;// this activates the pullup resistors on the IO pins
 	GPIO_Init(I2C_EE_PORT, &GPIO_InitStruct);// now all the values are passed to the GPIO_Init() 
  
 	
@@ -47,11 +47,15 @@ void I2C_EE_INIT(void){
 	I2C_InitStruct.I2C_OwnAddress1 = 0x00;
 	I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
-	I2C_InitStruct.I2C_ClockSpeed = 400000;
+	I2C_InitStruct.I2C_ClockSpeed = 100000;
 
 	/* Initialize the I2C peripheral w/ selected parameters */
-	I2C_Init(I2C_EE,&I2C_InitStruct);
+/*	I2C_Init(I2C_EE,&I2C_InitStruct);
 	I2C_Cmd(I2C_EE, ENABLE);
+	*/
+	I2C_Cmd(I2C_EE, ENABLE);
+	I2C_Init(I2C_EE, &I2C_InitStruct);
+
 }
 
 /*******************************************************************************
@@ -81,6 +85,7 @@ bool I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
     {
       while(NumOfPage--)
       {
+				
         if (I2C_EE_PageWrite(pBuffer, WriteAddr, I2C_PageSize)==EE_ERROR) return EE_ERROR; 
     	I2C_EE_WaitEepromStandbyState();
         WriteAddr +=  I2C_PageSize;
@@ -144,23 +149,24 @@ bool I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
 bool I2C_EE_PageWrite(u8* pBuffer, u8 WriteAddr, u8 NumByteToWrite)
 {
 	
+	
   /* Send START condition */
   I2C_GenerateSTART(I2C_EE, ENABLE);
   
   /* Test on EV5 and clear it */
- 	if (I2C_CheckEvent(I2C_EE, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
+ 	if (I2CWaitEvent(I2C_EE, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
   
   /* Send EEPROM address for write */
   I2C_Send7bitAddress(I2C_EE, EEPROM_ADDRESS, I2C_Direction_Transmitter);
 
   /* Test on EV6 and clear it */
-	if (I2C_CheckEvent(I2C_EE, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
+	if (I2CWaitEvent(I2C_EE, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
 	
   /* Send the EEPROM's internal address to write to */    
   I2C_SendData(I2C_EE, WriteAddr);  
 
   /* Test on EV8 and clear it */
-	while(! I2C_CheckEvent(I2C_EE, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
+	if( I2CWaitEvent(I2C_EE, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
 	
   /* While there is data to be written */
   while(NumByteToWrite--)  
@@ -172,7 +178,7 @@ bool I2C_EE_PageWrite(u8* pBuffer, u8 WriteAddr, u8 NumByteToWrite)
     pBuffer++; 
   
     /* Test on EV8 and clear it */
-		while (!I2C_CheckEvent(I2C_EE, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
+		if (I2CWaitEvent(I2C_EE, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
 	
   }
 
@@ -192,19 +198,19 @@ bool I2C_EE_ByteWrite(u8* pBuffer, u8 WriteAddr)
   I2C_GenerateSTART(I2C_EE, ENABLE);
 
   /* Test on EV5 and clear it */
-	if (I2C_CheckEvent(I2C_EE, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
+	if (I2CWaitEvent(I2C_EE, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
 	
   /* Send EEPROM address for write */
   I2C_Send7bitAddress(I2C_EE, EEPROM_ADDRESS, I2C_Direction_Transmitter);
   
   /* Test on EV6 and clear it */
-	if (I2C_CheckEvent(I2C_EE, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
+	if (I2CWaitEvent(I2C_EE, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
 	
   /* Send the EEPROM's internal address to write to */
   I2C_SendData(I2C_EE, WriteAddr);
   
   /* Test on EV8 and clear it */
-  if (I2C_CheckEvent(I2C_EE, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
+  if (I2CWaitEvent(I2C_EE, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR) return EE_ERROR;
 	
   /* Send the byte to be written */
   I2C_SendData(I2C_EE, *pBuffer); 
@@ -238,9 +244,7 @@ bool I2C_EE_BufferRead(u8* pBuffer, u8 ReadAddr, u16 NumByteToRead)
   /* Test on EV6 and clear it */
   if(I2CWaitEvent(I2C_EE, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
   
-  /* Clear EV6 by setting again the PE bit */
-  I2C_Cmd(I2C_EE, ENABLE);
-
+ 
   /* Send the EEPROM's internal address to write to */
   I2C_SendData(I2C_EE, ReadAddr);  
 
@@ -288,6 +292,10 @@ bool I2C_EE_BufferRead(u8* pBuffer, u8 ReadAddr, u16 NumByteToRead)
 
   /* Enable Acknowledgement to be ready for another reception */
   I2C_AcknowledgeConfig(I2C_EE, ENABLE);
+	
+	 /* Send STOP condition */
+ // I2C_GenerateSTOP(I2C_EE, ENABLE);
+
 	
 	return TRUE;
 }
