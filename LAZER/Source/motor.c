@@ -10,6 +10,8 @@ int openHole(int motor_number);
 int closeHole(int motor_number);
 int turnOutMotorFromSenser(int motor_number);
 
+uint8 data_test = 0;
+
 void motorInitGpio(void)
 {
 	EXTI_InitTypeDef   EXTI_InitStructure;
@@ -90,7 +92,8 @@ void motorInit(void)
 			
 			
   		motorSendI2C(motor[i].address_i2c,CONFPORT+motor[i].port,motor[i].mask_senser);
-			
+			//motorSendI2C(motor[i].address_i2c,POLARPORT+motor[i].port,motor[i].mask_senser);
+		
 			motorSendI2C(motor[i].address_i2c,OUTPORT+motor[i].port,0x00);
 		
 	}
@@ -251,12 +254,29 @@ void motorSettings(void)
 	uint8 read_data;
 	uint8 addr = 0 ;
 	uint8 inport = 0 ;
+	
 	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
 	{
+		
+				addr = motor[motor_number].address_i2c;
+			inport = INPORT + motor[motor_number].port;
+			
+			motorRecvI2C(addr, inport ,&data_test );
+	}
+	
+	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
+	{
+		
+		
+		
+		
 		if (motor[motor_number].work==true)
 		{
 			addr = motor[motor_number].address_i2c;
 			inport = INPORT + motor[motor_number].port;
+			
+			motorRecvI2C(addr, inport ,&data_test );
+
 			
 			if (openHole(motor_number)>=MAX_NUMBERS_TICKS)
 			{	
@@ -376,6 +396,7 @@ bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data )
 *****************************************/
 bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
 {
+	int i;
 	uint8 *read_data=data;
 	//Generate start
 	I2C_GenerateSTART(I2C, ENABLE);
@@ -389,12 +410,29 @@ bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
 	I2C_SendData(I2C,cmd); 
   if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
   
+	I2C_GenerateSTART(I2C, ENABLE);
+	if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR ) return EE_ERROR;
+
+	//Send Address
+	I2C_Send7bitAddress(I2C, address, I2C_Direction_Receiver);
+  if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)==EE_ERROR ) return EE_ERROR;
+ /* Enable Acknowledgement to be ready for another reception */
+  I2C_AcknowledgeConfig(I2C, ENABLE);
+	
+	//Generate Stop
+  I2C_GenerateSTOP(I2C, ENABLE);
+	i=3000;
+	while(i)
+	{
+		i--;
+	}
 	//Read data 
 	*read_data=I2C_ReceiveData(I2C); 
   if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
   
-	//Generate Stop
-  I2C_GenerateSTOP(I2C, ENABLE);
+	/* Enable Acknowledgement to be ready for another reception */
+  I2C_AcknowledgeConfig(I2C, ENABLE);
+
 	
 	return true;
 }
@@ -406,7 +444,7 @@ bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
 *******************************************************************************/
 bool I2CWaitEventMotor( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT)
 {
-	int eetime=WAYT_REQUEST_EEPROM;
+	int eetime=sEE_FLAG_TIMEOUT;
 	
   while(!I2C_CheckEvent(I2C, I2C_EVENT))
    {

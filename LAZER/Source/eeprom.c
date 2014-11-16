@@ -10,6 +10,7 @@
 
 /* Privat function */
 bool I2CWaitEvent( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT);
+void Delay_EE(int timeout);
 
 /*********************************************
 * Function Name  : I2C_EE_INIT
@@ -44,7 +45,7 @@ void I2C_EE_INIT(void){
 	/* Set the I2C structure parameters */
 	I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
 	I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;
-	I2C_InitStruct.I2C_OwnAddress1 = 0x00;
+	I2C_InitStruct.I2C_OwnAddress1 = 0xA0;
 	I2C_InitStruct.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStruct.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	I2C_InitStruct.I2C_ClockSpeed = 100000;
@@ -149,13 +150,20 @@ bool I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite)
 bool I2C_EE_PageWrite(u8* pBuffer, u8 WriteAddr, u8 NumByteToWrite)
 {
 	
+	int eetime=sEE_LONG_TIMEOUT;
 	
+  while(I2C_GetFlagStatus(I2C_EE, I2C_FLAG_BUSY))
+   {
+    if((eetime--)==0) return EE_ERROR;
+		//else (eetime--);
+  }
+
   /* Send START condition */
   I2C_GenerateSTART(I2C_EE, ENABLE);
-  
+	
   /* Test on EV5 and clear it */
  	if (I2CWaitEvent(I2C_EE, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
-  
+ 
   /* Send EEPROM address for write */
   I2C_Send7bitAddress(I2C_EE, EEPROM_ADDRESS, I2C_Direction_Transmitter);
 
@@ -194,15 +202,23 @@ bool I2C_EE_PageWrite(u8* pBuffer, u8 WriteAddr, u8 NumByteToWrite)
 bool I2C_EE_ByteWrite(u8* pBuffer, u8 WriteAddr)
 {
 
+	int eetime=sEE_LONG_TIMEOUT;
+	
+  while(I2C_GetFlagStatus(I2C_EE, I2C_FLAG_BUSY))
+   {
+    if((eetime--)==0) return EE_ERROR;
+		//else (eetime--);
+  }
+	 
   /* Send STRAT condition */
   I2C_GenerateSTART(I2C_EE, ENABLE);
 
   /* Test on EV5 and clear it */
 	if (I2CWaitEvent(I2C_EE, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
-	
+
   /* Send EEPROM address for write */
   I2C_Send7bitAddress(I2C_EE, EEPROM_ADDRESS, I2C_Direction_Transmitter);
-  
+ 
   /* Test on EV6 and clear it */
 	if (I2CWaitEvent(I2C_EE, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR) return EE_ERROR;
 	
@@ -231,13 +247,19 @@ bool I2C_EE_ByteWrite(u8* pBuffer, u8 WriteAddr)
 *******************************************************************************/
 bool I2C_EE_BufferRead(u8* pBuffer, u8 ReadAddr, u16 NumByteToRead)
 {  
+	int eetime=sEE_LONG_TIMEOUT;
 	
+  while(I2C_GetFlagStatus(I2C_EE, I2C_FLAG_BUSY))
+   {
+    if((eetime--)==0) return EE_ERROR;
+		//else (eetime--);
+  }
   /* Send START condition */
   I2C_GenerateSTART(I2C_EE, ENABLE);
-  
+
   /* Test on EV5 and clear it */
 	if (I2CWaitEvent(I2C_EE, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR) return EE_ERROR;
-   
+
   /* Send EEPROM address for write */
   I2C_Send7bitAddress(I2C_EE, EEPROM_ADDRESS, I2C_Direction_Transmitter);
 
@@ -303,22 +325,76 @@ bool I2C_EE_BufferRead(u8* pBuffer, u8 ReadAddr, u16 NumByteToRead)
 * Function Name  : I2C_EE_WaitEepromStandbyState
 * Description    : Wait for EEPROM Standby state
 *******************************************************************************/
-void I2C_EE_WaitEepromStandbyState(void)      
+bool I2C_EE_WaitEepromStandbyState(void)      
 {
-  vu16 SR1_Tmp = 0;
-
-  do
+    __IO uint16_t tmpSR1 = 0;
+  __IO uint32_t sEETrials = 0;
+	int sEETimeout =0;
+  /*!< While the bus is busy */
+  sEETimeout = sEE_LONG_TIMEOUT;
+  while(I2C_GetFlagStatus(I2C_EE, I2C_FLAG_BUSY))
   {
-    /* Send START condition */
+    if((sEETimeout--) == 0) return ERROR;
+  }
+
+  /* Keep looping till the slave acknowledge his address or maximum number 
+     of trials is reached (this number is defined by sEE_MAX_TRIALS_NUMBER define
+     in stm324xg_eval_i2c_ee.h file) */
+  while (1)
+  {
+    /*!< Send START condition */
     I2C_GenerateSTART(I2C_EE, ENABLE);
-    /* Read I2C1 SR1 register */
-    SR1_Tmp = I2C_ReadRegister(I2C_EE, I2C_Register_SR1);
-    /* Send EEPROM address for write */
+
+    /*!< Test on EV5 and clear it */
+    sEETimeout = sEE_FLAG_TIMEOUT;
+    while(!I2C_CheckEvent(I2C_EE, I2C_EVENT_MASTER_MODE_SELECT))
+    {
+      if((sEETimeout--) == 0) return ERROR;
+    }    
+
+    /*!< Send EEPROM address for write */
     I2C_Send7bitAddress(I2C_EE, EEPROM_ADDRESS, I2C_Direction_Transmitter);
-  }while(!(I2C_ReadRegister(I2C_EE, I2C_Register_SR1) & 0x0002));
-  
-  /* Clear AF flag */
-  I2C_ClearFlag(I2C_EE, I2C_FLAG_AF);
+    
+    /* Wait for ADDR flag to be set (Slave acknowledged his address) */
+    sEETimeout = sEE_LONG_TIMEOUT;
+    do
+    {     
+      /* Get the current value of the SR1 register */
+      tmpSR1 = I2C_EE->SR1;
+      
+      /* Update the timeout value and exit if it reach 0 */
+      if((sEETimeout--) == 0) return ERROR;
+    }
+    /* Keep looping till the Address is acknowledged or the AF flag is 
+       set (address not acknowledged at time) */
+    while((tmpSR1 & (I2C_SR1_ADDR | I2C_SR1_AF)) == 0);
+     
+    /* Check if the ADDR flag has been set */
+    if (tmpSR1 & I2C_SR1_ADDR)
+    {
+      /* Clear ADDR Flag by reading SR1 then SR2 registers (SR1 have already 
+         been read) */
+      (void)I2C_EE->SR2;
+      
+      /*!< STOP condition */    
+      I2C_GenerateSTOP(I2C_EE, ENABLE);
+        
+      /* Exit the function */
+      return true;
+    }
+    else
+    {
+      /*!< Clear AF flag */
+      I2C_ClearFlag(I2C_EE, I2C_FLAG_AF);                  
+    }
+    
+    /* Check if the maximum allowed number of trials has bee reached */
+    if (sEETrials++ == sEE_MAX_TRIALS_NUMBER)
+    {
+      /* If the maximum number of trials has been reached, exit the function */
+      return ERROR;
+    }
+  }
 }
 
 /*******************************************************************************
@@ -327,14 +403,23 @@ void I2C_EE_WaitEepromStandbyState(void)
 *******************************************************************************/
 bool I2CWaitEvent( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT)
 {
-	int eetime=WAYT_REQUEST_EEPROM;
+	int eetime=sEE_FLAG_TIMEOUT;
 	
   while(!I2C_CheckEvent(I2C_EE, I2C_EVENT))
    {
-    if(eetime==0) return EE_ERROR;
-		else (eetime--);
+    if((eetime--)==0) return EE_ERROR;
+		//else (eetime--);
   }
 	 
 	return NO_ERROR;
+	
+}
+void Delay_EE(int timeout)
+{
+	int time;
+	while(time)
+  {
+    time--;
+  }
 	
 }

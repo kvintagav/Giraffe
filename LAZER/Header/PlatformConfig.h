@@ -87,7 +87,7 @@ typedef uint8_t bit_data;
 #define I2C_EE_GPIO_AF								GPIO_AF_I2C1 
 
 
-#define EEPROM_ADDRESS								0xA4
+
 
 #define I2C                          	I2C2
 #define I2C_RCC 											RCC_APB1Periph_I2C2

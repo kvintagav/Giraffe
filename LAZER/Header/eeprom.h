@@ -23,6 +23,6 @@ bool I2C_EE_BufferWrite(u8* pBuffer, u8 WriteAddr, u16 NumByteToWrite);
 bool I2C_EE_PageWrite(u8* pBuffer, u8 WriteAddr, u8 NumByteToWrite);
 bool I2C_EE_ByteWrite(u8* pBuffer, u8 WriteAddr);
 bool I2C_EE_BufferRead(u8* pBuffer, u8 ReadAddr, u16 NumByteToRead);
-void I2C_EE_WaitEepromStandbyState(void);
+bool I2C_EE_WaitEepromStandbyState(void);
 
 #endif

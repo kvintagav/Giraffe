@@ -92,8 +92,10 @@ void InitAll()
 int main(void)
 
 {
-  InitAll();
-		
+	int i;
+
+	InitAll();
+
 	socket(0, Sn_MR_TCP, Config_Msg.port_science, 0);
 	
 	

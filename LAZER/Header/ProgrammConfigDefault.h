@@ -117,10 +117,12 @@ USART SETTINGS
 /***************************************
 EEPROM SETTINGS
 ****************************************/
-#define WAYT_REQUEST_EEPROM 0xFFFFF
-#define I2C_PageSize        16
-#define EE_START_STRUCT			0	
-
+#define sEE_FLAG_TIMEOUT    		0x100000
+#define sEE_LONG_TIMEOUT 				3*sEE_FLAG_TIMEOUT
+#define sEE_MAX_TRIALS_NUMBER   300
+#define I2C_PageSize        		16
+#define EE_START_STRUCT					0	
+#define EEPROM_ADDRESS					0xA4
 /****************************************
 SEtting w5200
 *****************************************/	
