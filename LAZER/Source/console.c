@@ -24,6 +24,8 @@ CONFIG_MSG Config_Msg;
 
 /********privat function *****************/
 void send_byte(char data);
+int BufferConfigRead();
+int BufferConfigWrite();
 char * TestCmd(char *bufer);
 
  
@@ -141,43 +143,74 @@ void ResetStart(void)
 	IWDG_ReloadCounter();
 	IWDG_Enable();
 }
+
+
+/******************************************************************************
+* Function Name  : BufferConfigRead
+* Description    : read buffer from memory
+*******************************************************************************/
+int BufferConfigRead(void)
+{
+	return FlashWrite();
+	/*
+	return 	I2C_EE_BufferRead(pBuffer,(u8)ReadAddr,NumByteToRead);
+	*/
+}
+/******************************************************************************
+* Function Name  : BufferConfigWrite
+* Description    : Reboot system
+*******************************************************************************/
+int BufferConfigWrite(void)
+{
+	return FlashRead();
+	/*
+	return	I2C_EE_BufferWrite(pBuffer,(u8)WriteAddr,NumByteToWrite);
+  */
+}
 /******************************************************************************
 * Function Name  : ReadConfig
 * Description    : settings all parameter if eeprom don't read or empty
 *******************************************************************************/
-bool ReadConfig(void)
+void ReadConfig(void)
 {
 	
-	if (I2C_EE_BufferRead((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==TRUE) //if read struct from eeprom without error
+	if (BufferConfigRead()>0) //if read struct from eeprom without error
 	{
 		//if  eeprom is empty
 		if(((Config_Msg.version[0]==0)||(Config_Msg.version[0]==0xFF))&&((Config_Msg.version[1]==0)||(Config_Msg.version[1]==0xFF))&&((Config_Msg.version[2]==0)||(Config_Msg.version[2]==0xFF)))
 		{
+			
 			//Eeprom is empty. Fill the structure with default values ??and write
 			SettingsDefault();
 			CheckAndWriteVersion();
-			if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) return FALSE;				
+			console_send("\nNot settings, default\r");
 		}
 		else
 		{
+			console_send("\nSettings Ok\r");
 			//if eeprom is not empty, check version
 			if (CheckAndWriteVersion()==FALSE)
 			{
-				if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) return FALSE;
+				console_send("\nReWrite Settings Ok\r");
+				if (BufferConfigWrite()<0) 	console_send("\nConfig not write\r");;
 			}
 		}	
 	}		
 	else
 	{
+		
 			//if error read from eeprom
-			SettingsDefault();
-			return FALSE;
+		SettingsDefault();
+		CheckAndWriteVersion();
+		console_send("\nBad read setiings\r");
+			
+			
 		
 	}
 	
-	return TRUE;
 
-	//return FALSE;
+
+
 }
 /******************************************************************************
 * Function Name  : SettingsDefault
@@ -247,8 +280,7 @@ bool CheckAndWriteVersion(void)
 			Config_Msg.year = 			YEAR_VERSION;	
 			return FALSE;
 		}
-		
-		return TRUE;
+		else	return TRUE;
 }
 
 /******************************************************************************
@@ -269,10 +301,7 @@ bool ParsingParameter(uint8 * bufer , int * num_par)
 {
 	int *point=num_par;
 	uint8 *buf;
-	int numb=0 , j;
-	bool cmd_par =0;
-	char int_buf[6]={0,0,0,0,0,0};
-	
+	uint8 numb=0 ;
 	for (buf = bufer; *buf != '\0' ; buf++)
 	{
 		if ((*buf>=0x30)&&(*buf<=0x39))
@@ -513,10 +542,7 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 							sprintf(bufer_out,"\nenter today's date[format DD.MM.YYYY]:");	
 							state=DATA;
 					
-							#ifdef EEPROM
-								if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
-								else sprintf(bufer_out,"\nsave successfully\r");
-							#endif
+							
 					
 					break;
 					case REBOOT :     
@@ -545,12 +571,9 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 				Config_Msg.month_set=parameter[1];
 				Config_Msg.year_set=parameter[2];
 	
-				#ifdef EEPROM
-					if (I2C_EE_BufferWrite((u8*)&Config_Msg,EE_START_STRUCT,sizeof(Config_Msg))==FALSE) sprintf(bufer_out,"\ncould not save\r");	
+				
+					if (BufferConfigWrite()<0) sprintf(bufer_out,"\nsettings not save\r");	
 					else sprintf(bufer_out,"\nsave successfully\r\nDATA SAVE  = %u.%u.%u\r",Config_Msg.day_set,Config_Msg.month_set,Config_Msg.year_set);	
-				#else
-					sprintf(bufer_out,"\nDATA SAVE  = %u.%u.%u\r",Config_Msg.day_set,Config_Msg.month_set,Config_Msg.year_set);	
-				#endif
 				
 				state=CMD;
 			}		

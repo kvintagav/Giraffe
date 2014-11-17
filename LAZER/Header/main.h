@@ -26,7 +26,7 @@
 #include "socket.h"
 #include "spi2.h"
 #include "loopback.h"
-
+#include "flash.h"
 /*eeprom*/
 #ifdef EEPROM
 	#include "eeprom.h"

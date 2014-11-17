@@ -49,7 +49,7 @@ void CONSOLE_USART_INIT(void);
 void CommandProcessing( char *bufer_in, char *bufer_out);
 void console_send( char* str);
 
-bool ReadConfig(void);
+void ReadConfig(void);
 void PrintVersion( char *bufer_out);
 void SettingsDefault(void);
 bool CheckAndWriteVersion(void);

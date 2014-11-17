@@ -1,6 +1,6 @@
 
 #include "motor.h"
-#include "eeprom.h"
+
 MOTOR_STATE motor[NUMBERS_MOTOR];
 
 

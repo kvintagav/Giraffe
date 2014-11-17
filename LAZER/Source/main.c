@@ -12,7 +12,7 @@
 #include "user.h"
 #include "console.h"
 #include "motor.h"
-
+#include "flash.h"
 
 #include "string.h"
 #include "stdio.h"
@@ -46,10 +46,10 @@ void InitAll()
 		
 		LED_INIT();
 		I2C_INIT();
-		I2C_EE_INIT();
 	
+	/*
 		#ifdef EEPROM
-			
+			I2C_EE_INIT();
 			if (ReadConfig()==TRUE)	console_send("\nEEPROM start\r");
 			else 
 			{
@@ -62,7 +62,7 @@ void InitAll()
 			PrintVersion(bufer_cons_out);
 			console_send(bufer_cons_out);
 		#endif
-	
+	*/
 		(SysTick_Config(SystemCoreClock / 16));
 		
 		#ifdef FOUR_MOTORS
@@ -92,7 +92,7 @@ void InitAll()
 int main(void)
 
 {
-	int i;
+//	int i;
 
 	InitAll();
 
