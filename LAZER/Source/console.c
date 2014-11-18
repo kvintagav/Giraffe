@@ -24,8 +24,8 @@ CONFIG_MSG Config_Msg;
 
 /********privat function *****************/
 void send_byte(char data);
-int BufferConfigRead();
-int BufferConfigWrite();
+int BufferConfigRead(void);
+int BufferConfigWrite(void);
 char * TestCmd(char *bufer);
 
  
@@ -151,7 +151,7 @@ void ResetStart(void)
 *******************************************************************************/
 int BufferConfigRead(void)
 {
-	return FlashWrite();
+	return FlashWrite((u8*)&Config_Msg,CONFIG_START_STRUCT,sizeof(Config_Msg));
 	/*
 	return 	I2C_EE_BufferRead(pBuffer,(u8)ReadAddr,NumByteToRead);
 	*/
@@ -162,7 +162,7 @@ int BufferConfigRead(void)
 *******************************************************************************/
 int BufferConfigWrite(void)
 {
-	return FlashRead();
+	return FlashRead((u8*)&Config_Msg,CONFIG_START_STRUCT,sizeof(Config_Msg));
 	/*
 	return	I2C_EE_BufferWrite(pBuffer,(u8)WriteAddr,NumByteToWrite);
   */
@@ -173,8 +173,9 @@ int BufferConfigWrite(void)
 *******************************************************************************/
 void ReadConfig(void)
 {
-	
-	if (BufferConfigRead()>0) //if read struct from eeprom without error
+	int status_write_config;
+	status_write_config=BufferConfigRead();
+	if (status_write_config>0) //if read struct from eeprom without error
 	{
 		//if  eeprom is empty
 		if(((Config_Msg.version[0]==0)||(Config_Msg.version[0]==0xFF))&&((Config_Msg.version[1]==0)||(Config_Msg.version[1]==0xFF))&&((Config_Msg.version[2]==0)||(Config_Msg.version[2]==0xFF)))
@@ -192,7 +193,8 @@ void ReadConfig(void)
 			if (CheckAndWriteVersion()==FALSE)
 			{
 				console_send("\nReWrite Settings Ok\r");
-				if (BufferConfigWrite()<0) 	console_send("\nConfig not write\r");;
+				status_write_config=BufferConfigRead();
+				if (status_write_config<0) 	console_send("\nConfig not write\r");;
 			}
 		}	
 	}		
@@ -203,14 +205,7 @@ void ReadConfig(void)
 		SettingsDefault();
 		CheckAndWriteVersion();
 		console_send("\nBad read setiings\r");
-			
-			
-		
 	}
-	
-
-
-
 }
 /******************************************************************************
 * Function Name  : SettingsDefault

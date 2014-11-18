@@ -12,14 +12,9 @@
 ***************************/
 //#define ONE_MOTOR  
 #define FOUR_MOTORS  
-
 /***************************/
 
 
-
-/*ADDRESS  I2C DRIVER PCA9539PW*/
-#define ADDRES_DRIVER_0 232
-#define ADDRES_DRIVER_1 234
 
 
 
@@ -67,6 +62,7 @@ TOP_VERSION = 1  - version programm for ONE MOTOR and FOUR MOTORS
 #define PERIOD_LED_TASK 			10000
 
 #define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 0
+
 /**************************************
 Network setting default
 ***************************************/
@@ -117,12 +113,16 @@ USART SETTINGS
 /***************************************
 EEPROM SETTINGS
 ****************************************/
+/*ADDRESS  I2C DRIVER PCA9539PW*/
+#define ADDRES_DRIVER_0 232
+#define ADDRES_DRIVER_1 234
+
 #define sEE_FLAG_TIMEOUT    		0x100000
 #define sEE_LONG_TIMEOUT 				3*sEE_FLAG_TIMEOUT
 #define sEE_MAX_TRIALS_NUMBER   300
 #define I2C_PageSize        		16
 #define EE_START_STRUCT					0	
-#define EEPROM_ADDRESS					0xA4
+#define EEPROM_ADDRESS					0xA0
 /****************************************
 SEtting w5200
 *****************************************/	

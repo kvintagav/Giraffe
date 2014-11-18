@@ -34,6 +34,10 @@ extern MOTOR_STATE motor[NUMBERS_MOTOR];
 /*******************************************************************/
 void InitAll()
 {
+	int i;
+	uint8 buffer_in[16]={0};
+	uint8 buffer_out[16]={0};
+	
 		CONSOLE_USART_INIT();
 	
 		#ifdef FOUR_MOTORS
@@ -47,10 +51,12 @@ void InitAll()
 		LED_INIT();
 		I2C_INIT();
 	
-	/*
+		ReadConfig();
+	
+	/*	
 		#ifdef EEPROM
-			I2C_EE_INIT();
-			if (ReadConfig()==TRUE)	console_send("\nEEPROM start\r");
+		
+	if (ReadConfig()==TRUE)	console_send("\nEEPROM start\r");
 			else 
 			{
 				console_send("\nEEPROM is not connect \r\n parameters is enabled by default\r");

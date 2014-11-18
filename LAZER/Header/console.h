@@ -8,6 +8,7 @@
 #define CMD 	0 
 #define DATA 	1
 
+#define CONFIG_START_STRUCT 0
 
 typedef  uint8_t fpga_size_byte;
 //=================================================
