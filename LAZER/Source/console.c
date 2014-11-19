@@ -24,8 +24,7 @@ CONFIG_MSG Config_Msg;
 
 /********privat function *****************/
 void send_byte(char data);
-int BufferConfigRead(void);
-int BufferConfigWrite(void);
+
 char * TestCmd(char *bufer);
 
  
@@ -151,7 +150,7 @@ void ResetStart(void)
 *******************************************************************************/
 int BufferConfigRead(void)
 {
-	return FlashWrite((u8*)&Config_Msg,CONFIG_START_STRUCT,sizeof(Config_Msg));
+	return FlashRead((u8*)&Config_Msg,CONFIG_START_STRUCT,sizeof(Config_Msg));
 	/*
 	return 	I2C_EE_BufferRead(pBuffer,(u8)ReadAddr,NumByteToRead);
 	*/
@@ -162,7 +161,7 @@ int BufferConfigRead(void)
 *******************************************************************************/
 int BufferConfigWrite(void)
 {
-	return FlashRead((u8*)&Config_Msg,CONFIG_START_STRUCT,sizeof(Config_Msg));
+	return FlashWrite((u8*)&Config_Msg,CONFIG_START_STRUCT,sizeof(Config_Msg));
 	/*
 	return	I2C_EE_BufferWrite(pBuffer,(u8)WriteAddr,NumByteToWrite);
   */
@@ -193,7 +192,7 @@ void ReadConfig(void)
 			if (CheckAndWriteVersion()==FALSE)
 			{
 				console_send("\nReWrite Settings Ok\r");
-				status_write_config=BufferConfigRead();
+				status_write_config=BufferConfigWrite();
 				if (status_write_config<0) 	console_send("\nConfig not write\r");;
 			}
 		}	
@@ -264,7 +263,7 @@ void SettingsDefault(void)
 bool CheckAndWriteVersion(void)
 {	
 				
-		if ((Config_Msg.version[0]!=	TOP_VERSION)||(Config_Msg.version[1]!=VERSION)||(Config_Msg.version[2]!= SUB_VERSION))
+		if ((Config_Msg.version[2]!=	TOP_VERSION)||(Config_Msg.version[1]!=VERSION)||(Config_Msg.version[0]!= SUB_VERSION))
 		{
 			/*Version and Date, update*/
 			Config_Msg.version[2]	=	TOP_VERSION;

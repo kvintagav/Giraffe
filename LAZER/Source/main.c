@@ -38,20 +38,21 @@ void InitAll()
 	uint8 buffer_in[16]={0};
 	uint8 buffer_out[16]={0};
 	
-		CONSOLE_USART_INIT();
+	CONSOLE_USART_INIT();
+
+	#ifdef FOUR_MOTORS
+		console_send("\r\nFour motors device start\r");
+	#endif	
 	
-		#ifdef FOUR_MOTORS
-			console_send("\r\nFour motors device start\r");
-		#endif	
-		
-		#ifdef ONE_MOTOR
-			console_send("\r\nOne motor device start\r");
-		#endif
-		
-		LED_INIT();
-		I2C_INIT();
+	#ifdef ONE_MOTOR
+		console_send("\r\nOne motor device start\r");
+	#endif
 	
-		ReadConfig();
+	LED_INIT();
+	I2C_INIT();
+
+
+	ReadConfig();
 	
 	/*	
 		#ifdef EEPROM

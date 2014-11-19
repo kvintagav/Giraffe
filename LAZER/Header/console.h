@@ -21,9 +21,6 @@ typedef struct _CONFIG_MSG
 	uint8 day;
 	uint8 month;
 	uint16 year;
-	
-
-	
 	uint8 Mac[6];
 	uint8 Lip[4];
 	uint8 Sub[4];
@@ -40,11 +37,14 @@ typedef struct _CONFIG_MSG
 	uint16 year_set;
 	
 	char type_device[20];
-			
+	//PORADOK NASTROEK HE MENAT, DOBAVIT NASTROEK MOGNO	
+	// ESLI DOBAVILI PARAMETRI, OBNOVITE VERSION in ProgrammConfigDefault.h
 }
 CONFIG_MSG;
 
 
+int BufferConfigRead(void);
+int BufferConfigWrite(void);
 
 void CONSOLE_USART_INIT(void);
 void CommandProcessing( char *bufer_in, char *bufer_out);
