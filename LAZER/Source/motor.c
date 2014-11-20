@@ -317,7 +317,7 @@ void motorTest(void)
 	int index;
 	for (index = 0 ; index<NUMBERS_MOTOR ; index++)
 	{
-		motorTurn(index,false,1,false);
+		motorTurn(index,false,8,false);
 		
 	}
 }
@@ -396,23 +396,35 @@ bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data )
 *****************************************/
 bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
 {
+	int eetime;
 	int i;
 	uint8 *read_data=data;
 	//Generate start
 	I2C_GenerateSTART(I2C, ENABLE);
-	if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR ) return EE_ERROR;
- 	
+	
+	eetime=sEE_FLAG_TIMEOUT;
+	while (!I2C_GetFlagStatus(I2C2,I2C_FLAG_SB)) 
+  {
+     if((eetime--)==0) return EE_ERROR;
+  }
 	//Send Address
 	I2C_Send7bitAddress(I2C, address, I2C_Direction_Transmitter);
   if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR ) return EE_ERROR;
   
 	//Send command
 	I2C_SendData(I2C,cmd); 
-  if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
-  
-	I2C_GenerateSTART(I2C, ENABLE);
-	if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR ) return EE_ERROR;
 
+	eetime=sEE_FLAG_TIMEOUT;
+  while((!I2C_GetFlagStatus(I2C2,I2C_FLAG_TXE))&&(!I2C_GetFlagStatus(I2C2,I2C_FLAG_BTF))) 
+  {
+     if((eetime--)==0) return EE_ERROR;
+  }	
+	I2C_GenerateSTART(I2C, ENABLE);
+	eetime=sEE_FLAG_TIMEOUT;
+	while (!I2C_GetFlagStatus(I2C2,I2C_FLAG_SB)) 
+  {
+     if((eetime--)==0) return EE_ERROR;
+  }
 	//Send Address
 	I2C_Send7bitAddress(I2C, address, I2C_Direction_Receiver);
   if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)==EE_ERROR ) return EE_ERROR;
@@ -421,20 +433,30 @@ bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
 	
 	//Generate Stop
   I2C_GenerateSTOP(I2C, ENABLE);
-	i=3000;
-	while(i)
+	eetime=sEE_FLAG_TIMEOUT;
+	while(I2C_GetFlagStatus(I2C2,I2C_FLAG_RXNE)==RESET) 
 	{
-		i--;
-	}
+     if((eetime--)==0) return EE_ERROR;
+  }
 	//Read data 
-	*read_data=I2C_ReceiveData(I2C); 
-  if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
-  
-	/* Enable Acknowledgement to be ready for another reception */
-  I2C_AcknowledgeConfig(I2C, ENABLE);
+	*read_data=I2C_ReceiveData(I2C);
 
+	eetime=sEE_FLAG_TIMEOUT;
+	
+	while(I2C2->CR1&I2C_CR1_STOP) 
+  {
+     if((eetime--)==0) return EE_ERROR;
+  } 
+	/* Enable Acknowledgement to be ready for another reception */
+  //I2C_AcknowledgeConfig(I2C, ENABLE);
+	I2C_GenerateSTOP(I2C, ENABLE);
 	
 	return true;
+
+
+
+
+
 }
 
 
