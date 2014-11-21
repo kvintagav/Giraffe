@@ -68,6 +68,7 @@ void motorSenser(void)
 void motorInit(void)
 {	
 	int i;
+	bool rezult;
 	for(i = 0 ; i < NUMBERS_MOTOR ; i++)
 	{
 			if ((i==0) || (i==1)) 	motor[i].address_i2c=ADDRES_DRIVER_0;
@@ -91,10 +92,10 @@ void motorInit(void)
 			motor[i].current_faza=0;
 			
 			
-  		motorSendI2C(motor[i].address_i2c,CONFPORT+motor[i].port,motor[i].mask_senser);
+  		rezult = motorSendI2C(motor[i].address_i2c,CONFPORT+motor[i].port,motor[i].mask_senser);
 			//motorSendI2C(motor[i].address_i2c,POLARPORT+motor[i].port,motor[i].mask_senser);
 		
-			motorSendI2C(motor[i].address_i2c,OUTPORT+motor[i].port,0x00);
+			rezult = motorSendI2C(motor[i].address_i2c,OUTPORT+motor[i].port,0x00);
 		
 	}
 }
@@ -254,14 +255,18 @@ void motorSettings(void)
 	uint8 read_data;
 	uint8 addr = 0 ;
 	uint8 inport = 0 ;
+	uint8 outport = 0 ;
 	
+	bool rezult;
 	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
 	{
 		
 				addr = motor[motor_number].address_i2c;
 			inport = INPORT + motor[motor_number].port;
-			
-			motorRecvI2C(addr, inport ,&data_test );
+			outport = OUTPORT + motor[motor_number].port;
+			rezult = motorRecvI2C(addr, inport ,&data_test );
+			rezult = motorSendI2C(addr, outport ,0);
+		
 	}
 	
 	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
@@ -398,15 +403,18 @@ bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
 {
 	int eetime;
 	int i;
+	uint8 read_data_two;
 	uint8 *read_data=data;
 	//Generate start
 	I2C_GenerateSTART(I2C, ENABLE);
 	
-	eetime=sEE_FLAG_TIMEOUT;
+	eetime=sEE_LONG_TIMEOUT;
 	while (!I2C_GetFlagStatus(I2C2,I2C_FLAG_SB)) 
   {
-     if((eetime--)==0) return EE_ERROR;
+		eetime--;
+		if(eetime==0) return EE_ERROR;
   }
+	
 	//Send Address
 	I2C_Send7bitAddress(I2C, address, I2C_Direction_Transmitter);
   if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR ) return EE_ERROR;
@@ -414,43 +422,46 @@ bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
 	//Send command
 	I2C_SendData(I2C,cmd); 
 
-	eetime=sEE_FLAG_TIMEOUT;
+	eetime=sEE_LONG_TIMEOUT;
   while((!I2C_GetFlagStatus(I2C2,I2C_FLAG_TXE))&&(!I2C_GetFlagStatus(I2C2,I2C_FLAG_BTF))) 
   {
      if((eetime--)==0) return EE_ERROR;
   }	
+	
+	//Generate start
 	I2C_GenerateSTART(I2C, ENABLE);
-	eetime=sEE_FLAG_TIMEOUT;
+	eetime=sEE_LONG_TIMEOUT;
 	while (!I2C_GetFlagStatus(I2C2,I2C_FLAG_SB)) 
   {
      if((eetime--)==0) return EE_ERROR;
   }
+	
 	//Send Address
 	I2C_Send7bitAddress(I2C, address, I2C_Direction_Receiver);
   if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)==EE_ERROR ) return EE_ERROR;
  /* Enable Acknowledgement to be ready for another reception */
-  I2C_AcknowledgeConfig(I2C, ENABLE);
+  
+	I2C_AcknowledgeConfig(I2C, DISABLE);
+	(void)I2C2->SR2;
 	
-	//Generate Stop
   I2C_GenerateSTOP(I2C, ENABLE);
-	eetime=sEE_FLAG_TIMEOUT;
+	
+	eetime=sEE_LONG_TIMEOUT;
 	while(I2C_GetFlagStatus(I2C2,I2C_FLAG_RXNE)==RESET) 
 	{
      if((eetime--)==0) return EE_ERROR;
   }
+	
 	//Read data 
 	*read_data=I2C_ReceiveData(I2C);
 
-	eetime=sEE_FLAG_TIMEOUT;
-	
+	eetime=sEE_LONG_TIMEOUT;
 	while(I2C2->CR1&I2C_CR1_STOP) 
-  {
-     if((eetime--)==0) return EE_ERROR;
-  } 
-	/* Enable Acknowledgement to be ready for another reception */
-  //I2C_AcknowledgeConfig(I2C, ENABLE);
-	I2C_GenerateSTOP(I2C, ENABLE);
+	{
+		if((eetime--)==0) return EE_ERROR;
+  }
 	
+	I2C_AcknowledgeConfig(I2C, ENABLE);
 	return true;
 
 
@@ -466,7 +477,7 @@ bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
 *******************************************************************************/
 bool I2CWaitEventMotor( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT)
 {
-	int eetime=sEE_FLAG_TIMEOUT;
+	int eetime=sEE_LONG_TIMEOUT;
 	
   while(!I2C_CheckEvent(I2C, I2C_EVENT))
    {
