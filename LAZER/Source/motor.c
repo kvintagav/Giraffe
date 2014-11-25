@@ -260,21 +260,14 @@ void motorSettings(void)
 	bool rezult;
 	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
 	{
-		
-				addr = motor[motor_number].address_i2c;
+			addr = motor[motor_number].address_i2c;
 			inport = INPORT + motor[motor_number].port;
 			outport = OUTPORT + motor[motor_number].port;
 			rezult = motorRecvI2C(addr, inport ,&data_test );
 			rezult = motorSendI2C(addr, outport ,0);
-		
 	}
-	
 	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
 	{
-		
-		
-		
-		
 		if (motor[motor_number].work==true)
 		{
 			addr = motor[motor_number].address_i2c;
@@ -317,12 +310,18 @@ void motorSettings(void)
 	}
 }
 
+/****************************************
+* Name: motorTest
+* Desc: Motor testing
+*****************************************/
 void motorTest(void)
 {
 	int index;
+	bool rezult;
 	for (index = 0 ; index<NUMBERS_MOTOR ; index++)
 	{
-		motorTurn(index,false,8,false);
+		rezult = motorTurn(index,false,8,false);
+		if (rezult == EE_ERROR) motor[index].work=false;
 		
 	}
 }
@@ -333,63 +332,43 @@ void motorTest(void)
 *****************************************/
 bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data )
 {
-	/*
-	//Generate START
-  I2C_GenerateSTART(I2C, ENABLE);
-	if(I2CWaitEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR ) return EE_ERROR;
- 	
-	//Send Address
-	I2C_Send7bitAddress(I2C, address, I2C_Direction_Transmitter); 
-  if(I2CWaitEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR ) return EE_ERROR;
-  
-	//Send command
-	I2C_SendData(I2C,cmd);
-  if(I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
-  
-	//Send data 8 bit
-	I2C_SendData(I2C,data); 
-  if(I2CWaitEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
-  
-	//Generate Stop
-  I2C_GenerateSTOP(I2C, ENABLE);
 	
-	return 1;
-	*/
-	 /* Send STRAT condition */
+	 // Send STRAT condition 
 	 
 	I2C_GenerateSTART(I2C, ENABLE);
 
-		
-  /* Test on EV5 and clear it */
-	while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)){};
+	if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR ) return EE_ERROR;
+
+  // Test on EV5 and clear it 
+	//while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)){};
 	
-  /* Send EEPROM address for write */
+  // Send EEPROM address for write 
   I2C_Send7bitAddress(I2C, address, I2C_Direction_Transmitter);
   
-  /* Test on EV6 and clear it */
-	while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)){};
+	if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR ) return EE_ERROR;
+ 
+  // Test on EV6 and clear it 
+	//while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)){};
 	
-  /* Send the byte to be written */
+  // Send the byte to be written 
   I2C_SendData(I2C,cmd); 
    
-  /* Test on EV8 and clear it */
+	if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
+
+  // Test on EV8 and clear it 
 	
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
+  //while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
   
-	 /* Send the byte to be written */
+	// Send the byte to be written 
   I2C_SendData(I2C,data); 
    
-  /* Test on EV8 and clear it */
-	
-  while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
- /* Send the byte to be written */
- // I2C_SendData(I2C,port1); 
-   
-  /* Test on EV8 and clear it */
-	
- // while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
+  if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
  
-  /* Send STOP condition */
+  // Test on EV8 and clear it 
+	
+  //while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
+  
+  // Send STOP condition 
 	I2C_GenerateSTOP(I2C, ENABLE);
 	
 	return NO_ERROR;
