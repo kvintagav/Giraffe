@@ -53,10 +53,6 @@ char *commands[] = {
 	"default",
 	"save",
 	"reboot",
-/*	NULL
-};
-
-char *com_par[] = {*/
   "mac",
   "ip",
 	"gateway",

@@ -73,16 +73,17 @@ void InitAll()
 		(SysTick_Config(SystemCoreClock / 16));
 		
 		#ifdef FOUR_MOTORS
-		
+			motorInitTimer();
 			motorInitGpio();
 			motorInit();	
 			motorTest();
 			motorSettings();
-		
+			
 		#endif	
 		
 		#ifdef ONE_MOTOR
 			DMOT_INIT();
+			TIM_INIT();
 			Set_OKO ();
 		#endif
 		

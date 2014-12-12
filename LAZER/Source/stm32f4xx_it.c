@@ -51,6 +51,7 @@ void EXTI2_IRQHandler (void)
     EXTI_ClearITPendingBit(INT_PCA9539_1_IRQLine);
   }
 }
+
 void EXTI3_IRQHandler (void)
 {
 	if(EXTI_GetITStatus(INT_PCA9539_2_IRQLine) != RESET)
@@ -168,17 +169,21 @@ void TIM2_IRQHandler(void)
 	}
 }
 /*******************************************************************************
-* Function Name  : TIM2_IRQHandler
-* Description    : This function handles TIM2 global interrupt request.
+* Function Name  : TIM3_IRQHandler
+* Description    : This function handles TIM3 global interrupt request.
 *******************************************************************************/
 void TIM3_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM3, TIM_IT_Update) == SET)
 	{
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-	
-		TIM_USER_HANDLER(); 	//	This can be code for interrupt
-
+		#ifdef ONE_MOTOR  
+			TIM_USER_HANDLER(); 	//	This can be code for interrupt
+		#endif
+		
+		#ifdef FOUR_MOTORS  
+			MOTOR_HANDLER(); 	//	This can be code for interrupt
+		#endif
 
 	}
 }

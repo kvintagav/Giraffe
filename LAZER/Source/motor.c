@@ -9,7 +9,7 @@ bool senser_pressed;
 int openHole(int motor_number);
 int closeHole(int motor_number);
 int turnOutMotorFromSenser(int motor_number);
-
+bool flag_new_tick ; //true - avaliable new tick, false - wait interrupt from timer 
 uint8 data_test = 0;
 
 void motorInitGpio(void)
@@ -58,12 +58,47 @@ void motorInitGpio(void)
   NVIC_Init(&NVIC_InitStructure);
 	
 }
+
+void motorInitTimer(void)
+{
+	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+	RCC_APB1PeriphClockCmd(RCC_TIM_MOTOR ,ENABLE);
+
+	  // Time base configuration 	
+			
+  TIM_TimeBaseStructure.TIM_Period = 1250;          
+  TIM_TimeBaseStructure.TIM_Prescaler = 0;      
+  TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;    
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; 
+  TIM_TimeBaseInit(TIM_MOTOR, &TIM_TimeBaseStructure);
+  // Prescaler configuration 
+  TIM_PrescalerConfig(TIM_MOTOR, 35, TIM_PSCReloadMode_Immediate);
+  // TIM enable counter 
+  TIM_Cmd(TIM_MOTOR, ENABLE);
+  /* TIM IT enable */
+  TIM_ITConfig(TIM_MOTOR, TIM_IT_Update, ENABLE);  
+	
+	
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+	/* Enable the TIM2 global Interrupt */
+  NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY+2;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;  
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+	
+}
+
 void motorSenser(void)
 {
 	senser_pressed=true;
-	//senser_pressed=false;
-	
 }	
+
+void MOTOR_HANDLER(void)
+{
+	flag_new_tick = true;
+}
 
 void motorInit(void)
 {	
@@ -135,9 +170,10 @@ int motorTurnOnPercent(int motor_number , int percent)
 	else return -1;
 	return numbers_tick; 
 }
+
+
 int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 {
-
 	int tick_numb = 0;
 	int j = 0;
 	uint8 value =  motor[number].mask_enable;
@@ -151,9 +187,11 @@ int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 	{
 		if (!senser_pressed) 
 		{
+			while (!flag_new_tick){}
+			flag_new_tick= false;
+				
 			switch (motor[number].current_faza)
 			{
-
 				case 0: 
 					motor[number].current_faza=(direction) ?1 : 7; 
 					value=(direction) ? FAZA1 : FAZA7;
@@ -193,7 +231,7 @@ int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 			}
 			value|=motor[number].mask_enable;
 			motorSendI2C(address , outport , value);
-			for (j=0;j<DELAY_MOTOR  ;j++){};
+			//for (j=0; j < DELAY_MOTOR ;j++){};
 			tick_numb++;
 			if ((!turn_to_senser)&&(tick_numb==tick)) work_motor = false;
 				
@@ -258,6 +296,7 @@ void motorSettings(void)
 	uint8 outport = 0 ;
 	
 	bool rezult;
+	/*
 	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
 	{
 			addr = motor[motor_number].address_i2c;
@@ -266,6 +305,7 @@ void motorSettings(void)
 			rezult = motorRecvI2C(addr, inport ,&data_test );
 			rezult = motorSendI2C(addr, outport ,0);
 	}
+	*/
 	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
 	{
 		if (motor[motor_number].work==true)
@@ -325,6 +365,7 @@ void motorTest(void)
 		
 	}
 }
+
 
 /****************************************
 * Name:Send message to motor driver 

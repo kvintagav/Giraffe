@@ -271,6 +271,7 @@ void TIM_INIT(void)
 	RCC_APB1PeriphClockCmd(RCC_TIM_MOTOR ,ENABLE);
 
 	  // Time base configuration 	
+			
   TIM_TimeBaseStructure.TIM_Period = 250;          
   TIM_TimeBaseStructure.TIM_Prescaler = 0;      
   TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;    

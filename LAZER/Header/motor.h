@@ -117,5 +117,6 @@ void motorInit(void);
 void motorTest(void);
 void motorInitGpio(void);
 void motorSenser(void);
-
+void MOTOR_HANDLER(void);
+void motorInitTimer(void);
 #endif
