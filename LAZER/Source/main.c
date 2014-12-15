@@ -34,9 +34,9 @@ extern MOTOR_STATE motor[NUMBERS_MOTOR];
 /*******************************************************************/
 void InitAll()
 {
-	int i;
-	uint8 buffer_in[16]={0};
-	uint8 buffer_out[16]={0};
+//	int i;
+//	uint8 buffer_in[16]={0};
+	//uint8 buffer_out[16]={0};
 	
 	CONSOLE_USART_INIT();
 
@@ -76,7 +76,7 @@ void InitAll()
 			motorInitTimer();
 			motorInitGpio();
 			motorInit();	
-			motorTest();
+		//	motorTest();
 			motorSettings();
 			
 		#endif	

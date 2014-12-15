@@ -37,7 +37,7 @@ void motorInitGpio(void)
   SYSCFG_EXTILineConfig(INT_PCA9539_2_PortSource, INT_PCA9539_2_PinSource);
 
   EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;  
+  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;  
   EXTI_InitStructure.EXTI_LineCmd = ENABLE;
   
 	EXTI_InitStructure.EXTI_Line = INT_PCA9539_1_IRQLine;
@@ -67,7 +67,7 @@ void motorInitTimer(void)
 
 	  // Time base configuration 	
 			
-  TIM_TimeBaseStructure.TIM_Period = 1250;          
+  TIM_TimeBaseStructure.TIM_Period = 20000;          
   TIM_TimeBaseStructure.TIM_Prescaler = 0;      
   TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;    
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; 
@@ -126,6 +126,8 @@ void motorInit(void)
 			motor[i].work = true;
 			motor[i].current_faza=0;
 			
+			motor[i].mask_senser_open=1;
+			motor[i].mask_senser_close=2;
 			
   		rezult = motorSendI2C(motor[i].address_i2c,CONFPORT+motor[i].port,motor[i].mask_senser);
 			//motorSendI2C(motor[i].address_i2c,POLARPORT+motor[i].port,motor[i].mask_senser);
@@ -175,7 +177,7 @@ int motorTurnOnPercent(int motor_number , int percent)
 int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 {
 	int tick_numb = 0;
-	int j = 0;
+//	int j = 0;
 	uint8 value =  motor[number].mask_enable;
 	uint8 address = motor[number].address_i2c;
 	uint8 outport = OUTPORT+motor[number].port;
@@ -238,6 +240,7 @@ int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 			if (tick_numb>=MAX_NUMBERS_TICKS)
 			{
 				work_motor = false;
+				senser_pressed = false;
 			}
 		}
 		else 
@@ -256,25 +259,26 @@ int turnOutMotorFromSenser(int motor_number)
 	uint8 read_data = 0;
 	uint8 addr = motor[motor_number].address_i2c;
 	uint8 inport = INPORT+motor[motor_number].port; 
-	int mount_tick;
+	int mount;
 	bool turn_motor= true;
 	while (turn_motor)
 	{
 		motorRecvI2C(addr, inport ,&read_data );
 		if (read_data==motor[motor_number].mask_senser_open)
 		{
-			motorTurn(motor_number,CLOSE,1,false);
-			mount_tick++;
+			motorTurn(motor_number,CLOSE,2,false);
+			mount++;
 		}
 		else if (read_data==motor[motor_number].mask_senser_close)
 		{
-			motorTurn(motor_number,OPEN,1,false);
-			mount_tick++;
+			motorTurn(motor_number,OPEN,2,false);
+			mount++;
 		}
 		else  turn_motor=0;
 		
 	}
-	return mount_tick;
+	senser_pressed = false;
+	return mount;
 }
 int openHole(int motor_number)
 {
@@ -290,12 +294,13 @@ void motorSettings(void)
 {
 	int motor_number;
 	int mount_tick;
+	int rezult;
 	uint8 read_data;
 	uint8 addr = 0 ;
 	uint8 inport = 0 ;
 	uint8 outport = 0 ;
 	
-	bool rezult;
+	
 	/*
 	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
 	{
@@ -315,27 +320,31 @@ void motorSettings(void)
 			
 			motorRecvI2C(addr, inport ,&data_test );
 
-			
-			if (openHole(motor_number)>=MAX_NUMBERS_TICKS)
+			rezult = openHole(motor_number);
+			if (rezult < MAX_NUMBERS_TICKS)
 			{	
 				motor[motor_number].work=true;
 
 				motorRecvI2C(addr, inport ,&read_data );
 				
-				read_data|=motor[motor_number].mask_senser;
-				motor[motor_number].mask_senser_open=read_data;
+				//read_data|=motor[motor_number].mask_senser;
+			//	motor[motor_number].mask_senser_open=read_data;
 				
+				turnOutMotorFromSenser(motor_number);
 				mount_tick = closeHole(motor_number);
 				
 				motorRecvI2C(addr, inport ,&read_data );
-				read_data|=motor[motor_number].mask_senser;
-				motor[motor_number].mask_senser_close=read_data;
+				//read_data|=motor[motor_number].mask_senser;
+		//		motor[motor_number].mask_senser_close=read_data;
+				turnOutMotorFromSenser(motor_number);
 				
 				mount_tick += openHole(motor_number);
+				
 				motor[motor_number].max_count_tick=(int)(mount_tick>>1);
 				motor[motor_number].current_percent=0;
 
 				turnOutMotorFromSenser(motor_number);
+				motorTurnOnPercent( motor_number ,  25);
 			}	
 			else 
 			{
@@ -422,7 +431,7 @@ bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data )
 bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
 {
 	int eetime;
-	int i;
+//	int i;
 	uint8 read_data_two;
 	uint8 *read_data=data;
 	//Generate start
