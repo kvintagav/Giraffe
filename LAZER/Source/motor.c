@@ -11,6 +11,7 @@ int closeHole(int motor_number);
 int turnOutMotorFromSenser(int motor_number);
 bool flag_new_tick ; //true - avaliable new tick, false - wait interrupt from timer 
 uint8 data_test = 0;
+void motorOneTick(int number, bool direction);
 
 void motorInitGpio(void)
 {
@@ -100,6 +101,10 @@ void MOTOR_HANDLER(void)
 	flag_new_tick = true;
 }
 
+/*********************************************
+* Function Name  : 
+* Description    : 
+*********************************************/
 void motorInit(void)
 {	
 	int i;
@@ -137,6 +142,10 @@ void motorInit(void)
 	}
 }
 
+/*********************************************
+* Function Name  : 
+* Description    : 
+*********************************************/
 int motorTurnOnPercent(int motor_number , int percent)
 {
 	int numbers_tick;
@@ -173,23 +182,15 @@ int motorTurnOnPercent(int motor_number , int percent)
 	return numbers_tick; 
 }
 
-
-int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
+/*********************************************
+* Function Name  : 
+* Description    : 
+*********************************************/
+void motorOneTick(int number, bool direction_napr)
 {
-	int tick_numb = 0;
-//	int j = 0;
-	uint8 value =  motor[number].mask_enable;
-	uint8 address = motor[number].address_i2c;
-	uint8 outport = OUTPORT+motor[number].port;
-	bool work_motor = true;
-
-	motorSendI2C(address,outport, value); //ENABLE
-	
-	while (work_motor)
-	{
-		if (!senser_pressed) 
-		{
-			while (!flag_new_tick){}
+	uint8 value = 0;
+	bool direction =!direction_napr;
+	while (!flag_new_tick){}
 			flag_new_tick= false;
 				
 			switch (motor[number].current_faza)
@@ -232,28 +233,87 @@ int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 				break;
 			}
 			value|=motor[number].mask_enable;
-			motorSendI2C(address , outport , value);
-			//for (j=0; j < DELAY_MOTOR ;j++){};
-			tick_numb++;
-			if ((!turn_to_senser)&&(tick_numb==tick)) work_motor = false;
-				
-			if (tick_numb>=MAX_NUMBERS_TICKS)
-			{
-				work_motor = false;
-				senser_pressed = false;
-			}
-		}
-		else 
+			motorSendI2C(motor[number].address_i2c , motor[number].port + OUTPORT , value);
+
+}
+
+
+/*********************************************
+* Function Name  : 
+* Description    : 
+*********************************************/
+int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
+{
+	int tick_numb = 0;
+//	int j = 0;
+	uint8 address = motor[number].address_i2c;
+	uint8 outport = OUTPORT+motor[number].port;
+	uint8 inport = motor[number].port+INPORT;
+	bool work_motor = true;
+	uint8 inport_data = 0 ;
+	bool out_from_senser =  false; //if senser enable nado otodvinut ot nego
+	motorSendI2C(address,outport, motor[number].mask_enable); //ENABLE
+	
+	senser_pressed = false;	//obnul senser 
+	
+	while (work_motor)
+	{
+		if (!turn_to_senser)
 		{
-			senser_pressed = false;
-			work_motor = false;
+				motorOneTick(number, direction);
+				tick_numb++;
+				if (tick_numb>=tick) work_motor = false;
+		}
+		else
+		{
+			if (out_from_senser==true)
+			{
+	//				motorSendI2C(address,outport,0x00); //DISABLE
+					motorRecvI2C(address, inport,&inport_data );
+					inport_data=inport_data&motor[number].mask_senser;
+	//motorSendI2C(address,outport, motor[number].mask_enable); //ENABLE
+				
+					if (inport_data==motor[number].mask_senser_open)
+					{
+						motorOneTick(number, !direction);
+						tick_numb--;
+					}
+					else if (inport_data==motor[number].mask_senser_close)
+					{
+						motorOneTick(number, !direction);
+						tick_numb--;
+					}
+					else  work_motor=false;
+			}
+			else
+			{
+				motorOneTick(number, direction);
+				tick_numb++;
+				if (senser_pressed==true)
+				{
+					out_from_senser=true;
+				}					
+				
+				if (tick_numb>=MAX_NUMBERS_TICKS)
+				{
+					work_motor = false;
+					senser_pressed = false;
+				}
+			
+			}
 		}
 		
 	}
 	motorSendI2C(address,outport,0x00); //DISABLE
 	return tick_numb;
+	senser_pressed = false;
 }
 
+
+/*********************************************
+* Function Name  : 
+* Description    : 
+*********************************************/
 int turnOutMotorFromSenser(int motor_number)
 {
 	uint8 read_data = 0;
@@ -266,15 +326,15 @@ int turnOutMotorFromSenser(int motor_number)
 		motorRecvI2C(addr, inport ,&read_data );
 		if (read_data==motor[motor_number].mask_senser_open)
 		{
-			motorTurn(motor_number,CLOSE,2,false);
+			motorTurn(motor_number,CLOSE,TURN_ONE_PERIOD,false);
 			mount++;
 		}
 		else if (read_data==motor[motor_number].mask_senser_close)
 		{
-			motorTurn(motor_number,OPEN,2,false);
+			motorTurn(motor_number,OPEN,TURN_ONE_PERIOD,false);
 			mount++;
 		}
-		else  turn_motor=0;
+		else  turn_motor=false;
 		
 	}
 	senser_pressed = false;
@@ -290,60 +350,33 @@ int closeHole(int motor_number)
 	return motorTurn(motor_number,CLOSE,0,true);
 }
 
+
+/*********************************************
+* Function Name  : 
+* Description    : 
+*********************************************/
 void motorSettings(void)
 {
 	int motor_number;
 	int mount_tick;
 	int rezult;
-	uint8 read_data;
-	uint8 addr = 0 ;
-	uint8 inport = 0 ;
-	uint8 outport = 0 ;
-	
-	
-	/*
-	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
-	{
-			addr = motor[motor_number].address_i2c;
-			inport = INPORT + motor[motor_number].port;
-			outport = OUTPORT + motor[motor_number].port;
-			rezult = motorRecvI2C(addr, inport ,&data_test );
-			rezult = motorSendI2C(addr, outport ,0);
-	}
-	*/
-	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
+
+	for (motor_number = 3 ; motor_number<NUMBERS_MOTOR; motor_number++)
 	{
 		if (motor[motor_number].work==true)
 		{
-			addr = motor[motor_number].address_i2c;
-			inport = INPORT + motor[motor_number].port;
-			
-			motorRecvI2C(addr, inport ,&data_test );
-
 			rezult = openHole(motor_number);
 			if (rezult < MAX_NUMBERS_TICKS)
 			{	
 				motor[motor_number].work=true;
 
-				motorRecvI2C(addr, inport ,&read_data );
-				
-				//read_data|=motor[motor_number].mask_senser;
-			//	motor[motor_number].mask_senser_open=read_data;
-				
-				turnOutMotorFromSenser(motor_number);
 				mount_tick = closeHole(motor_number);
-				
-				motorRecvI2C(addr, inport ,&read_data );
-				//read_data|=motor[motor_number].mask_senser;
-		//		motor[motor_number].mask_senser_close=read_data;
-				turnOutMotorFromSenser(motor_number);
-				
+					
 				mount_tick += openHole(motor_number);
 				
 				motor[motor_number].max_count_tick=(int)(mount_tick>>1);
 				motor[motor_number].current_percent=0;
 
-				turnOutMotorFromSenser(motor_number);
 				motorTurnOnPercent( motor_number ,  25);
 			}	
 			else 
@@ -365,13 +398,12 @@ void motorSettings(void)
 *****************************************/
 void motorTest(void)
 {
-	int index;
+	int index,mount_tick;
 	bool rezult;
+	uint8_t read_data;
 	for (index = 0 ; index<NUMBERS_MOTOR ; index++)
 	{
-		rezult = motorTurn(index,false,8,false);
-		if (rezult == EE_ERROR) motor[index].work=false;
-		
+			turnOutMotorFromSenser(index);
 	}
 }
 

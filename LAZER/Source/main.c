@@ -76,7 +76,7 @@ void InitAll()
 			motorInitTimer();
 			motorInitGpio();
 			motorInit();	
-		//	motorTest();
+			motorTest();
 			motorSettings();
 			
 		#endif	
@@ -101,7 +101,17 @@ int main(void)
 
 {
 //	int i;
-
+		GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+ 
+    GPIO_StructInit(&GPIO_InitStructure);
+    
+	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_Init(LED_GPIO, &GPIO_InitStructure);
+	  GPIO_SetBits(GPIOD,GPIO_Pin_5);
+		GPIO_ResetBits(GPIOD,GPIO_Pin_5);
 	InitAll();
 
 	socket(0, Sn_MR_TCP, Config_Msg.port_science, 0);

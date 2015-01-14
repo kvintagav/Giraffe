@@ -6,8 +6,9 @@
 #include "main.h"
 
 
-#define DELAY_MOTOR 1000000
+#define DELAY_MOTOR 			1000000
 #define MAX_NUMBERS_TICKS 800
+#define TURN_ONE_PERIOD		3
 
 #define INPORT 		0
 #define OUTPORT		2
