@@ -4,60 +4,53 @@
 MOTOR_STATE motor[NUMBERS_MOTOR];
 
 
-bool I2CWaitEventMotor( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT);
-bool senser_pressed;
 int openHole(int motor_number);
 int closeHole(int motor_number);
 int turnOutMotorFromSenser(int motor_number);
 bool flag_new_tick ; //true - avaliable new tick, false - wait interrupt from timer 
 uint8 data_test = 0;
 void motorOneTick(int number, bool direction);
+void sendFaza(uint8 faza);
+void enableMotor(int number_motor);
+void disableMotor(int number_motor);
 
 void motorInitGpio(void)
 {
 	EXTI_InitTypeDef   EXTI_InitStructure;
   GPIO_InitTypeDef   GPIO_InitStructure;
   NVIC_InitTypeDef   NVIC_InitStructure;
-	
-  RCC_AHB1PeriphClockCmd( INT_PCA9539_1_RCC, ENABLE);
-	RCC_AHB1PeriphClockCmd( INT_PCA9539_2_RCC, ENABLE);
-  
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-  
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	RCC_AHB1PeriphClockCmd(MOTOR_GPIO_RCC_D, ENABLE);
+	RCC_AHB1PeriphClockCmd(MOTOR_GPIO_RCC_E, ENABLE);
 
-	GPIO_InitStructure.GPIO_Pin = INT_PCA9539_1_GPIO;
-  GPIO_Init(INT_PCA9539_1_PORT, &GPIO_InitStructure);
-	
-	GPIO_InitStructure.GPIO_Pin = INT_PCA9539_2_GPIO;
-  GPIO_Init(INT_PCA9539_2_PORT, &GPIO_InitStructure);
-	
-  SYSCFG_EXTILineConfig(INT_PCA9539_1_PortSource, INT_PCA9539_1_PinSource);
-  SYSCFG_EXTILineConfig(INT_PCA9539_2_PortSource, INT_PCA9539_2_PinSource);
+  GPIO_StructInit(&GPIO_InitStructure);
 
-  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;  
-  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-  
-	EXTI_InitStructure.EXTI_Line = INT_PCA9539_1_IRQLine;
-  EXTI_Init(&EXTI_InitStructure);
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Pin = MOTOR_SENSE_IN_D;
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
 
-  EXTI_InitStructure.EXTI_Line = INT_PCA9539_2_IRQLine;
-	EXTI_Init(&EXTI_InitStructure);
-  
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  
-	NVIC_InitStructure.NVIC_IRQChannel = INT_PCA9539_1_IRQChannel;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0E;
-  NVIC_Init(&NVIC_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = MOTOR_SENSE_IN_E;
+	GPIO_Init(GPIOE, &GPIO_InitStructure);
+  	 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_Pin = MOTOR_OBM_OUT;
+	GPIO_Init(GPIOE, &GPIO_InitStructure);
 	
-	NVIC_InitStructure.NVIC_IRQChannel = INT_PCA9539_2_IRQChannel;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
-  NVIC_Init(&NVIC_InitStructure);
+	GPIO_ResetBits(MOT_OBM_1);
+  GPIO_ResetBits(MOT_OBM_2);
+  GPIO_ResetBits(MOT_OBM_3);
+  GPIO_ResetBits(MOT_OBM_4);
 	
+	GPIO_InitStructure.GPIO_Pin = MOTOR_EN_OUT;
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
+
+  GPIO_ResetBits(MOT_EN_1);
+  GPIO_ResetBits(MOT_EN_2);
+  GPIO_ResetBits(MOT_EN_3);
+  GPIO_ResetBits(MOT_EN_4);
+
+
 }
 
 void motorInitTimer(void)
@@ -91,19 +84,109 @@ void motorInitTimer(void)
 	
 }
 
-void motorSenser(void)
-{
-	senser_pressed=true;
-}	
-
 void MOTOR_HANDLER(void)
 {
 	flag_new_tick = true;
 }
 
 /*********************************************
-* Function Name  : 
-* Description    : 
+* Function Name  : checkSenser 
+* Description    : check sensers open and close
+*********************************************/
+int checkSensers(int number_motor)
+{
+		switch(number_motor)
+		{
+			case 0: 
+				motor[number_motor].open = GPIO_ReadInputDataBit_BOOL(SENSE_1_OPEN);
+				motor[number_motor].close = GPIO_ReadInputDataBit_BOOL(SENSE_1_CLOSE);
+				 
+			break;
+			case 1: 
+				motor[number_motor].open = GPIO_ReadInputDataBit_BOOL(SENSE_2_OPEN);
+				motor[number_motor].close = GPIO_ReadInputDataBit_BOOL(SENSE_2_CLOSE);
+			break;
+			case 2: 
+				motor[number_motor].open = GPIO_ReadInputDataBit_BOOL(SENSE_3_OPEN);
+				motor[number_motor].close = GPIO_ReadInputDataBit_BOOL(SENSE_3_CLOSE);
+			break;
+			case 3: 
+				motor[number_motor].open = GPIO_ReadInputDataBit_BOOL(SENSE_4_OPEN);
+				motor[number_motor].close = GPIO_ReadInputDataBit_BOOL(SENSE_4_CLOSE);
+			break;
+		}	
+		return ( motor[number_motor].open+motor[number_motor].close*2);
+		
+}
+
+/*********************************************
+* Function Name  : checkSenser 
+* Description    : check sensers open and close
+*********************************************/
+void enableMotor(int number_motor)
+{
+	switch(number_motor)
+	{
+		case 0: 
+			GPIO_SetBits(MOT_EN_1);
+		break;
+		case 1: 
+			GPIO_SetBits(MOT_EN_2);
+		break;
+		case 2: 
+			GPIO_SetBits(MOT_EN_3);
+		break;
+		case 3: 
+			GPIO_SetBits(MOT_EN_4);
+		break;
+	}
+}
+
+/*********************************************
+* Function Name  : checkSenser 
+* Description    : check sensers open and close
+*********************************************/
+void disableMotor(int number_motor)
+{
+	switch(number_motor)
+	{
+		case 0: 
+			GPIO_ResetBits(MOT_EN_1);
+		break;
+		case 1: 
+			GPIO_ResetBits(MOT_EN_2);
+		break;
+		case 2: 
+			GPIO_ResetBits(MOT_EN_3);
+		break;
+		case 3: 
+			GPIO_ResetBits(MOT_EN_4);
+		break;
+	}
+}
+
+/*********************************************
+* Function Name  : sendFaza 
+* Description    : set faza on output mk
+*********************************************/
+void sendFaza(uint8 faza)
+{
+	if ((faza&0x01)>0) GPIO_SetBits(MOT_OBM_1);
+	else GPIO_ResetBits(MOT_OBM_1);
+	
+	if ((faza&0x02)>0) GPIO_SetBits(MOT_OBM_2);
+	else GPIO_ResetBits(MOT_OBM_2);
+	
+	if ((faza&0x04)>0) GPIO_SetBits(MOT_OBM_3);
+	else GPIO_ResetBits(MOT_OBM_3);
+	
+	if ((faza&0x08)>0) GPIO_SetBits(MOT_OBM_4);
+	else GPIO_ResetBits(MOT_OBM_4);
+}
+	
+/*********************************************
+* Function Name  : motorInit 
+* Description    : settings firt set of motor
 *********************************************/
 void motorInit(void)
 {	
@@ -111,34 +194,11 @@ void motorInit(void)
 	bool rezult;
 	for(i = 0 ; i < NUMBERS_MOTOR ; i++)
 	{
-			if ((i==0) || (i==1)) 	motor[i].address_i2c=ADDRES_DRIVER_0;
-			else										motor[i].address_i2c=ADDRES_DRIVER_1;
-			
-			if ((i==0) || (i==2)) 	motor[i].port=0;				
-			else										motor[i].port=1;
-			
-			if ((i==0) || (i==3))		motor[i].mask_enable=0xC0;
-			else										motor[i].mask_enable=0x03;
-			
-			if ((i==0) || (i==3))		
-			{
-				motor[i].mask_senser=0x03;
-			}
-			else
-			{
-				motor[i].mask_senser=0xC0;
-			}
 			motor[i].work = true;
-			motor[i].current_faza=0;
-			
-			motor[i].mask_senser_open=1;
-			motor[i].mask_senser_close=2;
-			
-  		rezult = motorSendI2C(motor[i].address_i2c,CONFPORT+motor[i].port,motor[i].mask_senser);
-			//motorSendI2C(motor[i].address_i2c,POLARPORT+motor[i].port,motor[i].mask_senser);
-		
-			rezult = motorSendI2C(motor[i].address_i2c,OUTPORT+motor[i].port,0x00);
-		
+			motor[i].current_faza = 0;
+			motor[i].current_tick = 0;
+			motor[i].current_percent = 0;
+			motor[i].max_count_tick = 0;
 	}
 }
 
@@ -232,9 +292,8 @@ void motorOneTick(int number, bool direction_napr)
 					value= FAZA0;
 				break;
 			}
-			value|=motor[number].mask_enable;
-			motorSendI2C(motor[number].address_i2c , motor[number].port + OUTPORT , value);
-
+			sendFaza(value);
+			
 }
 
 
@@ -245,17 +304,11 @@ void motorOneTick(int number, bool direction_napr)
 int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 {
 	int tick_numb = 0;
-//	int j = 0;
-	uint8 address = motor[number].address_i2c;
-	uint8 outport = OUTPORT+motor[number].port;
-	uint8 inport = motor[number].port+INPORT;
 	bool work_motor = true;
-	uint8 inport_data = 0 ;
 	bool out_from_senser =  false; //if senser enable nado otodvinut ot nego
-	motorSendI2C(address,outport, motor[number].mask_enable); //ENABLE
-	
-	senser_pressed = false;	//obnul senser 
-	
+	uint8 rezult_senser = 0;
+
+	enableMotor(number);
 	while (work_motor)
 	{
 		if (!turn_to_senser)
@@ -268,20 +321,11 @@ int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 		{
 			if (out_from_senser==true)
 			{
-	//				motorSendI2C(address,outport,0x00); //DISABLE
-					motorRecvI2C(address, inport,&inport_data );
-					inport_data=inport_data&motor[number].mask_senser;
-	//motorSendI2C(address,outport, motor[number].mask_enable); //ENABLE
-				
-					if (inport_data==motor[number].mask_senser_open)
+					if (checkSensers(number)>0)
 					{
 						motorOneTick(number, !direction);
 						tick_numb--;
-					}
-					else if (inport_data==motor[number].mask_senser_close)
-					{
-						motorOneTick(number, !direction);
-						tick_numb--;
+						if (tick_numb==0) work_motor = false;
 					}
 					else  work_motor=false;
 			}
@@ -289,24 +333,15 @@ int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 			{
 				motorOneTick(number, direction);
 				tick_numb++;
-				if (senser_pressed==true)
-				{
-					out_from_senser=true;
-				}					
+				if (checkSensers(number)>0)	out_from_senser=true;
+				if (tick_numb>=MAX_NUMBERS_TICKS)	work_motor = false;
 				
-				if (tick_numb>=MAX_NUMBERS_TICKS)
-				{
-					work_motor = false;
-					senser_pressed = false;
-				}
-			
 			}
 		}
-		
 	}
-	motorSendI2C(address,outport,0x00); //DISABLE
+	disableMotor(number);
 	return tick_numb;
-	senser_pressed = false;
+	
 }
 
 
@@ -316,28 +351,24 @@ int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 *********************************************/
 int turnOutMotorFromSenser(int motor_number)
 {
-	uint8 read_data = 0;
-	uint8 addr = motor[motor_number].address_i2c;
-	uint8 inport = INPORT+motor[motor_number].port; 
 	int mount;
 	bool turn_motor= true;
 	while (turn_motor)
 	{
-		motorRecvI2C(addr, inport ,&read_data );
-		if (read_data==motor[motor_number].mask_senser_open)
+		checkSensers(motor_number);
+		if (motor[motor_number].open == true)
 		{
 			motorTurn(motor_number,CLOSE,TURN_ONE_PERIOD,false);
-			mount++;
+			mount+=TURN_ONE_PERIOD;
 		}
-		else if (read_data==motor[motor_number].mask_senser_close)
+		else if (motor[motor_number].close == true)
 		{
 			motorTurn(motor_number,OPEN,TURN_ONE_PERIOD,false);
-			mount++;
+			mount+=TURN_ONE_PERIOD;
 		}
 		else  turn_motor=false;
-		
+		if (mount >=MAX_NUMBERS_TICKS) turn_motor = false;
 	}
-	senser_pressed = false;
 	return mount;
 }
 int openHole(int motor_number)
@@ -382,9 +413,7 @@ void motorSettings(void)
 			else 
 			{
 				motor[motor_number].work=false;
-				motor[motor_number].mask_senser=0;
-				motor[motor_number].mask_senser_open=0;
-				motor[motor_number].mask_senser_close=0;
+
 				motor[motor_number].max_count_tick=0;
 				motor[motor_number].current_percent=0;
 			}
@@ -407,146 +436,4 @@ void motorTest(void)
 	}
 }
 
-
-/****************************************
-* Name:Send message to motor driver 
-* Desc: address cmd data 
-*****************************************/
-bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data )
-{
-	
-	 // Send STRAT condition 
-	 
-	I2C_GenerateSTART(I2C, ENABLE);
-
-	if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_MODE_SELECT)==EE_ERROR ) return EE_ERROR;
-
-  // Test on EV5 and clear it 
-	//while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_MODE_SELECT)){};
-	
-  // Send EEPROM address for write 
-  I2C_Send7bitAddress(I2C, address, I2C_Direction_Transmitter);
-  
-	if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR ) return EE_ERROR;
- 
-  // Test on EV6 and clear it 
-	//while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)){};
-	
-  // Send the byte to be written 
-  I2C_SendData(I2C,cmd); 
-   
-	if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
-
-  // Test on EV8 and clear it 
-	
-  //while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
-  
-	// Send the byte to be written 
-  I2C_SendData(I2C,data); 
-   
-  if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)==EE_ERROR ) return EE_ERROR;
- 
-  // Test on EV8 and clear it 
-	
-  //while(!I2C_CheckEvent(I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTED)){};
-  
-  // Send STOP condition 
-	I2C_GenerateSTOP(I2C, ENABLE);
-	
-	return NO_ERROR;
-}
-
-/****************************************
-* Name:Recv message from motor driver 
-* Desc: data - pointer on the data  
-*****************************************/
-bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data )
-{
-	int eetime;
-//	int i;
-	uint8 read_data_two;
-	uint8 *read_data=data;
-	//Generate start
-	I2C_GenerateSTART(I2C, ENABLE);
-	
-	eetime=sEE_LONG_TIMEOUT;
-	while (!I2C_GetFlagStatus(I2C2,I2C_FLAG_SB)) 
-  {
-		eetime--;
-		if(eetime==0) return EE_ERROR;
-  }
-	
-	//Send Address
-	I2C_Send7bitAddress(I2C, address, I2C_Direction_Transmitter);
-  if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)==EE_ERROR ) return EE_ERROR;
-  
-	//Send command
-	I2C_SendData(I2C,cmd); 
-
-	eetime=sEE_LONG_TIMEOUT;
-  while((!I2C_GetFlagStatus(I2C2,I2C_FLAG_TXE))&&(!I2C_GetFlagStatus(I2C2,I2C_FLAG_BTF))) 
-  {
-     if((eetime--)==0) return EE_ERROR;
-  }	
-	
-	//Generate start
-	I2C_GenerateSTART(I2C, ENABLE);
-	eetime=sEE_LONG_TIMEOUT;
-	while (!I2C_GetFlagStatus(I2C2,I2C_FLAG_SB)) 
-  {
-     if((eetime--)==0) return EE_ERROR;
-  }
-	
-	//Send Address
-	I2C_Send7bitAddress(I2C, address, I2C_Direction_Receiver);
-  if(I2CWaitEventMotor(I2C, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)==EE_ERROR ) return EE_ERROR;
- /* Enable Acknowledgement to be ready for another reception */
-  
-	I2C_AcknowledgeConfig(I2C, DISABLE);
-	(void)I2C2->SR2;
-	
-  I2C_GenerateSTOP(I2C, ENABLE);
-	
-	eetime=sEE_LONG_TIMEOUT;
-	while(I2C_GetFlagStatus(I2C2,I2C_FLAG_RXNE)==RESET) 
-	{
-     if((eetime--)==0) return EE_ERROR;
-  }
-	
-	//Read data 
-	*read_data=I2C_ReceiveData(I2C);
-
-	eetime=sEE_LONG_TIMEOUT;
-	while(I2C2->CR1&I2C_CR1_STOP) 
-	{
-		if((eetime--)==0) return EE_ERROR;
-  }
-	
-	I2C_AcknowledgeConfig(I2C, ENABLE);
-	return true;
-
-
-
-
-
-}
-
-
-/*******************************************************************************
-* Function Name  : I2C_WaitEvent
-* Description    : wait event from i2c
-*******************************************************************************/
-bool I2CWaitEventMotor( I2C_TypeDef* I2Cx, uint32_t I2C_EVENT)
-{
-	int eetime=sEE_LONG_TIMEOUT;
-	
-  while(!I2C_CheckEvent(I2C, I2C_EVENT))
-   {
-    if((eetime--)==0) return EE_ERROR;
-		
-  }
-	 
-	return NO_ERROR;
-	
-}
 

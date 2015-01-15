@@ -42,7 +42,7 @@ uint8 led_delay;
 /*            Cortex-M3 Processor Exceptions Handlers                         */
 /******************************************************************************/
 
-
+/*
 void EXTI2_IRQHandler (void)
 {
 	if(EXTI_GetITStatus(INT_PCA9539_1_IRQLine) != RESET)
@@ -60,7 +60,7 @@ void EXTI3_IRQHandler (void)
     EXTI_ClearITPendingBit(INT_PCA9539_2_IRQLine);
   }
 }
-
+*/
 /*************************************************************
 * Function Name  : EXTI9_5_IRQHandler
 * Description    :  This function handles EXT NWAIT for FPGA .
@@ -177,13 +177,9 @@ void TIM3_IRQHandler(void)
 	if(TIM_GetITStatus(TIM3, TIM_IT_Update) == SET)
 	{
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-		#ifdef ONE_MOTOR  
-			TIM_USER_HANDLER(); 	//	This can be code for interrupt
-		#endif
 		
-		#ifdef FOUR_MOTORS  
-			MOTOR_HANDLER(); 	//	This can be code for interrupt
-		#endif
+		MOTOR_HANDLER(); 	//	This can be code for interrupt
+	
 
 	}
 }

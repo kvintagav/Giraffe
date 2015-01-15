@@ -40,13 +40,10 @@ void InitAll()
 	
 	CONSOLE_USART_INIT();
 
-	#ifdef FOUR_MOTORS
-		console_send("\r\nFour motors device start\r");
-	#endif	
+	console_send("\r\nFour motors device start\r");
+
 	
-	#ifdef ONE_MOTOR
-		console_send("\r\nOne motor device start\r");
-	#endif
+	
 	
 	LED_INIT();
 	I2C_INIT();
@@ -72,20 +69,13 @@ void InitAll()
 	*/
 		(SysTick_Config(SystemCoreClock / 16));
 		
-		#ifdef FOUR_MOTORS
-			motorInitTimer();
-			motorInitGpio();
-			motorInit();	
-			motorTest();
-			motorSettings();
-			
-		#endif	
-		
-		#ifdef ONE_MOTOR
-			DMOT_INIT();
-			TIM_INIT();
-			Set_OKO ();
-		#endif
+
+		motorInitTimer();
+		motorInitGpio();
+		motorInit();	
+		motorTest();
+		motorSettings();
+	
 		
 		WIZ_GPIO_Install();
 		WIZ_Config();

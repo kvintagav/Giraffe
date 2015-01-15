@@ -101,7 +101,7 @@ typedef uint8_t bit_data;
 
 
 /*Settings Interrupt for PCA9539*/
-
+/*
 #define INT_PCA9539_1_GPIO						GPIO_Pin_2
 #define INT_PCA9539_1_PORT						GPIOC
 #define INT_PCA9539_1_RCC 						RCC_AHB1Periph_GPIOC
@@ -117,22 +117,44 @@ typedef uint8_t bit_data;
 #define INT_PCA9539_2_IRQLine 				EXTI_Line3
 #define INT_PCA9539_2_PortSource      EXTI_PortSourceGPIOC
 #define INT_PCA9539_2_PinSource 			EXTI_PinSource3
+*/
+
+/*Setting IN and OUT for gpio motor */
+
+#define MOTOR_GPIO_RCC_D 					RCC_AHB1Periph_GPIOD
+#define MOTOR_GPIO_RCC_E 					RCC_AHB1Periph_GPIOE
+
+#define MOTOR_SENSE_IN_D GPIO_Pin_15|GPIO_Pin_10|GPIO_Pin_9
+#define MOTOR_SENSE_IN_E GPIO_Pin_12|GPIO_Pin_11|GPIO_Pin_8|GPIO_Pin_14|GPIO_Pin_13
 
 
-/*DMOT GPIO Settings*/
+#define SENSE_1_CLOSE 	GPIOE,GPIO_Pin_12
+#define SENSE_1_OPEN		GPIOE,GPIO_Pin_11
+#define SENSE_2_CLOSE		GPIOE,GPIO_Pin_8
+#define SENSE_2_OPEN		GPIOD,GPIO_Pin_15
+#define SENSE_3_CLOSE		GPIOE,GPIO_Pin_14
+#define SENSE_3_OPEN		GPIOE,GPIO_Pin_13
+#define SENSE_4_CLOSE		GPIOD,GPIO_Pin_10
+#define SENSE_4_OPEN		GPIOD,GPIO_Pin_9
 
-#define DMOT_GPIO_RCC 				RCC_AHB1Periph_GPIOC
-#define DMOT_GPIO 						GPIOC
-#define DMOT0									GPIO_Pin_0	// out
-#define DMOT1									GPIO_Pin_1	// out
-#define DMOT2									GPIO_Pin_2	// out
-#define DMOT3									GPIO_Pin_3	// out
+#define MOTOR_OBM_OUT GPIO_Pin_8|GPIO_Pin_7|GPIO_Pin_10|GPIO_Pin_9
 
-/*DCON GPIO Settings*/
-#define DCON_GPIO_RCC 				RCC_AHB1Periph_GPIOC
-#define DCON_GPIO 						GPIOC
-#define DCON1									GPIO_Pin_6	// in
-#define DCON2									GPIO_Pin_7	// in
+#define MOT_OBM_1				GPIOE,GPIO_Pin_8
+#define MOT_OBM_2				GPIOE,GPIO_Pin_7
+#define MOT_OBM_3				GPIOE,GPIO_Pin_10
+#define MOT_OBM_4				GPIOE,GPIO_Pin_9
+
+#define MOTOR_EN_OUT GPIO_Pin_15|GPIO_Pin_0|GPIO_Pin_14|GPIO_Pin_1
+
+#define MOT_EN_1 				GPIOD,GPIO_Pin_15
+#define MOT_EN_2 				GPIOD,GPIO_Pin_0
+#define MOT_EN_3				GPIOD,GPIO_Pin_14
+#define MOT_EN_4				GPIOD,GPIO_Pin_1
+
+
+
+
+
 
 
 /*Settings Reset for PCA9539*/

@@ -6,14 +6,10 @@
 #include "main.h"
 
 
-#define DELAY_MOTOR 			1000000
+//#define DELAY_MOTOR 			1000000
 #define MAX_NUMBERS_TICKS 800
 #define TURN_ONE_PERIOD		3
 
-#define INPORT 		0
-#define OUTPORT		2
-#define POLARPORT	4
-#define CONFPORT	6
 
 
 #define OPEN false
@@ -34,15 +30,21 @@
 
 
 // for 8-faze turn
-#define FAZA0 0x0C
-#define FAZA1 0x08
-#define FAZA2 0x18
-#define FAZA3 0x10
-#define FAZA4 0x30
-#define FAZA5 0x20
-#define FAZA6 0x24
-#define FAZA7 0x04
+#define FAZA0 0x01
+#define FAZA1 0x03
+#define FAZA2 0x02
+#define FAZA3 0x06
+#define FAZA4 0x04
+#define FAZA5 0x0C
+#define FAZA6 0x08
+#define FAZA7 0x09
 
+
+
+#define INPORT 		0
+#define OUTPORT		2
+#define POLARPORT	4
+#define CONFPORT	6
 
 /*structure PCA9539PW /1
 	MOTOR1 
@@ -90,7 +92,7 @@ structure PCA9539PW /2
 
 */
 
-
+/*
 typedef struct _MOTOR_STATE
 {
 	
@@ -108,9 +110,23 @@ typedef struct _MOTOR_STATE
 	
 }
 MOTOR_STATE;
+*/
 
-bool motorSendI2C(uint8 address, uint8 cmd ,uint8 data );
-bool motorRecvI2C(uint8 address, uint8 cmd ,uint8 *data );
+typedef struct _MOTOR_STATE
+{
+	
+	uint8 current_faza;
+	int current_tick;
+	int current_percent;
+	int max_count_tick;
+	bool work;
+	bool open;
+	bool close;
+	
+}
+MOTOR_STATE;
+
+
 int motorTurn(int number, bool direction,int tick ,bool turn_to_senser);
 int motorTurnOnPercent(int number , int percent);
 void motorSettings(void);

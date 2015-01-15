@@ -61,15 +61,11 @@ int motor_tcps(SOCKET s, uint16 port)
 			if   (strstr( DATA_BUFF_A,"MOTOR")!=NULL)
 			{
 				ParsingParameter(DATA_BUFF_A , InParMassiv);
-				#ifdef FOUR_MOTORS
-					motorTurnOnPercent(InParMassiv[0]-1, InParMassiv[1] );
+			
+				motorTurnOnPercent(InParMassiv[0]-1, InParMassiv[1] );
 					
 
-				#endif
-				
-				#ifdef ONE_MOTOR
-					 Otkr_Zakr(InParMassiv[0]);
-				#endif
+			
 				
 				clearBuffer();
 				strncpy(DATA_BUFF_A,"MOTOR,OK",9);
@@ -77,13 +73,8 @@ int motor_tcps(SOCKET s, uint16 port)
 			else if (strstr( DATA_BUFF_A,"GETTYPE")!=NULL)
 			{
 				clearBuffer();
-				#ifdef FOUR_MOTORS
-					strncpy(DATA_BUFF_A,"FOUR_MOTORS",11);
-				#endif
+				strncpy(DATA_BUFF_A,"FOUR_MOTORS",11);
 				
-				#ifdef ONE_MOTOR
-					strncpy(DATA_BUFF_A,"ONE_MOTOR",9);
-				#endif
 				
 			}
 			received_len=strlen(DATA_BUFF_A);

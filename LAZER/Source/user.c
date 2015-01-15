@@ -6,77 +6,6 @@
 #define OPEN 1
 #define CLOSE 0
 
-uint16  cnt;
-int16  	R_cnt;					// polojenie diafragmy
-int16  	R_max;
-uint16  P_cnt;					// schivaem v prerivanii
-bool  Napr;
-uint16  S_par;					// koef delenia v prerivanii
-int16   R_tmp;
-void Obnulaem_Upr_Dvigatel(void);
-
-
-void Obnulaem_Upr_Dvigatel(void)
-{
-	GPIO_ResetBits(DMOT_GPIO,DMOT0);			// obnulaem upravlenie dvigatela
-	GPIO_ResetBits(DMOT_GPIO,DMOT1);
-	GPIO_ResetBits(DMOT_GPIO,DMOT2);
-	GPIO_ResetBits(DMOT_GPIO,DMOT3);
-}
-int Otkr_Zakr(int persent)	// otkpivaem-zakrivaem ha prosenty
-{
-	int tempbyte;
-	int temp;
-	int Sint;
-	if (persent <= 100)
-	{
-			temp = persent;
-			if (R_cnt < temp)
-					{Napr = CLOSE;		Sint = temp - R_cnt;}					// opredelaem napravlenie
-			else
-					{Napr = OPEN;		Sint = R_cnt - temp;}					// vrashenia
-			while (R_cnt != temp)
-			{
-					if (Sint < 63)															// reguliruem
-					{
-							tempbyte = (Sint >> 5);									// skorost
-							S_par = 120 - tempbyte;
-					}
-					else	
-							S_par = 63;															// vrashenia 
-			}
-			
-			Obnulaem_Upr_Dvigatel();
-			
-			S_par = 0;														// v prerivanii nichego ne delaem
-			tempbyte = 0;
-	}
-	else
-			tempbyte = -1;	
-	return tempbyte;
-}	
-
-// Kalibrovka
-void Set_OKO(void)
-{
-		S_par = 100;
-		cnt = 1;
-		Napr = OPEN;						// otkrivaem diafragmu polnostu
-		while (cnt != 9)		// kogda srabotaet praviy konsevik
-		{										// zaskochem vnutr
-				cnt = 1;
-				while (cnt != 9);	
-		}
-		Napr = CLOSE;	cnt = 1;	// pomenaly napravlenie - teper zakrivaem
-		while (cnt != 10);	
-		Napr = OPEN;	cnt = 1;	// pomenaly napravlenie - teper otkrivaem
-		while (cnt != 9);
-		// diafragma polnostu otkrita
-		Obnulaem_Upr_Dvigatel();	// obnulaem upravlenie dvigatela
-		
-		S_par = 0;												// v prerivanii nichego ne delaem
-		Napr = CLOSE;		cnt = 1;		
-}
 void Delay (uint32 count)
 {
 uint16 i;
@@ -85,104 +14,6 @@ uint16 i;
 		count--;
 	}	while (count != 0);
 }	
-
-void MOT_OBOR ()
-{
-
-	if (GPIO_ReadInputDataBit(DCON_GPIO,DCON1)==0)		//	if (DCON1 == 0)
-	{
-		if (Napr==OPEN)
-		{
-			Obnulaem_Upr_Dvigatel();	cnt = 9;
-		}
-		R_cnt = 0;
-	}
-	if (GPIO_ReadInputDataBit(DCON_GPIO,DCON2)==0)		//	if (DCON2 == 0)
-	{
-		if (Napr == CLOSE)
-		{
-			Obnulaem_Upr_Dvigatel();	cnt = 10;
-		}
-		R_max = R_cnt;
-	}																
-	if (cnt < 9)
-	{
-		if (Napr == CLOSE)
-		{
-			switch (cnt)
-			{
-				case 1:	{GPIO_ResetBits(DMOT_GPIO,DMOT3);
-								GPIO_SetBits(DMOT_GPIO,DMOT0); 	cnt++;}	  /* 0001 */	break;
-				case 2:	{GPIO_SetBits(DMOT_GPIO,DMOT1);	cnt++;}	  /* 0011 */	break;
-				case 3:	{GPIO_ResetBits(DMOT_GPIO,DMOT0);	cnt++;} /* 0010 */	break;
-				case 4:	{GPIO_SetBits(DMOT_GPIO,DMOT2); cnt++;}   /* 0110 */	break;
-				case 5:	{GPIO_ResetBits(DMOT_GPIO,DMOT1);	cnt++;} /* 0100 */	break;
-				case 6:	{GPIO_SetBits(DMOT_GPIO,DMOT3);	cnt++;}   /* 1100 */	break;
-				case 7: {GPIO_ResetBits(DMOT_GPIO,DMOT2); cnt++;} /* 1000 */	break;
-				case 8:	{GPIO_SetBits(DMOT_GPIO,DMOT0); cnt = 1;} /* 1001 */	break;
-				default: cnt = 1; break;
-			}
-			if (R_tmp >= 18)
-					{R_cnt++;	R_tmp = 0;}
-			R_tmp++;
-		}
-		else
-		{
-			switch (cnt)
-			{
-				case 1:	{GPIO_ResetBits(DMOT_GPIO,DMOT0);
-								GPIO_SetBits(DMOT_GPIO,DMOT3);	cnt++;}		/* 1000 */ break;
-				case 2:	{GPIO_SetBits(DMOT_GPIO,DMOT2);	cnt++;} 	/* 1100 */ break;
-				case 3:	{GPIO_ResetBits(DMOT_GPIO,DMOT3);	cnt++;} /* 0100 */ break;
-				case 4:	{GPIO_SetBits(DMOT_GPIO,DMOT1); cnt++;} 	/* 0110 */ break;
-				case 5:	{GPIO_ResetBits(DMOT_GPIO,DMOT2);	cnt++;} /* 0010 */ break;
-				case 6:	{GPIO_SetBits(DMOT_GPIO,DMOT0);	cnt++;} 	/* 0011 */ break;
-				case 7:	{GPIO_ResetBits(DMOT_GPIO,DMOT1); cnt++;} /* 0001 */ break;
-				case 8:	{GPIO_SetBits(DMOT_GPIO,DMOT3); cnt = 1;}	/* 1001 */ break;
-				default:	cnt = 1;    	break;
-			}
-			if ((18+R_tmp) <= 0)
-					{R_cnt--;	R_tmp = 0;}
-			R_tmp--;
-		}
-		
-	}
-}
-
-/*********************************************
-* Function Name  : DMOT_INIT
-* Description    : init <<Diafragm-MOTOR>>
-*********************************************/
-void DMOT_INIT(void)
-{
-		GPIO_InitTypeDef GPIO_InitStructure;
-		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
- 
-    GPIO_StructInit(&GPIO_InitStructure);
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
-	  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-		GPIO_Init(GPIOC, &GPIO_InitStructure);
-	
-  /* Configure PC6,7 pin as input PULLup */
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-		GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_6 | GPIO_Pin_7 ;
-		GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-		GPIO_Init(GPIOC, &GPIO_InitStructure);
-// proverka (mojno ubrat)
-		Obnulaem_Upr_Dvigatel();
-		
-	  GPIO_SetBits(DMOT_GPIO,DMOT0);
-		GPIO_ResetBits(DMOT_GPIO,DMOT0);
-		GPIO_SetBits(DMOT_GPIO,DMOT1);
-		GPIO_ResetBits(DMOT_GPIO,DMOT1);
-		GPIO_SetBits(DMOT_GPIO,DMOT2);
-		GPIO_ResetBits(DMOT_GPIO,DMOT2);
-		GPIO_SetBits(DMOT_GPIO,DMOT3);	
-		GPIO_ResetBits(DMOT_GPIO,DMOT3);	
-}
-
 
 /*********************************************
 * Function Name  : ChangeLED
@@ -302,12 +133,5 @@ void TIM_INIT(void)
 *********************************************/
 void TIM_USER_HANDLER(void)
 {
-		if (S_par != 0)				// esly to ne dvigaemsa
-		{
-				if (P_cnt > S_par)
-				{
-						MOT_OBOR ();  	P_cnt = 0;
-				}
-				P_cnt++;
-		}
+	
 }

@@ -10,7 +10,7 @@
 * ONE_MOTOR - one motor 
 * FOUR_MOTORS - four motors
 ***************************/
-//#define ONE_MOTOR  
+
 #define FOUR_MOTORS  
 /***************************/
 

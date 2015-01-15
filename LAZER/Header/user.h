@@ -12,10 +12,7 @@ void ChangeLED(void);
 void TIM_INIT(void);
 void TIM_USER_HANDLER(void);
 void I2C_INIT(void);
-void DMOT_INIT(void);
-void MOT_OBOR (void);
+
 void Delay (uint32 count);
-void Set_OKO (void);
-int Otkr_Zakr (int persent);
 
 #endif
