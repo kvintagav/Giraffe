@@ -40,7 +40,7 @@ void InitAll()
 	
 	CONSOLE_USART_INIT();
 
-	console_send("\r\nFour motors device start\r");
+	console_send("\r\n Motors device start\r");
 
 	
 	
@@ -79,7 +79,7 @@ void InitAll()
 		
 		WIZ_GPIO_Install();
 		WIZ_Config();
-		console_send("\nWIZNET start\r");
+		console_send("\nWIZNET start\r\n>");
 }
  
  
@@ -91,7 +91,7 @@ int main(void)
 
 {
 //	int i;
-		GPIO_InitTypeDef GPIO_InitStructure;
+	/*	GPIO_InitTypeDef GPIO_InitStructure;
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
  
     GPIO_StructInit(&GPIO_InitStructure);
@@ -102,7 +102,7 @@ int main(void)
     GPIO_Init(LED_GPIO, &GPIO_InitStructure);
 	  GPIO_SetBits(GPIOD,GPIO_Pin_5);
 		GPIO_ResetBits(GPIOD,GPIO_Pin_5);
-	InitAll();
+	*/InitAll();
 
 	socket(0, Sn_MR_TCP, Config_Msg.port_science, 0);
 	

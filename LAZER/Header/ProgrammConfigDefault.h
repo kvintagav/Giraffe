@@ -29,15 +29,15 @@ VERSION Programm and DATA Relelease
 NESESSARILY CHANGE WITH THE NEW RELEASE
 ********************************************/
 #define TOP_VERSION 	1
-#define VERSION 			1
+#define VERSION 			2
 #define SUB_VERSION		0
 /*
 TOP_VERSION = 1  - version programm for ONE MOTOR and FOUR MOTORS
 
 */
-#define DAY_VERSION		11
-#define MONTH_VERSION	11
-#define YEAR_VERSION	2014
+#define DAY_VERSION		15
+#define MONTH_VERSION	2
+#define YEAR_VERSION	2015
 /*******************************************/
 
 
@@ -107,7 +107,7 @@ Network setting default
 /***************************************
 USART SETTINGS
 ****************************************/
-#define USART_BAUD_RATE 115200
+#define USART_BAUD_RATE 57600
 
 
 /***************************************

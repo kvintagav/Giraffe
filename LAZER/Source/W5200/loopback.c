@@ -39,6 +39,7 @@ void clearBuffer()
 int motor_tcps(SOCKET s, uint16 port)
 {	       
 	int InParMassiv[4]={0,0,0,0};
+	int rezult=0;
 	uint16 RSR_len=0;
 	uint16 received_len=0;
 	
@@ -60,23 +61,33 @@ int motor_tcps(SOCKET s, uint16 port)
 
 			if   (strstr( DATA_BUFF_A,"MOTOR")!=NULL)
 			{
-				ParsingParameter(DATA_BUFF_A , InParMassiv);
-			
-				motorTurnOnPercent(InParMassiv[0]-1, InParMassiv[1] );
+				if (strstr( DATA_BUFF_A,"STAT")!=NULL)
+				{
+					clearBuffer();
+					strncpy(DATA_BUFF_A,"MOTOR,STAT",11);
+				}
+				else
+				{
+					ParsingParameter(DATA_BUFF_A , InParMassiv);
+				
+					rezult = motorTurnOnPercent(InParMassiv[0]-1, InParMassiv[1]) ;
+					clearBuffer();
+					if (rezult>0)
+						strncpy(DATA_BUFF_A,"MOTOR,OK",9);
+					else if (rezult ==-3)
+						strncpy(DATA_BUFF_A,"MOTOR,DONTWORK",15);
+					else if (rezult ==-2)
+						strncpy(DATA_BUFF_A,"MOTOR,ERRORNUMBER",18);
+					else if (rezult ==-1)
+						strncpy(DATA_BUFF_A,"MOTOR,ERRORPERCENT",19);
+					else if (rezult < 0)
+						strncpy(DATA_BUFF_A,"MOTOR,ERROR",12);
+		
 					
-
+						
+				}
+			}
 			
-				
-				clearBuffer();
-				strncpy(DATA_BUFF_A,"MOTOR,OK",9);
-			}
-			else if (strstr( DATA_BUFF_A,"GETTYPE")!=NULL)
-			{
-				clearBuffer();
-				strncpy(DATA_BUFF_A,"FOUR_MOTORS",11);
-				
-				
-			}
 			received_len=strlen(DATA_BUFF_A);
 			
 					sent_data_len = send(s, DATA_BUFF_A, received_len, (bool)WINDOWFULL_FLAG_OFF,MCU);    	/* sent the received data */

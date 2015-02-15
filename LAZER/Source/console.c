@@ -42,7 +42,8 @@ enum tel_cmd {
 	MASK,
 	PORT,
   SERVIP,
-	SERPORT
+	SERPORT,
+	ID
 };
 
 // Command table
@@ -58,9 +59,9 @@ char *commands[] = {
 	"gateway",
 	"mask",
 	"port",
-	"port",
 	"servip",
 	"servport",
+	"id",
   NULL
 };
 
@@ -401,14 +402,15 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 						break;
 					
 					case PRINT:    
-						sprintf(bufer_out,"\nVersion: %u.%u.%u Compilation date: %u.%u.%u\
+						sprintf(bufer_out,"\nKontroller ID %u\
+						\r\nVersion: %u.%u.%u Compilation date: %u.%u.%u\
 						\r\nSET MAC = %u.%u.%u.%u.%u.%u\r\nSET IP = %u.%u.%u.%u\
 						\r\nSET GateWay  = %u.%u.%u.%u\r\nSET MASK= %u.%u.%u.%u\
 						\r\nSET Port = %u\
 						\r\nSET Server IP  = %u.%u.%u.%u\
 						\r\nSET Server Port = %u\
 						\r\nData settings: %u.%u.%u\r",\
-						Config_Msg.version[2],Config_Msg.version[1],Config_Msg.version[0],Config_Msg.day,Config_Msg.month,Config_Msg.year,\
+						Config_Msg.ID,Config_Msg.version[2],Config_Msg.version[1],Config_Msg.version[0],Config_Msg.day,Config_Msg.month,Config_Msg.year,\
 						Config_Msg.Mac[0],Config_Msg.Mac[1],Config_Msg.Mac[2],Config_Msg.Mac[3],Config_Msg.Mac[4],Config_Msg.Mac[5],\
 						Config_Msg.Lip[0],Config_Msg.Lip[1],Config_Msg.Lip[2],Config_Msg.Lip[3],\
 						Config_Msg.Gw[0],Config_Msg.Gw[1],Config_Msg.Gw[2],Config_Msg.Gw[3],\
@@ -516,6 +518,10 @@ void CommandProcessing( char *bufer_in, char *bufer_out)
 								case SERPORT:
 												Config_Msg.port=parameter[0];
 												sprintf(bufer_out,"\nSET SERVER PORT  = %u\r",Config_Msg.port );
+								break;
+								case ID:
+												Config_Msg.ID=parameter[0];
+												sprintf(bufer_out,"\nSET ID  = %u\r",Config_Msg.ID );
 								break;
 								default:
 										sprintf(bufer_out,"\nBAD SET\r");

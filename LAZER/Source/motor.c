@@ -1,6 +1,6 @@
 
 #include "motor.h"
-
+#include "console.h"
 MOTOR_STATE motor[NUMBERS_MOTOR];
 
 
@@ -16,9 +16,9 @@ void disableMotor(int number_motor);
 
 void motorInitGpio(void)
 {
-	EXTI_InitTypeDef   EXTI_InitStructure;
+
   GPIO_InitTypeDef   GPIO_InitStructure;
-  NVIC_InitTypeDef   NVIC_InitStructure;
+
 	RCC_AHB1PeriphClockCmd(MOTOR_GPIO_RCC_D, ENABLE);
 	RCC_AHB1PeriphClockCmd(MOTOR_GPIO_RCC_E, ENABLE);
 
@@ -61,7 +61,7 @@ void motorInitTimer(void)
 
 	  // Time base configuration 	
 			
-  TIM_TimeBaseStructure.TIM_Period = 20000;          
+  TIM_TimeBaseStructure.TIM_Period = 7500;          
   TIM_TimeBaseStructure.TIM_Prescaler = 0;      
   TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;    
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up; 
@@ -191,7 +191,7 @@ void sendFaza(uint8 faza)
 void motorInit(void)
 {	
 	int i;
-	bool rezult;
+	
 	for(i = 0 ; i < NUMBERS_MOTOR ; i++)
 	{
 			motor[i].work = true;
@@ -199,6 +199,8 @@ void motorInit(void)
 			motor[i].current_tick = 0;
 			motor[i].current_percent = 0;
 			motor[i].max_count_tick = 0;
+			motor[i].open = 0;
+			motor[i].close = 0;
 	}
 }
 
@@ -209,7 +211,9 @@ void motorInit(void)
 int motorTurnOnPercent(int motor_number , int percent)
 {
 	int numbers_tick;
-	if ((motor_number>(NUMBERS_MOTOR-1))||(motor_number<0)||(percent>100)|| (percent<0)||(motor[motor_number].work==false)) return -1;
+	if (motor[motor_number].work==false) return -3;
+	if ((motor_number>(NUMBERS_MOTOR-1))||(motor_number<0)) return -2;
+	if ((percent>100)|| (percent<0)) return -1;
 	
 	if (motor[motor_number].max_count_tick!=0)
 	{
@@ -249,7 +253,7 @@ int motorTurnOnPercent(int motor_number , int percent)
 void motorOneTick(int number, bool direction_napr)
 {
 	uint8 value = 0;
-	bool direction =!direction_napr;
+	bool direction =direction_napr;
 	while (!flag_new_tick){}
 			flag_new_tick= false;
 				
@@ -306,7 +310,7 @@ int motorTurn(int number, bool direction,int tick ,bool turn_to_senser)
 	int tick_numb = 0;
 	bool work_motor = true;
 	bool out_from_senser =  false; //if senser enable nado otodvinut ot nego
-	uint8 rezult_senser = 0;
+
 
 	enableMotor(number);
 	while (work_motor)
@@ -391,9 +395,12 @@ void motorSettings(void)
 	int motor_number;
 	int mount_tick;
 	int rezult;
-
-	for (motor_number = 3 ; motor_number<NUMBERS_MOTOR; motor_number++)
+	char c_number[1];
+	for (motor_number = 0 ; motor_number<NUMBERS_MOTOR; motor_number++)
 	{
+		sprintf(c_number,"%u",motor_number);
+		console_send("\nMotor ");
+		console_send(c_number); 
 		if (motor[motor_number].work==true)
 		{
 			rezult = openHole(motor_number);
@@ -407,8 +414,10 @@ void motorSettings(void)
 				
 				motor[motor_number].max_count_tick=(int)(mount_tick>>1);
 				motor[motor_number].current_percent=0;
-
-				motorTurnOnPercent( motor_number ,  25);
+				
+				
+				console_send(" WORK\r");
+				
 			}	
 			else 
 			{
@@ -416,6 +425,7 @@ void motorSettings(void)
 
 				motor[motor_number].max_count_tick=0;
 				motor[motor_number].current_percent=0;
+				console_send(" DONTWORK\r");
 			}
 		}
 	}
@@ -427,9 +437,8 @@ void motorSettings(void)
 *****************************************/
 void motorTest(void)
 {
-	int index,mount_tick;
-	bool rezult;
-	uint8_t read_data;
+	int index;
+	
 	for (index = 0 ; index<NUMBERS_MOTOR ; index++)
 	{
 			turnOutMotorFromSenser(index);

@@ -124,18 +124,21 @@ typedef uint8_t bit_data;
 #define MOTOR_GPIO_RCC_D 					RCC_AHB1Periph_GPIOD
 #define MOTOR_GPIO_RCC_E 					RCC_AHB1Periph_GPIOE
 
-#define MOTOR_SENSE_IN_D GPIO_Pin_15|GPIO_Pin_10|GPIO_Pin_9
-#define MOTOR_SENSE_IN_E GPIO_Pin_12|GPIO_Pin_11|GPIO_Pin_8|GPIO_Pin_14|GPIO_Pin_13
+#define MOTOR_SENSE_IN_D GPIO_Pin_8|GPIO_Pin_10|GPIO_Pin_9
+#define MOTOR_SENSE_IN_E GPIO_Pin_12|GPIO_Pin_11|GPIO_Pin_15|GPIO_Pin_14|GPIO_Pin_13
 
 
-#define SENSE_1_CLOSE 	GPIOE,GPIO_Pin_12
-#define SENSE_1_OPEN		GPIOE,GPIO_Pin_11
-#define SENSE_2_CLOSE		GPIOE,GPIO_Pin_8
-#define SENSE_2_OPEN		GPIOD,GPIO_Pin_15
+#define SENSE_1_CLOSE 	 GPIOE,GPIO_Pin_11
+#define SENSE_1_OPEN		GPIOE,GPIO_Pin_12
+
+#define SENSE_2_CLOSE		 GPIOD,GPIO_Pin_10
+#define SENSE_2_OPEN		 GPIOD,GPIO_Pin_9
+
 #define SENSE_3_CLOSE		GPIOE,GPIO_Pin_14
-#define SENSE_3_OPEN		GPIOE,GPIO_Pin_13
-#define SENSE_4_CLOSE		GPIOD,GPIO_Pin_10
-#define SENSE_4_OPEN		GPIOD,GPIO_Pin_9
+#define SENSE_3_OPEN		 GPIOE,GPIO_Pin_13
+
+#define SENSE_4_CLOSE		 GPIOE,GPIO_Pin_15
+#define SENSE_4_OPEN		 GPIOD,GPIO_Pin_8 
 
 #define MOTOR_OBM_OUT GPIO_Pin_8|GPIO_Pin_7|GPIO_Pin_10|GPIO_Pin_9
 
@@ -148,7 +151,7 @@ typedef uint8_t bit_data;
 
 #define MOT_EN_1 				GPIOD,GPIO_Pin_15
 #define MOT_EN_2 				GPIOD,GPIO_Pin_0
-#define MOT_EN_3				GPIOD,GPIO_Pin_14
+#define MOT_EN_3				 GPIOD,GPIO_Pin_14
 #define MOT_EN_4				GPIOD,GPIO_Pin_1
 
 
